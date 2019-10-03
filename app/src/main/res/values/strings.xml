@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">MaximSensorsApp</string>
+    <string name="maxim_hsp">Maxim Health Sensor Platform</string>
+    <string name="spo2">Pulse Oximetry</string>
+    <string name="whrm">Optical HRM</string>
+    <string name="hrv">Heart Rate Variability</string>
+    <string name="respiratory">Respiratory Rate</string>
+    <string name="sleep_quality">Sleep Quality</string>
+    <string name="stress">Stress</string>
+    <string name="sports_coaching">Sports Coaching</string>
+    <string name="ppg_signal">PPG Signal</string>
+    <string name="ppg_signal_scale_seconds">4 seconds</string>
+
+    <string name="channel_ir">IR</string>
+    <string name="channel_red">Red</string>
+    <string name="channel_green">Green</string>
+
+    <string name="monitoring_start">Start Monitoring</string>
+    <string name="monitoring_stop">Stop Monitoring</string>
+    <string name="log_to_file">Log to File</string>
+    <string name="log_to_flash">Log to Flash</string>
+    <string name="log_file_saved_to">Log file saved to %1$s</string>
+
+    <string name="settings">Settings</string>
+    <string name="spo2_settings">Spo2 Settings</string>
+
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+</resources>

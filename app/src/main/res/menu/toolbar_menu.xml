@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/monitoring_start"
+        android:icon="@drawable/ic_start"
+        android:title="@string/monitoring_start"
+        app:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/monitoring_stop"
+        android:icon="@drawable/ic_stop"
+        android:title="@string/monitoring_stop"
+        android:visible="false"
+        app:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/log_to_file"
+        android:checkable="true"
+        android:checked="false"
+        android:title="@string/log_to_file"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/log_to_flash"
+        android:checkable="true"
+        android:checked="false"
+        android:title="@string/log_to_flash"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/hrm_settings"
+        android:checkable="false"
+        android:checked="false"
+        android:title="@string/settings"
+        app:showAsAction="never" />
+
+</menu>

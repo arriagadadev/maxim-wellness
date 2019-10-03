@@ -1,0 +1,66 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "29.0.2"
+    dataBinding {
+        enabled true
+    }
+    defaultConfig {
+        applicationId "com.maximintegrated.maximsensorsapp"
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':style')
+    implementation project(':bluetooth')
+    implementation project(':hsp')
+
+    implementation deps.kotlinStdLib
+    implementation deps.appcompat
+    implementation deps.material
+    implementation deps.constraintLayout
+    implementation deps.recyclerView
+
+    implementation deps.lifecycleExtensions
+    implementation deps.lifecycleCommon
+    implementation deps.liveData
+    implementation deps.viewModel
+
+    implementation deps.ktx
+    implementation deps.timber
+
+    implementation deps.bleLibrary
+    implementation deps.bleCommon
+
+    implementation deps.bluetoothStateView
+
+    implementation deps.lottie
+    implementation deps.mpAndroidChart
+
+    testImplementation deps.junit
+    androidTestImplementation deps.atsl
+    androidTestImplementation deps.espresso
+}

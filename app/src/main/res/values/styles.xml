@@ -1,0 +1,6 @@
+<resources>
+
+    <style name="Theme.MaximSensorsApp" parent="Theme.Maxim" />
+
+    <style name="TextAppearance.Maxim.PpgChannel" parent="TextAppearance.AppCompat.Caption" />
+</resources>
