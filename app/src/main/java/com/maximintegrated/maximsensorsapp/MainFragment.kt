@@ -1,5 +1,9 @@
 package com.maximintegrated.maximsensorsapp
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -106,7 +110,10 @@ class MainFragment : Fragment() {
         }
 
         sleepMenuItemView.setOnClickListener {
-            requireActivity().addFragment(SleepFragment.newInstance())
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.component = ComponentName("maximintegrated.com", "maximintegrated.com.MainActivity")
+            startActivity(intent)
+
         }
 
         stressMenuItemView.setOnClickListener {
@@ -114,7 +121,9 @@ class MainFragment : Fragment() {
         }
 
         sportsCoachingMenuItemView.setOnClickListener {
-            requireActivity().addFragment(SportsCoachingFragment.newInstance())
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.component = ComponentName("com.maximintegrated.sportscoaching", "com.maximintegrated.sportscoaching.view.MainActivity")
+            startActivity(intent)
         }
     }
 

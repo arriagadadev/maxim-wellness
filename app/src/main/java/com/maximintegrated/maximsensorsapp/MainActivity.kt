@@ -7,15 +7,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
-import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.include_app_bar.*
 import timber.log.Timber.d
 
 class MainActivity : AppCompatActivity() {
@@ -44,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         hspViewModel = ViewModelProviders.of(this).get(HspViewModel::class.java)
         hspViewModel.connect(bluetoothDevice)
 
-
         d("Connected bluetooth device $bluetoothDevice")
         showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
     }
@@ -61,13 +56,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
 
-        when(getCurrentFragment()){
+        when (getCurrentFragment()) {
             is MainFragment -> Log.d("AAAA", "MAIN Fragment")
             else -> hspViewModel.stopStreaming()
-
         }
-
-        Log.d("AAAA", "onBackPressed")
 
         super.onBackPressed()
     }
