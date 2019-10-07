@@ -7,4 +7,10 @@
     <dimen name="menu_item_view_max_width">480dp</dimen>
     <dimen name="view_signal_margin">4dp</dimen>
     <dimen name="signal_chart_height">250dp</dimen>
+
+
+    <dimen name="measuring_circle_width">120dp</dimen>
+    <dimen name="measuring_circle_height">120dp</dimen>
+    <dimen name="measuring_circle_margin_top">8dp</dimen>
+    <dimen name="measuring_circle_margin_bottom">3dp</dimen>
 </resources>

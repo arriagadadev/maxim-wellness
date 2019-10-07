@@ -59,6 +59,7 @@ dependencies {
 
     implementation deps.lottie
     implementation deps.mpAndroidChart
+    implementation deps.circleProgress
 
     testImplementation deps.junit
     androidTestImplementation deps.atsl

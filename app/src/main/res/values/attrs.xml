@@ -5,4 +5,8 @@
         <attr name="miv_icon" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="MeasurementResultView">
+        <attr name="mrv_title" format="string" />
+        <attr name="mrv_unit" format="string" />
+    </declare-styleable>
 </resources>

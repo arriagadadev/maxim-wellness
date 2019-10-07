@@ -26,4 +26,10 @@
 
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+
+    <string name="measurement_result_ready_to_start_message">Ready to Start</string>
+    <string name="measurement_result_measuring_message">Measuring…</string>
+    <string name="measurement_result_timeout_message">TIMEOUT</string>
+    <string name="measurement_result_warning_message">Keep your arm still</string>
+    <string name="measurement_result_failure_message">Check wrist band tightness &amp; placement and keep your arm still</string>
 </resources>

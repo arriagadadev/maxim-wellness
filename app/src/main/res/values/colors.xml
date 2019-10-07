@@ -11,4 +11,6 @@
     <color name="channel_red">#F44336</color>
     <color name="channel_green">#4CAF50</color>
 
+    <color name="error_text">#d32f2f</color>
+
 </resources>

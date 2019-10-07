@@ -14,8 +14,11 @@ import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
+import kotlinx.android.synthetic.main.fragment_spo2.*
 import kotlinx.android.synthetic.main.include_app_bar.*
+import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
 import timber.log.Timber
+import kotlin.math.roundToInt
 
 
 class Spo2Fragment : Fragment() {
@@ -133,6 +136,10 @@ class Spo2Fragment : Fragment() {
     private fun startMonitoring() {
         isMonitoring = true
 
+        spo2ResultView.isMeasuring = true
+        spo2ResultView.result = null
+        spo2ResultView.isTimeout = false
+
         hspViewModel.isDeviceSupported
             .observe(this) {
                 hspViewModel.startStreaming()
@@ -164,6 +171,24 @@ class Spo2Fragment : Fragment() {
 
     fun addStreamData(streamData: HspStreamData) {
         chartView.addData(streamData.ir, streamData.red, streamData.green)
+
+//        motionView.emptyValue = model.motionMessage
+        spo2ResultView.measurementProgress = streamData.wspo2PercentageComplete
+        spo2ResultView.result = streamData.spo2.roundToInt()
+
+//        if (algorithmModeContinuousRadioButton.isChecked) {
+//            spo2ResultView.result = model.spo2.roundToInt()
+//            confidenceView.value = model.spo2Confidence.toFloat()
+//        } else if (model.spo2PercentageCompleted == 100) {
+//            spo2ResultView.result = model.spo2.roundToInt()
+//            confidenceView.value = model.spo2Confidence.toFloat()
+//            stopMonitoring()
+//        }
+//
+//        if (model.isTimeout) {
+//            spo2ResultView.isTimeout = true
+//            stopMonitoring()
+//        }
     }
 
     fun clearChart() {
