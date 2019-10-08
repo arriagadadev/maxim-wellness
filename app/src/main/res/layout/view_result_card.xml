@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/iconImageView"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_margin="10dp"
+            app:layout_constraintEnd_toStartOf="@id/titleView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/titleView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Title"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iconImageView"
+            app:layout_constraintTop_toTopOf="@id/iconImageView"
+            tools:text="TITLE" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/iconImageView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/titleView"
+            app:layout_constraintTop_toBottomOf="@id/titleView">
+
+            <TextView
+                android:id="@+id/valueView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Value"
+                tools:text="AAAA" />
+
+            <TextView
+                android:id="@+id/flashingTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Value"
+                android:visibility="gone"
+                app:autoSizeTextType="uniform" />
+
+            <TextView
+                android:id="@+id/emptyTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Value"
+                android:visibility="gone"
+                app:autoSizeTextType="uniform" />
+
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</merge>

@@ -5,12 +5,19 @@
     <style name="TextAppearance.Maxim.PpgChannel" parent="TextAppearance.AppCompat.Caption" />
 
     <style name="TextAppearance.Maxim.MeasuringTitleView" parent="TextAppearance.MaterialComponents.Headline6" />
+
     <style name="TextAppearance.Maxim.MeasuringReadyToStartMessageView" parent="TextAppearance.MaterialComponents.Subtitle2" />
+
     <style name="TextAppearance.Maxim.MeasuringMessage" parent="TextAppearance.MaterialComponents.Subtitle2" />
 
     <style name="TextAppearance.Maxim.MeasuringWarningMessageView" parent="TextAppearance.MaterialComponents.Subtitle1" />
 
     <style name="TextAppearance.Maxim.MeasuringTimeoutMessageView" parent="TextAppearance.MaterialComponents.Caption" />
+
     <style name="TextAppearance.Maxim.MeasuringResultView" parent="TextAppearance.MaterialComponents.Headline4" />
+
+    <style name="TextAppearance.Maxim.ResultCard.Title" parent="TextAppearance.AppCompat.Subhead" />
+
+    <style name="TextAppearance.Maxim.ResultCard.Value" parent="TextAppearance.AppCompat.Large" />
 
 </resources>

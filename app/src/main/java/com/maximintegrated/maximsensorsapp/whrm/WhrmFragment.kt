@@ -8,19 +8,31 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
-import com.maximintegrated.maximsensorsapp.BleConnectionInfo
-import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.view.DataSetInfo
+import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
+import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class WhrmFragment : Fragment() {
 
     companion object {
         fun newInstance() = WhrmFragment()
+
+        private val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
     }
 
     private lateinit var hspViewModel: HspViewModel
+    private lateinit var chartView: MultiChannelChartView
+
+    private var measurementStartTimestamp: Long? = null
+    private var minConfidenceLevel = 0
+    private var hrExpireDuration = 30
+    private var lastValidHrTimestamp: Long = 0L
 
     private lateinit var menuItemStartMonitoring: MenuItem
     private lateinit var menuItemStopMonitoring: MenuItem
@@ -33,8 +45,52 @@ class WhrmFragment : Fragment() {
             field = value
             menuItemStopMonitoring.isVisible = value
             menuItemStartMonitoring.isVisible = !value
-
+            hrResultView.isMeasuring = value
         }
+
+
+    private var hrConfidence: Int? = null
+        set(value) {
+            field = value
+//            hrConfidenceView.value = value?.toFloat()
+        }
+
+    private var ibi: String? = null
+        set(value) {
+            field = value
+            ibiView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
+        }
+
+    private var stepCount: Int = 0
+        set(value) {
+            field = value
+            stepsView.emptyValue = value.toString()
+        }
+
+    private var energy: Int = 0
+        set(value) {
+            field = value
+            energyView.emptyValue = value.toString()
+        }
+
+    private var activity: String? = null
+        set(value) {
+            field = value
+            activityView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
+        }
+
+    private var scd: String? = null
+        set(value) {
+            field = value
+            scdView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
+        }
+
+    private var cadence: Int = 0
+        set(value) {
+            field = value
+            cadenceView.emptyValue = value.toString()
+        }
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -56,6 +112,7 @@ class WhrmFragment : Fragment() {
 
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
+                addStreamData(hspStreamData)
                 Timber.d(hspStreamData.toString())
             }
     }
@@ -74,7 +131,19 @@ class WhrmFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        chartView = view.findViewById(R.id.chart_view)
+
         setupToolbar()
+        setupChart()
+    }
+
+    private fun setupChart() {
+        chartView.dataSetInfoList = listOf(
+            DataSetInfo(R.string.channel_ir, R.color.channel_ir),
+            DataSetInfo(R.string.channel_green, R.color.channel_green)
+        )
+
+        chartView.maximumEntryCount = 100
     }
 
     private fun setupToolbar() {
@@ -112,6 +181,12 @@ class WhrmFragment : Fragment() {
     private fun startMonitoring() {
         isMonitoring = true
 
+        hrResultView.measurementProgress = 0
+
+        measurementStartTimestamp = null
+        hrResultView.measurementProgress = getMeasurementProgress()
+        hrResultView.result = null
+
         hspViewModel.isDeviceSupported
             .observe(this) {
                 hspViewModel.startStreaming()
@@ -120,8 +195,17 @@ class WhrmFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
-
         hspViewModel.stopStreaming()
+    }
+
+    fun addStreamData(streamData: HspStreamData) {
+        renderHrmModel(streamData)
+        stepCount = streamData.runSteps + streamData.walkSteps
+        ibi = streamData.rr.toString()
+        energy = streamData.kCal
+        activity = Activity.values()[streamData.activity].displayName
+        scd = Scd.values()[streamData.scdState].displayName
+        cadence = streamData.cadence
     }
 
     private fun dataLoggingToggled() {
@@ -138,5 +222,60 @@ class WhrmFragment : Fragment() {
 
     private fun onBackPressed() {
 
+    }
+
+    fun clearChart() {
+        chartView.clearChart()
+    }
+
+    private fun shouldShowMeasuringProgress(): Boolean {
+        return (System.currentTimeMillis() - (measurementStartTimestamp
+            ?: 0L)) < HR_MEASURING_PERIOD_IN_MILLIS
+    }
+
+    private fun getMeasurementProgress(): Int {
+        return ((System.currentTimeMillis() - (measurementStartTimestamp
+            ?: 0L)) * 100 / HR_MEASURING_PERIOD_IN_MILLIS).toInt()
+    }
+
+    private fun renderHrmModel(streamData: HspStreamData) {
+        if (measurementStartTimestamp == null) {
+            measurementStartTimestamp = System.currentTimeMillis()
+        }
+
+        chartView.addData(streamData.green, streamData.green2)
+
+        val shouldShowMeasuringProgress = shouldShowMeasuringProgress()
+        if (shouldShowMeasuringProgress) {
+            hrConfidence = null
+
+            hrResultView.measurementProgress = getMeasurementProgress()
+            hrResultView.result = null
+        } else {
+            hrConfidence = streamData.hrConfidence
+        }
+
+        if (isHrConfidenceHighEnough(streamData) && !shouldShowMeasuringProgress) {
+            hrResultView.result = streamData.hr
+
+            lastValidHrTimestamp = System.currentTimeMillis()
+        } else if (isHrObsolete()) {
+            // show HR as empty
+            hrResultView.result = null
+        }
+    }
+
+    private fun isHrConfidenceHighEnough(hrmModel: HspStreamData): Boolean {
+        return if (hrmModel.hr < 40 || hrmModel.hr > 240) {
+            false
+        } else {
+            hrmModel.hrConfidence >= minConfidenceLevel
+        }
+    }
+
+    private fun isHrObsolete(): Boolean {
+        return (System.currentTimeMillis() - lastValidHrTimestamp) > TimeUnit.SECONDS.toMillis(
+            hrExpireDuration.toLong()
+        )
     }
 }

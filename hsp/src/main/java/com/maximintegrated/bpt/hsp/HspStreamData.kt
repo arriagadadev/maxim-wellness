@@ -27,11 +27,18 @@ data class HspStreamData(
     val wspo2UnreliableR: Int,
     val wspo2State: Int,
     val scdState: Int,
+    val walkSteps: Int,
+    val runSteps: Int,
+    val kCal: Int,
+    val cadence: Int,
     val currentTimeMillis: Long = System.currentTimeMillis()
 ) {
     companion object {
 
-        // get_format ppg 4 enc=bin cs=1 format={smpleCnt,8},{grnCnt,20},{irCnt,20},{redCnt,20},{accelX,14,3},{accelY,14,3},{accelZ,14,3},{hr,9},{hrconf,8},{spo2,8},{wspo2conf,8},{wspo2lowSNR,1} err=0
+        // get_format ppg 9 enc=bin cs=1 format={smpleCnt,8},{smpleTime,32},{grnCnt,20},{grn2Cnt,20},{irCnt,20},{redCnt,20},{accelX,14,3},
+        //{accelY,14,3},{accelZ,14,3},{opMode,4},{hr,12},{hrconf,8},{rr,14,1},{rrconf,8},{activity,4},{r,12,3},{wspo2conf,8},{spo2,11,1},{wspo2percentcomplete,8},
+        //{wspo2lowSNR,1},{wspo2motion,1},{wspo2lowpi,1},{wspo2unreliableR,1},{wspo2state,4},{scdstate,4},
+        //{wSteps,24},{rSteps,24},{kCal,24},{cadence,24}
         fun fromPacket(packet: ByteArray) = with(BitStreamReader(packet, 8)) {
             HspStreamData(
                 sampleCount = nextInt(8),
@@ -58,7 +65,11 @@ data class HspStreamData(
                 wspo2LowPi = nextInt(1),
                 wspo2UnreliableR = nextInt(1),
                 wspo2State = nextInt(4),
-                scdState = nextInt(4)
+                scdState = nextInt(4),
+                walkSteps = nextInt(24),
+                runSteps = nextInt(24),
+                kCal = nextInt(24),
+                cadence = nextInt(24)
             )
         }
     }

@@ -89,7 +89,7 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         sendCommand(SetConfigurationCommand("wearablesuite", "autopdcurrentenable", "0"))
         sendCommand(SetConfigurationCommand("wearablesuite", "targetpdcurrent", "A"))
 
-        sendCommand(ReadCommand("ppg", 4))
+        sendCommand(ReadCommand("ppg", 9))
     }
 
     fun stopStreaming() {

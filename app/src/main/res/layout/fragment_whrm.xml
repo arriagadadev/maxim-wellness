@@ -9,4 +9,13 @@
 
     <include layout="@layout/include_app_bar" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp">
+
+        <include layout="@layout/include_whrm_fragment_content" />
+
+    </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/colorBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewWhrm"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/signal_chart_height"
+            android:layout_marginTop="20dp"
+            android:minHeight="@dimen/signal_chart_height"
+            app:layout_constraintBottom_toTopOf="@id/hrResultView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
+                android:id="@+id/chart_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.cardview.widget.CardView>
+
+        <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
+            android:id="@+id/hrResultView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            app:layout_constraintBottom_toTopOf="@id/stepsView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardViewWhrm"
+            app:mrv_title="HR"
+            app:mrv_unit="bpm" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/stepsView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/ibiView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hrResultView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_footprint"
+            app:rcv_title="Steps" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/ibiView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/energyView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stepsView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_hrv_signal"
+            app:rcv_title="IBI" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/energyView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/activityView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ibiView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_fire"
+            app:rcv_title="Energy" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/activityView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/scdView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/energyView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_sports_coaching"
+            app:rcv_title="Activity" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/scdView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/cadenceView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activityView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_hand"
+            app:rcv_title="SCD" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/cadenceView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/scdView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_sin"
+            app:rcv_title="Cadence" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</merge>

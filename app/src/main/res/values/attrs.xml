@@ -9,4 +9,12 @@
         <attr name="mrv_title" format="string" />
         <attr name="mrv_unit" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="ResultCardView">
+        <attr name="rcv_title" format="string" />
+        <attr name="rcv_unit" format="string" />
+        <attr name="rcv_value" format="float" />
+        <attr name="rcv_decimal_places" format="integer" />
+        <attr name="rcv_flashing_text" format="string" />
+    </declare-styleable>
 </resources>
