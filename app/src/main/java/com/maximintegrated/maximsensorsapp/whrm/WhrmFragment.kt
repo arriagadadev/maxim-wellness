@@ -23,7 +23,7 @@ class WhrmFragment : Fragment() {
     companion object {
         fun newInstance() = WhrmFragment()
 
-        private val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
+        val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
     }
 
     private lateinit var hspViewModel: HspViewModel
@@ -67,7 +67,7 @@ class WhrmFragment : Fragment() {
             stepsView.emptyValue = value.toString()
         }
 
-    private var energy: Int = 0
+    private var energy: String? = null
         set(value) {
             field = value
             energyView.emptyValue = value.toString()
@@ -85,7 +85,7 @@ class WhrmFragment : Fragment() {
             scdView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
         }
 
-    private var cadence: Int = 0
+    private var cadence: String? = null
         set(value) {
             field = value
             cadenceView.emptyValue = value.toString()
@@ -201,11 +201,11 @@ class WhrmFragment : Fragment() {
     fun addStreamData(streamData: HspStreamData) {
         renderHrmModel(streamData)
         stepCount = streamData.runSteps + streamData.walkSteps
-        ibi = streamData.rr.toString()
-        energy = streamData.kCal
+        ibi = "${streamData.rr} msec"
+        energy = "${streamData.kCal} cal"
         activity = Activity.values()[streamData.activity].displayName
         scd = Scd.values()[streamData.scdState].displayName
-        cadence = streamData.cadence
+        cadence = "${streamData.cadence} steps/min"
     }
 
     private fun dataLoggingToggled() {

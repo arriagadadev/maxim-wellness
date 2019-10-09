@@ -32,4 +32,12 @@
     <string name="measurement_result_timeout_message">TIMEOUT</string>
     <string name="measurement_result_warning_message">Keep your arm still</string>
     <string name="measurement_result_failure_message">Check wrist band tightness &amp; placement and keep your arm still</string>
+
+    <string name="spo2_algorithm_mode_one_shot">One Shot</string>
+    <string name="spo2_algorithm_mode_continuous">Continuous</string>
+    <string name="spo2_algorithm_mode">Algorithm Mode</string>
+    <string name="snr">Snr</string>
+    <string name="motion">Motion</string>
+    <string name="pi">Pi</string>
+    <string name="reliable_r">Reliable R</string>
 </resources>
