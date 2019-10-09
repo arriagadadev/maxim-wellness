@@ -1,20 +1,23 @@
 package com.maximintegrated.maximsensorsapp.spo2
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
-import kotlinx.android.synthetic.main.fragment_spo2.*
+import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
 import timber.log.Timber
@@ -25,6 +28,7 @@ class Spo2Fragment : Fragment() {
 
     companion object {
         fun newInstance() = Spo2Fragment()
+        const val STATUS_TIMEOUT = 3
     }
 
     private lateinit var hspViewModel: HspViewModel
@@ -35,6 +39,15 @@ class Spo2Fragment : Fragment() {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+
+    private var measurementStartTimestamp: Long? = null
+
+
+    private var rResult: Float = 0f
+        set(value) {
+            field = value
+            rResultView.emptyValue = value.toString()
+        }
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -60,7 +73,6 @@ class Spo2Fragment : Fragment() {
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
                 addStreamData(hspStreamData)
-                Timber.d(hspStreamData.toString())
             }
 
 
@@ -96,6 +108,8 @@ class Spo2Fragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         chartView = view.findViewById(R.id.chart_view)
+
+        algorithmModeOneShotRadioButton.isChecked = true
 
         setupToolbar()
         setupChart()
@@ -136,18 +150,36 @@ class Spo2Fragment : Fragment() {
     private fun startMonitoring() {
         isMonitoring = true
 
+        measurementStartTimestamp = null
+        hrResultView.measurementProgress = 0
+        hrResultView.result = null
+
         spo2ResultView.isMeasuring = true
         spo2ResultView.result = null
         spo2ResultView.isTimeout = false
 
+        setAlgorithmModeRadioButtonsEnabled(false)
+
         hspViewModel.isDeviceSupported
             .observe(this) {
+                sendAlgoMode()
                 hspViewModel.startStreaming()
             }
     }
 
+    private fun sendAlgoMode() {
+        if (algorithmModeContinuousRadioButton.isChecked) {
+            hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "0"))
+        } else if (algorithmModeOneShotRadioButton.isChecked) {
+            hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "1"))
+        }
+    }
+
     private fun stopMonitoring() {
         isMonitoring = false
+        spo2ResultView.isMeasuring = false
+
+        setAlgorithmModeRadioButtonsEnabled(true)
 
         hspViewModel.stopStreaming()
     }
@@ -170,28 +202,74 @@ class Spo2Fragment : Fragment() {
     }
 
     fun addStreamData(streamData: HspStreamData) {
-        chartView.addData(streamData.ir, streamData.red, streamData.green)
 
-//        motionView.emptyValue = model.motionMessage
-        spo2ResultView.measurementProgress = streamData.wspo2PercentageComplete
-        spo2ResultView.result = streamData.spo2.roundToInt()
+        renderSpo2Model(streamData)
+        renderHrmModel(streamData)
 
-//        if (algorithmModeContinuousRadioButton.isChecked) {
-//            spo2ResultView.result = model.spo2.roundToInt()
-//            confidenceView.value = model.spo2Confidence.toFloat()
-//        } else if (model.spo2PercentageCompleted == 100) {
-//            spo2ResultView.result = model.spo2.roundToInt()
-//            confidenceView.value = model.spo2Confidence.toFloat()
-//            stopMonitoring()
-//        }
-//
-//        if (model.isTimeout) {
-//            spo2ResultView.isTimeout = true
-//            stopMonitoring()
-//        }
+        when (streamData.wspo2LowSnr) {
+            1 -> lowSnr.background.setTint(Color.RED)
+            else -> lowSnr.background.setTint(Color.GREEN)
+        }
+
+        when (streamData.wspo2Motion) {
+            1 -> motion.background.setTint(Color.RED)
+            else -> motion.background.setTint(Color.GREEN)
+        }
+
+        when (streamData.wspo2LowPi) {
+            1 -> lowPi.background.setTint(Color.RED)
+            else -> lowPi.background.setTint(Color.GREEN)
+        }
+
+        when (streamData.wspo2UnreliableR) {
+            1 -> unreliableR.background.setTint(Color.RED)
+            else -> unreliableR.background.setTint(Color.GREEN)
+        }
+
+        rResult = streamData.r
+
+    }
+
+
+    private fun renderSpo2Model(model: HspStreamData) {
+        chartView.addData(model.ir, model.red, model.green)
+
+        spo2ResultView.measurementProgress = model.wspo2PercentageComplete
+
+        if (algorithmModeContinuousRadioButton.isChecked) {
+            spo2ResultView.result = model.spo2.roundToInt()
+        } else if (model.wspo2PercentageComplete == 100) {
+            spo2ResultView.result = model.spo2.roundToInt()
+            stopMonitoring()
+        }
+
+        if (model.wspo2State == STATUS_TIMEOUT) {
+            spo2ResultView.isTimeout = true
+            stopMonitoring()
+        }
+    }
+
+    private fun renderHrmModel(streamData: HspStreamData) {
+        if (measurementStartTimestamp == null) {
+            measurementStartTimestamp = System.currentTimeMillis()
+        }
+
+        hrResultView.measurementProgress = getMeasurementProgress()
+        hrResultView.result = streamData.hr
+    }
+
+    private fun getMeasurementProgress(): Int {
+        return ((System.currentTimeMillis() - (measurementStartTimestamp
+            ?: 0L)) * 100 / WhrmFragment.HR_MEASURING_PERIOD_IN_MILLIS).toInt()
     }
 
     fun clearChart() {
         chartView.clearChart()
+    }
+
+    private fun setAlgorithmModeRadioButtonsEnabled(isEnabled: Boolean) {
+        for (radioButton in algorithmModeRadioGroup.children) {
+            radioButton.isEnabled = isEnabled
+        }
     }
 }

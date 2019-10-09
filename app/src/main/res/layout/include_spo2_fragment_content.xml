@@ -2,8 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?android:attr/colorBackground"
@@ -15,7 +14,8 @@
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="@dimen/signal_chart_height"
-            app:layout_constraintBottom_toTopOf="@id/spo2ResultView"
+            android:layout_marginTop="20dp"
+            app:layout_constraintBottom_toTopOf="@id/algorithmModeTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -27,16 +27,138 @@
 
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/algorithmModeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/algorithm_mode_title_top_margin"
+            android:text="@string/spo2_algorithm_mode"
+            android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Title"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/algorithmModeRadioGroup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardView" />
+
+        <RadioGroup
+            android:id="@+id/algorithmModeRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spo2_radio_group_top_margin"
+            android:layout_marginBottom="@dimen/spo2_radio_group_bottom_margin"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/algorithmModeTitle">
+
+            <RadioButton
+                android:id="@+id/algorithmModeOneShotRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
+                android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
+                android:text="@string/spo2_algorithm_mode_one_shot" />
+
+            <RadioButton
+                android:id="@+id/algorithmModeContinuousRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
+                android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
+                android:text="@string/spo2_algorithm_mode_continuous" />
+
+        </RadioGroup>
+
         <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
             android:id="@+id/spo2ResultView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/lowSnr"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/algorithmModeRadioGroup"
             app:mrv_title="SpO2"
             app:mrv_unit="%" />
+
+        <TextView
+            android:id="@+id/lowSnr"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/rectangle"
+            android:gravity="center"
+            android:text="@string/snr"
+            app:layout_constraintBottom_toTopOf="@id/hrResultView"
+            app:layout_constraintEnd_toStartOf="@id/motion"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/spo2ResultView" />
+
+        <TextView
+            android:id="@+id/motion"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/rectangle"
+            android:gravity="center"
+            android:text="@string/motion"
+            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
+            app:layout_constraintEnd_toStartOf="@id/lowPi"
+            app:layout_constraintStart_toEndOf="@id/lowSnr"
+            app:layout_constraintTop_toTopOf="@id/lowSnr" />
+
+        <TextView
+            android:id="@+id/lowPi"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/rectangle"
+            android:gravity="center"
+            android:text="@string/pi"
+            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
+            app:layout_constraintEnd_toStartOf="@id/unreliableR"
+            app:layout_constraintStart_toEndOf="@id/motion"
+            app:layout_constraintTop_toTopOf="@id/lowSnr" />
+
+        <TextView
+            android:id="@+id/unreliableR"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/rectangle"
+            android:gravity="center"
+            android:text="@string/reliable_r"
+            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/lowPi"
+            app:layout_constraintTop_toTopOf="@id/lowSnr" />
+
+        <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
+            android:id="@+id/hrResultView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            app:layout_constraintBottom_toTopOf="@id/rResultView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/unreliableR"
+            app:mrv_title="HR"
+            app:mrv_unit="bpm" />
+
+        <com.maximintegrated.maximsensorsapp.ResultCardView
+            android:id="@+id/rResultView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/hrResultView"
+            app:layout_constraintWidth_max="300dp"
+            app:miv_icon="@drawable/ic_sin"
+            app:rcv_title="R" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>
