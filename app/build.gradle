@@ -37,6 +37,7 @@ dependencies {
     implementation project(':style')
     implementation project(':bluetooth')
     implementation project(':hsp')
+    implementation project(':algorithm_hrv')
 
     implementation deps.kotlinStdLib
     implementation deps.appcompat

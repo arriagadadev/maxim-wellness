@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.hrv
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -8,6 +9,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.algorithm_hrv.HrvAlgorithm
+import com.maximintegrated.algorithm_hrv.HrvAlgorithmInitConfig
+import com.maximintegrated.algorithm_hrv.HrvAlgorithmInput
+import com.maximintegrated.algorithm_hrv.HrvAlgorithmOutput
+import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -26,6 +32,10 @@ class HrvFragment : Fragment() {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+
+    private var hrvAlgorithmInitConfig: HrvAlgorithmInitConfig? = null
+    private val hrvAlgorithmInput = HrvAlgorithmInput()
+    private val hrvAlgorithmOutput = HrvAlgorithmOutput()
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -55,7 +65,7 @@ class HrvFragment : Fragment() {
 
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
-                Timber.d(hspStreamData.toString())
+                addStreamData(hspStreamData)
             }
     }
 
@@ -74,7 +84,20 @@ class HrvFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 60, 15)
+        HrvAlgorithm.init(hrvAlgorithmInitConfig)
+
         setupToolbar()
+    }
+
+    fun addStreamData(streamData: HspStreamData) {
+        hrvAlgorithmInput.ibi = streamData.rr
+        hrvAlgorithmInput.ibiConfidence = streamData.rrConfidence
+        hrvAlgorithmInput.isIbiValid = true
+
+        HrvAlgorithm.run(hrvAlgorithmInput, hrvAlgorithmOutput)
+
+        Log.d("RESULT", "result: $hrvAlgorithmOutput")
     }
 
     private fun setupToolbar() {
@@ -120,6 +143,8 @@ class HrvFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        HrvAlgorithm.end()
 
         hspViewModel.stopStreaming()
     }
