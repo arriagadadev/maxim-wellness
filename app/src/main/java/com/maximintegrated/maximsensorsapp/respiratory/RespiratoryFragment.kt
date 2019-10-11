@@ -17,7 +17,11 @@ import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.view.DataSetInfo
+import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
+import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
+import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import timber.log.Timber
 
 class RespiratoryFragment : Fragment() {
@@ -34,6 +38,8 @@ class RespiratoryFragment : Fragment() {
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
 
+    private lateinit var chartView: MultiChannelChartView
+
     var calculated: Float = 0f
 
     private var respiratoryRateAlgorithmInitConfig: RespiratoryRateAlgorithmInitConfig? = null
@@ -46,6 +52,12 @@ class RespiratoryFragment : Fragment() {
             menuItemStopMonitoring.isVisible = value
             menuItemStartMonitoring.isVisible = !value
 
+        }
+
+    private var respiration: Float = 0f
+        set(value) {
+            field = value
+            respirationResultView.emptyValue = "%.2f".format(value)
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -87,6 +99,8 @@ class RespiratoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        chartView = view.findViewById(R.id.chart_view)
+
         respiratoryRateAlgorithmInitConfig = RespiratoryRateAlgorithmInitConfig(
             RespiratoryRateAlgorithmInitConfig.SourceOptions.FINGER,
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
@@ -94,7 +108,17 @@ class RespiratoryFragment : Fragment() {
         )
         RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
 
+        setupChart()
         setupToolbar()
+    }
+
+    private fun setupChart() {
+        chartView.dataSetInfoList = listOf(
+            DataSetInfo(R.string.channel_red, R.color.channel_red)
+        )
+
+        chartView.titleView.text = getString(R.string.respiration_rate)
+        chartView.maximumEntryCount = 4500
     }
 
     private fun setupToolbar() {
@@ -133,6 +157,7 @@ class RespiratoryFragment : Fragment() {
         respiratoryRateAlgorithmInput.ppg = streamData.green.toFloat()
         respiratoryRateAlgorithmInput.ibi = streamData.rr
         respiratoryRateAlgorithmInput.ibiConfidence = streamData.rrConfidence.toFloat()
+
         if (calculated == streamData.rr) {
             respiratoryRateAlgorithmInput.isIbiUpdateFlag = false
         } else {
@@ -143,6 +168,9 @@ class RespiratoryFragment : Fragment() {
         respiratoryRateAlgorithmInput.isPpgUpdateFlag = true
 
         RespiratoryRateAlgorithm.run(respiratoryRateAlgorithmInput, respiratoryRateAlgorithmOutput)
+
+        chartView.addData(respiratoryRateAlgorithmOutput.respirationRate.toInt())
+        respiration = respiratoryRateAlgorithmOutput.respirationRate
 
         Log.d("RESULT", "result: $respiratoryRateAlgorithmOutput")
     }
@@ -178,5 +206,9 @@ class RespiratoryFragment : Fragment() {
 
     private fun onBackPressed() {
 
+    }
+
+    fun clearChart() {
+        chartView.clearChart()
     }
 }

@@ -9,4 +9,6 @@
 
     <include layout="@layout/include_app_bar" />
 
+    <include layout="@layout/include_respiratory_fragment_content"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
