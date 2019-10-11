@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.respiratory
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -8,6 +9,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithm
+import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInitConfig
+import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInput
+import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOutput
+import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -27,6 +33,12 @@ class RespiratoryFragment : Fragment() {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+
+    var calculated: Float = 0f
+
+    private var respiratoryRateAlgorithmInitConfig: RespiratoryRateAlgorithmInitConfig? = null
+    private val respiratoryRateAlgorithmInput = RespiratoryRateAlgorithmInput()
+    private val respiratoryRateAlgorithmOutput = RespiratoryRateAlgorithmOutput()
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -56,7 +68,7 @@ class RespiratoryFragment : Fragment() {
 
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
-                Timber.d(hspStreamData.toString())
+                addStreamData(hspStreamData)
             }
     }
 
@@ -74,6 +86,14 @@ class RespiratoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        respiratoryRateAlgorithmInitConfig = RespiratoryRateAlgorithmInitConfig(
+            RespiratoryRateAlgorithmInitConfig.SourceOptions.FINGER,
+            RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
+            RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
+        )
+        RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
+
         setupToolbar()
     }
 
@@ -109,6 +129,24 @@ class RespiratoryFragment : Fragment() {
 
     }
 
+    fun addStreamData(streamData: HspStreamData) {
+        respiratoryRateAlgorithmInput.ppg = streamData.green.toFloat()
+        respiratoryRateAlgorithmInput.ibi = streamData.rr
+        respiratoryRateAlgorithmInput.ibiConfidence = streamData.rrConfidence.toFloat()
+        if (calculated == streamData.rr) {
+            respiratoryRateAlgorithmInput.isIbiUpdateFlag = false
+        } else {
+            respiratoryRateAlgorithmInput.isIbiUpdateFlag = true;
+            calculated = streamData.rr
+        }
+
+        respiratoryRateAlgorithmInput.isPpgUpdateFlag = true
+
+        RespiratoryRateAlgorithm.run(respiratoryRateAlgorithmInput, respiratoryRateAlgorithmOutput)
+
+        Log.d("RESULT", "result: $respiratoryRateAlgorithmOutput")
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
 
@@ -120,6 +158,8 @@ class RespiratoryFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        RespiratoryRateAlgorithm.end()
 
         hspViewModel.stopStreaming()
     }
