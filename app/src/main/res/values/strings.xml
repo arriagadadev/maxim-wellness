@@ -41,4 +41,22 @@
     <string name="pi">Pi</string>
     <string name="reliable_r">Reliable R</string>
     <string name="respiration_rate">Respiration Rate</string>
+
+    <string name="time_domain_metrics">Time Domain Metrics</string>
+    <string name="frequency_domain_metrics">Frequency Domain Metrics</string>
+
+    <string name="avnn">avnn</string>
+    <string name="sdnn">sdnn</string>
+    <string name="rmssd">rmssd</string>
+    <string name="pnn50">pnn50</string>
+
+    <string name="ulf">ulf</string>
+    <string name="vlf">vlf</string>
+    <string name="lf">lf</string>
+    <string name="hf">hf</string>
+    <string name="lfOverHf">lfOverHf</string>
+    <string name="totPwr">totPwr</string>
+
+    <string name="ibi">IBI</string>
+    <string name="ibiRr">Inter Beat Interval(ms)</string>
 </resources>
