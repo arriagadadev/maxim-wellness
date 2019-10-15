@@ -1,7 +1,6 @@
 package com.maximintegrated.maximsensorsapp.respiratory
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -171,8 +170,6 @@ class RespiratoryFragment : Fragment() {
 
         chartView.addData(respiratoryRateAlgorithmOutput.respirationRate.toInt())
         respiration = respiratoryRateAlgorithmOutput.respirationRate
-
-        Log.d("RESULT", "result: $respiratoryRateAlgorithmOutput")
     }
 
     private fun startMonitoring() {

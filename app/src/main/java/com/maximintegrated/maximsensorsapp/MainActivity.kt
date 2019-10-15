@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
 
         when (getCurrentFragment()) {
-            is MainFragment -> Log.d("AAAA", "MAIN Fragment")
+            is MainFragment -> Log.d("Main", "Main")
             else -> hspViewModel.stopStreaming()
         }
 
