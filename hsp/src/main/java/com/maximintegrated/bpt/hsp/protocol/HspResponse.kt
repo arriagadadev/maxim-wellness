@@ -39,7 +39,20 @@ sealed class HspResponse<out T : HspCommand>(
             }
 
             return when (command) {
-                is GetDeviceInformationCommand -> GetDeviceInformationResponse(command, status)
+                is GetDeviceInformationCommand -> {
+                    val hubVersion = responseParameters.firstOrNull {
+                        it.key == GetDeviceInformationResponse.HUB_VERSION
+                    }
+
+                    val firmwareVersion = responseParameters.firstOrNull {
+                        it.key == GetDeviceInformationResponse.FIRMWARE_VERSION
+                    }
+
+                    GetDeviceInformationResponse(
+                        command,
+                        firmwareVersion?.value.toString(), hubVersion?.value.toString(), status
+                    )
+                }
                 is DumpRegistersCommand -> DumpRegistersResponse(command, status)
                 is GetRegisterCommand -> {
                     val registerValueParameter = responseParameters.firstOrNull {
@@ -138,16 +151,33 @@ data class Status(val code: Int, val message: String) {
 }
 
 // TODO: implement response parsing
-class GetDeviceInformationResponse(command: GetDeviceInformationCommand, status: Status) :
-    HspResponse<GetDeviceInformationCommand>(command, status = status)
+class GetDeviceInformationResponse(
+    command: GetDeviceInformationCommand,
+    val firmwareVersion: String,
+    val hubVersion: String,
+    status: Status
+) :
+    HspResponse<GetDeviceInformationCommand>(
+        command, listOf(
+            HspParameter(FIRMWARE_VERSION, firmwareVersion ?: ""), HspParameter(
+                HUB_VERSION, hubVersion ?: ""
+            )
+        ), status = status
+    ) {
+    companion object {
+        const val HUB_VERSION = "hub_firm_ver"
+        const val FIRMWARE_VERSION = "firmware_ver"
+    }
+}
 
 class GetRegisterResponse(
     command: GetRegisterCommand,
     val registerValue: Int? = null,
     status: Status
-) : HspResponse<GetRegisterCommand>(
-    command, listOf(HspParameter(KEY_REGISTER_VALUE, registerValue?.toString() ?: "")), status
-) {
+) :
+    HspResponse<GetRegisterCommand>(
+        command, listOf(HspParameter(KEY_REGISTER_VALUE, registerValue?.toString() ?: "")), status
+    ) {
 
     companion object {
         const val KEY_REGISTER_VALUE = "reg_val"

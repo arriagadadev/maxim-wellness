@@ -1,4 +1,8 @@
 <resources>
+    <string name="app_version">App Version: %1$s</string>
+    <string name="server_version">Server: %1$s</string>
+    <string name="hub_version">Hub Version: %1$s</string>
+
     <string name="app_name">MaximSensorsApp</string>
     <string name="maxim_hsp">Maxim Health Sensor Platform</string>
     <string name="spo2">Pulse Oximetry</string>

@@ -8,7 +8,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.bpt.hsp.protocol.HspCommand
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
 import kotlinx.android.synthetic.main.activity_main.*
@@ -34,11 +36,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        appVersion.text = "3.3.3"
+
+        appVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
         bluetoothDevice = intent.getParcelableExtra(KEY_BLUETOOTH_DEVICE)
 
         hspViewModel = ViewModelProviders.of(this).get(HspViewModel::class.java)
         hspViewModel.connect(bluetoothDevice)
+
+        hspViewModel.isDeviceSupported
+            .observe(this) {
+                hspViewModel.sendCommand(HspCommand.fromText("get_device_info"))
+            }
+
+        hspViewModel.commandResponse
+            .observe(this) { response ->
+                if(response.command.name == HspCommand.COMMAND_GET_DEVICE_INFO && response.parameters.size > 1){
+                    serverVersion.text = getString(R.string.server_version, response.parameters[0].value)
+                    hubVersion.text =  getString(R.string.hub_version, response.parameters[1].value)
+                }
+            }
 
         d("Connected bluetooth device $bluetoothDevice")
         showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
