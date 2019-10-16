@@ -14,6 +14,7 @@ import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
+import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
@@ -41,6 +42,7 @@ class Spo2Fragment : Fragment() {
     private lateinit var menuItemSettings: MenuItem
 
     private var measurementStartTimestamp: Long? = null
+    private var dataRecorder: DataRecorder? = null
 
 
     private var rResult: Float = 0f
@@ -150,6 +152,8 @@ class Spo2Fragment : Fragment() {
     private fun startMonitoring() {
         isMonitoring = true
 
+        dataRecorder = DataRecorder("SpO2")
+
         measurementStartTimestamp = null
         hrResultView.measurementProgress = 0
         hrResultView.result = null
@@ -177,6 +181,10 @@ class Spo2Fragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        dataRecorder?.close()
+        dataRecorder = null
+
         spo2ResultView.isMeasuring = false
 
         setAlgorithmModeRadioButtonsEnabled(true)
@@ -202,6 +210,8 @@ class Spo2Fragment : Fragment() {
     }
 
     fun addStreamData(streamData: HspStreamData) {
+
+        dataRecorder?.record(streamData)
 
         renderSpo2Model(streamData)
         renderHrmModel(streamData)

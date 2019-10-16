@@ -12,6 +12,7 @@ import com.maximintegrated.algorithm_hrv.*
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
+import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
@@ -41,6 +42,8 @@ class HrvFragment : Fragment() {
     private lateinit var timeChartView: MultiChannelChartView
     private lateinit var frequencyChartView: MultiChannelChartView
     private lateinit var ibiChartView: MultiChannelChartView
+
+    private var dataRecorder: DataRecorder? = null
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -239,6 +242,9 @@ class HrvFragment : Fragment() {
     }
 
     fun addStreamData(streamData: HspStreamData) {
+
+        dataRecorder?.record(streamData)
+
         hrvAlgorithmInput.ibi = streamData.rr
         hrvAlgorithmInput.ibiConfidence = streamData.rrConfidence
         hrvAlgorithmInput.isIbiValid = true
@@ -290,6 +296,7 @@ class HrvFragment : Fragment() {
 
     private fun startMonitoring() {
         isMonitoring = true
+        dataRecorder = DataRecorder("Hrv")
         clearChart()
 
         percentCompleted.measurementProgress = 0
@@ -305,6 +312,10 @@ class HrvFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        dataRecorder?.close()
+        dataRecorder = null
+
         percentCompleted.isMeasuring = false
         HrvAlgorithm.end()
 

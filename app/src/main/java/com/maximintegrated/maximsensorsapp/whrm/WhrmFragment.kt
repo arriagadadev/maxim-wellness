@@ -28,6 +28,7 @@ class WhrmFragment : Fragment() {
 
     private lateinit var hspViewModel: HspViewModel
     private lateinit var chartView: MultiChannelChartView
+    private var dataRecorder: DataRecorder? = null
 
     private var measurementStartTimestamp: Long? = null
     private var minConfidenceLevel = 0
@@ -180,6 +181,7 @@ class WhrmFragment : Fragment() {
 
     private fun startMonitoring() {
         isMonitoring = true
+        dataRecorder = DataRecorder("Whrm")
 
         hrResultView.measurementProgress = 0
 
@@ -195,11 +197,16 @@ class WhrmFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        dataRecorder?.close()
+        dataRecorder = null
+
         hspViewModel.stopStreaming()
     }
 
     fun addStreamData(streamData: HspStreamData) {
         renderHrmModel(streamData)
+        dataRecorder?.record(streamData)
         stepCount = streamData.runSteps + streamData.walkSteps
         ibi = "${streamData.rr} msec"
         energy = "${streamData.kCal} cal"

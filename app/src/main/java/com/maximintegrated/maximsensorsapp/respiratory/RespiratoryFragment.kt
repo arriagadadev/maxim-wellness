@@ -15,6 +15,7 @@ import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOu
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
+import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
@@ -36,6 +37,8 @@ class RespiratoryFragment : Fragment() {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+
+    private var dataRecorder: DataRecorder? = null
 
     private lateinit var chartView: MultiChannelChartView
 
@@ -153,6 +156,9 @@ class RespiratoryFragment : Fragment() {
     }
 
     fun addStreamData(streamData: HspStreamData) {
+
+        dataRecorder?.record(streamData)
+
         respiratoryRateAlgorithmInput.ppg = streamData.green.toFloat()
         respiratoryRateAlgorithmInput.ibi = streamData.rr
         respiratoryRateAlgorithmInput.ibiConfidence = streamData.rrConfidence.toFloat()
@@ -174,6 +180,7 @@ class RespiratoryFragment : Fragment() {
 
     private fun startMonitoring() {
         isMonitoring = true
+        dataRecorder = DataRecorder("Respiration_Rate")
 
         hspViewModel.isDeviceSupported
             .observe(this) {
@@ -183,6 +190,9 @@ class RespiratoryFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        dataRecorder?.close()
+        dataRecorder = null
 
         RespiratoryRateAlgorithm.end()
 
