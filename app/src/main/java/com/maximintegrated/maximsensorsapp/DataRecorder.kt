@@ -4,7 +4,9 @@ import android.os.Environment
 import android.util.Log
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
+import timber.log.Timber
 import java.io.File
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -72,6 +74,11 @@ class DataRecorder(type: String) {
     }
 
     fun close() {
-        csvWriter.close()
+        try {
+            csvWriter.close()
+        }catch (e:Exception){
+            Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
+        }
+
     }
 }

@@ -29,13 +29,21 @@ class CsvWriter private constructor(filePath: String) {
             file.parentFile.mkdirs()
 
             file.printWriter().use { out ->
+                var count = 0
+
                 while (true) {
                     val line = linesQueue.take()
                     if (line == POISON_PILL) {
                         break
                     }
+                    count++
 
                     out.println(line)
+                    if (count > 10000) {
+                        out.flush()
+                        count = 0
+                    }
+
                 }
             }
         }
