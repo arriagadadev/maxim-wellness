@@ -2,8 +2,6 @@ package com.maximintegrated.maximsensorsapp
 
 import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,10 +15,7 @@ import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
-import com.maximintegrated.maximsensorsapp.sleep.SleepFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
-import com.maximintegrated.maximsensorsapp.sports_coaching.SportsCoachingFragment
-import com.maximintegrated.maximsensorsapp.stress.StressFragment
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_main_fragment_content.*
@@ -111,18 +106,27 @@ class MainFragment : Fragment() {
 
         sleepMenuItemView.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND)
-            intent.component = ComponentName("maximintegrated.com", "maximintegrated.com.MainActivity")
+            intent.component =
+                ComponentName("maximintegrated.com", "maximintegrated.com.MainActivity")
             startActivity(intent)
 
         }
 
         stressMenuItemView.setOnClickListener {
-            requireActivity().addFragment(StressFragment.newInstance())
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.component = ComponentName(
+                "com.maximintegrated.sportscoaching",
+                "com.maximintegrated.sportscoaching.view.MainActivity"
+            )
+            startActivity(intent)
         }
 
         sportsCoachingMenuItemView.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND)
-            intent.component = ComponentName("com.maximintegrated.sportscoaching", "com.maximintegrated.sportscoaching.view.MainActivity")
+            intent.component = ComponentName(
+                "com.maximintegrated.sportscoaching",
+                "com.maximintegrated.sportscoaching.view.MainActivity"
+            )
             startActivity(intent)
         }
     }
