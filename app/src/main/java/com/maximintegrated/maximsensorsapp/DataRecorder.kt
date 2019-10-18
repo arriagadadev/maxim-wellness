@@ -1,30 +1,61 @@
 package com.maximintegrated.maximsensorsapp
 
 import android.os.Environment
-import android.util.Log
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import timber.log.Timber
 import java.io.File
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
 class DataRecorder(type: String) {
 
-    companion object{
+    companion object {
         val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp")
-        private val TIMESTAMP_FORMAT = SimpleDateFormat("yyyyMMddHHmmss", Locale.US)
+        private val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
         private val CSV_HEADER_HSP = arrayOf(
-            "sample_count","sample_time","green", "green2", "ir", "red",
-            "acceleration_x", "acceleration_y", "acceleration_z","op_mode",
-            "hr", "hr_confidence", "rr", "rr_confidence", "activity", "r", "spo2_confidence", "spo2",
-            "spo2_percentage_complete", "spo2_low_snr", "spo2_motion", "spo2_low_pi",
-            "spo2_unreliable_r", "spo2_state", "scd_state", "walking_steps", "running_steps",
-            "calorie", "cadence", "timestamp"
+            "sample_count",
+            "sample_time",
+            "green",
+            "green2",
+            "ir",
+            "red",
+            "acceleration_x",
+            "acceleration_y",
+            "acceleration_z",
+            "op_mode",
+            "hr",
+            "hr_confidence",
+            "rr",
+            "rr_confidence",
+            "activity",
+            "r",
+            "spo2_confidence",
+            "spo2",
+            "spo2_percentage_complete",
+            "spo2_low_snr",
+            "spo2_motion",
+            "spo2_low_pi",
+            "spo2_unreliable_r",
+            "spo2_state",
+            "scd_state",
+            "walking_steps",
+            "running_steps",
+            "calorie",
+            "cadence",
+            "timestamp"
+        )
+
+        private val CSV_HEADER_HSP_1Hz = arrayOf(
+            "timestamp",
+            "hr"
         )
     }
+
     private val csvWriter: CsvWriter
+    private val csvWriter1Hz: CsvWriter
+    private var count = 1
+
     private val timestamp = TIMESTAMP_FORMAT.format(Date())
 
     init {
@@ -32,16 +63,24 @@ class DataRecorder(type: String) {
             getCsvFilePath(type),
             CSV_HEADER_HSP
         )
+
+        csvWriter1Hz = CsvWriter.open(
+            getCsvFilePath1Hz(type),
+            CSV_HEADER_HSP_1Hz
+        )
     }
 
     private fun getCsvFilePath(type: String) =
         File(OUTPUT_DIRECTORY, "MaximSensorsApp_${timestamp}_$type.csv").absolutePath
 
+    private fun getCsvFilePath1Hz(type: String) =
+        File(OUTPUT_DIRECTORY, "MaximSensorsApp_${timestamp}_${type}_1Hz.csv").absolutePath
+
 
     fun record(data: HspStreamData) {
         csvWriter.write(
             data.sampleCount,
-            data.sampleTime,
+            TIMESTAMP_FORMAT.format(Date(data.sampleTime.toLong())),
             data.green,
             data.green2,
             data.ir,
@@ -69,14 +108,25 @@ class DataRecorder(type: String) {
             data.runSteps,
             data.kCal,
             data.cadence,
-            data.currentTimeMillis
+            TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis))
         )
+
+        if (count % 25 == 0) {
+            csvWriter1Hz.write(
+                TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis)),
+                data.hr
+            )
+            count = 1
+        }
+
+        count++
     }
 
     fun close() {
         try {
             csvWriter.close()
-        }catch (e:Exception){
+            csvWriter1Hz.close()
+        } catch (e: Exception) {
             Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
         }
 
