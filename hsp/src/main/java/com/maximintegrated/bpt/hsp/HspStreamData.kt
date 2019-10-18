@@ -53,7 +53,7 @@ data class HspStreamData(
                 operationMode = nextInt(4),
                 hr = nextInt(12),
                 hrConfidence = nextInt(8),
-                rr = nextSignedFloat(14, 10),
+                rr = nextFloat(14, 10),
                 rrConfidence = nextInt(8),
                 activity = nextInt(4),
                 r = nextSignedFloat(12, 10),
