@@ -14,6 +14,7 @@ import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmIn
 import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOutput
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
@@ -178,12 +179,18 @@ class RespiratoryFragment : Fragment() {
         respiration = respiratoryRateAlgorithmOutput.respirationRate
     }
 
+    private fun sendDefaultSettings() {
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Respiration_Rate")
 
         hspViewModel.isDeviceSupported
             .observe(this) {
+                sendDefaultSettings()
                 hspViewModel.startStreaming()
             }
     }

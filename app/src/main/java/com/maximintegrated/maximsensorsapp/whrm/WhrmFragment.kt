@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
@@ -179,6 +180,12 @@ class WhrmFragment : Fragment() {
 
     }
 
+    private fun sendDefaultSettings() {
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
+//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
@@ -191,6 +198,7 @@ class WhrmFragment : Fragment() {
 
         hspViewModel.isDeviceSupported
             .observe(this) {
+                sendDefaultSettings()
                 hspViewModel.startStreaming()
             }
     }

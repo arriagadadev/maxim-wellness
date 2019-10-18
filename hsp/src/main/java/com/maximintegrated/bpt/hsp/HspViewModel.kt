@@ -84,10 +84,6 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
 
     fun startStreaming() {
         sendCommand(SetConfigurationCommand("stream", "bin"))
-        // enable AGC
-        sendCommand(SetConfigurationCommand("wearablesuite", "aecenable", "1"))
-        sendCommand(SetConfigurationCommand("wearablesuite", "autopdcurrentenable", "0"))
-        sendCommand(SetConfigurationCommand("wearablesuite", "targetpdcurrent", "A"))
 
         sendCommand(ReadCommand("ppg", 9))
     }

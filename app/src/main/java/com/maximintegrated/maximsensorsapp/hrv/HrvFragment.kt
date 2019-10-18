@@ -11,6 +11,7 @@ import androidx.lifecycle.observe
 import com.maximintegrated.algorithm_hrv.*
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
@@ -294,6 +295,11 @@ class HrvFragment : Fragment() {
         )
     }
 
+    private fun sendDefaultSettings() {
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Hrv")
@@ -306,6 +312,7 @@ class HrvFragment : Fragment() {
 
         hspViewModel.isDeviceSupported
             .observe(this) {
+                sendDefaultSettings()
                 hspViewModel.startStreaming()
             }
     }

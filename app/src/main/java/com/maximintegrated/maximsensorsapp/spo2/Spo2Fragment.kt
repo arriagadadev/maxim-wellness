@@ -166,9 +166,15 @@ class Spo2Fragment : Fragment() {
 
         hspViewModel.isDeviceSupported
             .observe(this) {
+                sendDefaultSettings()
                 sendAlgoMode()
                 hspViewModel.startStreaming()
             }
+    }
+
+    private fun sendDefaultSettings() {
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
     private fun sendAlgoMode() {
