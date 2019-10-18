@@ -23,6 +23,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
 
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
+        private const val DEVICE_NAME_PREFIX_HSP = "HSP"
 
         fun start(context: Context) {
             val intent = Intent(context, BleScannerActivity::class.java)
@@ -37,7 +38,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
         setContentView(R.layout.activity_bluetooth_scanner)
 
         scannerDelegate = BluetoothScannerDelegate(this,
-                ViewModelProviders.of(this).get(BleScannerViewModel::class.java)).apply {
+                ViewModelProviders.of(this).get(BleScannerViewModel::class.java), DEVICE_NAME_PREFIX_HSP).apply {
             deviceClickListener = this@BleScannerActivity
             scanStateChangeHandler = this@BleScannerActivity::invalidateOptionsMenu
         }
