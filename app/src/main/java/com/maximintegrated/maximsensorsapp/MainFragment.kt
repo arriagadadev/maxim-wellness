@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.maximsensorsapp.archive.ArchiveFragment
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
@@ -73,6 +74,9 @@ class MainFragment : Fragment() {
         sportsCoachingMenuItemView.isEnabled = true
         sportsCoachingMenuItemView.isVisible = true
 
+        archiveMenuItemView.isEnabled = true
+        archiveMenuItemView.isVisible = true
+
 
         hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
 
@@ -128,6 +132,10 @@ class MainFragment : Fragment() {
                 "com.maximintegrated.sportscoaching.view.MainActivity"
             )
             startActivity(intent)
+        }
+
+        archiveMenuItemView.setOnClickListener {
+            requireActivity().addFragment(ArchiveFragment.newInstance())
         }
     }
 
