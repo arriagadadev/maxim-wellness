@@ -307,7 +307,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/signal_chart_height"
             android:layout_marginTop="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/hrvChronometer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/frequencyCardView">
@@ -318,6 +318,21 @@
                 android:layout_height="match_parent" />
 
         </androidx.cardview.widget.CardView>
+
+        <Chronometer
+            android:id="@+id/hrvChronometer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#9EC3DE"
+            android:gravity="center"
+            android:padding="10dp"
+            android:textColor="#00B2A9"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ibiCardView" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.respiratory
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,12 +19,15 @@ import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class RespiratoryFragment : Fragment() {
 
@@ -40,6 +44,8 @@ class RespiratoryFragment : Fragment() {
     private lateinit var menuItemSettings: MenuItem
 
     private var dataRecorder: DataRecorder? = null
+
+    private var startTime: String? = null
 
     private lateinit var chartView: MultiChannelChartView
 
@@ -111,8 +117,23 @@ class RespiratoryFragment : Fragment() {
         )
         RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
 
+        initializeChronometer()
         setupChart()
         setupToolbar()
+    }
+
+    private fun initializeChronometer() {
+
+        respirationChronometer.format =
+            "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+        respirationChronometer.setOnChronometerTickListener { cArg ->
+            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
+            if (elapsedMillis > 3600000L) {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
+            } else {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+            }
+        }
     }
 
     private fun setupChart() {
@@ -188,6 +209,12 @@ class RespiratoryFragment : Fragment() {
         isMonitoring = true
         dataRecorder = DataRecorder("Respiration_Rate")
 
+        clearChart()
+
+        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+        respirationChronometer.base = SystemClock.elapsedRealtime()
+        respirationChronometer.start()
+
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
@@ -200,6 +227,9 @@ class RespiratoryFragment : Fragment() {
 
         dataRecorder?.close()
         dataRecorder = null
+
+        startTime = null
+        respirationChronometer.stop()
 
         RespiratoryRateAlgorithm.end()
 

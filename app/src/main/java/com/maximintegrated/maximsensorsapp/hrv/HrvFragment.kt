@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.hrv
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -22,6 +23,8 @@ import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_hrv_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HrvFragment : Fragment() {
     companion object {
@@ -45,6 +48,8 @@ class HrvFragment : Fragment() {
     private lateinit var ibiChartView: MultiChannelChartView
 
     private var dataRecorder: DataRecorder? = null
+
+    private var startTime: String? = null
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -168,9 +173,24 @@ class HrvFragment : Fragment() {
         frequencyChartView = view.findViewById(R.id.frequency_chart_view)
         ibiChartView = view.findViewById(R.id.ibi_chart_view)
 
+        initializeChronometer()
         setupChart()
         setupToolbar()
     }
+
+    private fun initializeChronometer() {
+
+        hrvChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+        hrvChronometer.setOnChronometerTickListener { cArg ->
+            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
+            if (elapsedMillis > 3600000L) {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
+            } else {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+            }
+        }
+    }
+
 
     private fun setupChart() {
         timeChartView.dataSetInfoList = listOf(
@@ -303,7 +323,13 @@ class HrvFragment : Fragment() {
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Hrv")
+
         clearChart()
+
+        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+        hrvChronometer.base = SystemClock.elapsedRealtime()
+        hrvChronometer.start()
+
 
         percentCompleted.measurementProgress = 0
         percentCompleted.isMeasuring = true
@@ -322,6 +348,9 @@ class HrvFragment : Fragment() {
 
         dataRecorder?.close()
         dataRecorder = null
+
+        startTime = null
+        hrvChronometer.stop()
 
         percentCompleted.isMeasuring = false
         HrvAlgorithm.end()

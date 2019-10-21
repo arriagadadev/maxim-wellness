@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.whrm
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -17,6 +18,8 @@ import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class WhrmFragment : Fragment() {
@@ -50,6 +53,7 @@ class WhrmFragment : Fragment() {
             hrResultView.isMeasuring = value
         }
 
+    private var startTime: String? = null
 
     private var hrConfidence: Int? = null
         set(value) {
@@ -135,8 +139,22 @@ class WhrmFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         chartView = view.findViewById(R.id.chart_view)
 
+        initializeChronometer()
         setupToolbar()
         setupChart()
+    }
+
+    private fun initializeChronometer() {
+
+        whrmChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+        whrmChronometer.setOnChronometerTickListener { cArg ->
+            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
+            if (elapsedMillis > 3600000L) {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
+            } else {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+            }
+        }
     }
 
     private fun setupChart() {
@@ -190,11 +208,17 @@ class WhrmFragment : Fragment() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
 
+        clearChart()
+
         hrResultView.measurementProgress = 0
 
         measurementStartTimestamp = null
         hrResultView.measurementProgress = getMeasurementProgress()
         hrResultView.result = null
+
+        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+        whrmChronometer.base = SystemClock.elapsedRealtime()
+        whrmChronometer.start()
 
         hspViewModel.isDeviceSupported
             .observe(this) {
@@ -205,6 +229,9 @@ class WhrmFragment : Fragment() {
 
     private fun stopMonitoring() {
         isMonitoring = false
+
+        startTime = null
+        whrmChronometer.stop()
 
         dataRecorder?.close()
         dataRecorder = null

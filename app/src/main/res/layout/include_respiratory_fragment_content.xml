@@ -15,9 +15,9 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/signal_chart_height"
             app:layout_constraintBottom_toTopOf="@id/respirationResultView"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
                 android:id="@+id/chart_view"
@@ -33,13 +33,28 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@id/respirationChronometer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardView"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_respiration"
             app:rcv_title="Respiration Rate" />
+
+        <Chronometer
+            android:id="@+id/respirationChronometer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#9EC3DE"
+            android:gravity="center"
+            android:padding="10dp"
+            android:textColor="#00B2A9"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/respirationResultView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

@@ -2,6 +2,7 @@ package com.maximintegrated.maximsensorsapp.spo2
 
 import android.graphics.Color
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -16,12 +17,15 @@ import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -43,6 +47,7 @@ class Spo2Fragment : Fragment() {
 
     private var measurementStartTimestamp: Long? = null
     private var dataRecorder: DataRecorder? = null
+    private var startTime: String? = null
 
 
     private var rResult: Float = 0f
@@ -84,16 +89,6 @@ class Spo2Fragment : Fragment() {
             }
     }
 
-    private fun setupChart() {
-        chartView.dataSetInfoList = listOf(
-            DataSetInfo(R.string.channel_ir, R.color.channel_ir),
-            DataSetInfo(R.string.channel_red, R.color.channel_red),
-            DataSetInfo(R.string.channel_green, R.color.channel_green)
-        )
-
-        chartView.maximumEntryCount = 100
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -113,9 +108,34 @@ class Spo2Fragment : Fragment() {
 
         algorithmModeOneShotRadioButton.isChecked = true
 
-        setupToolbar()
+        initializeChronometer()
         setupChart()
+        setupToolbar()
     }
+
+    private fun initializeChronometer() {
+
+        spo2Chronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+        spo2Chronometer.setOnChronometerTickListener { cArg ->
+            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
+            if (elapsedMillis > 3600000L) {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
+            } else {
+                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
+            }
+        }
+    }
+
+    private fun setupChart() {
+        chartView.dataSetInfoList = listOf(
+            DataSetInfo(R.string.channel_ir, R.color.channel_ir),
+            DataSetInfo(R.string.channel_red, R.color.channel_red),
+            DataSetInfo(R.string.channel_green, R.color.channel_green)
+        )
+
+        chartView.maximumEntryCount = 100
+    }
+
 
     private fun setupToolbar() {
 
@@ -153,6 +173,11 @@ class Spo2Fragment : Fragment() {
         isMonitoring = true
 
         dataRecorder = DataRecorder("SpO2")
+        clearChart()
+
+        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+        spo2Chronometer.base = SystemClock.elapsedRealtime()
+        spo2Chronometer.start()
 
         measurementStartTimestamp = null
         hrResultView.measurementProgress = 0
@@ -190,6 +215,9 @@ class Spo2Fragment : Fragment() {
 
         dataRecorder?.close()
         dataRecorder = null
+
+        startTime = null
+        spo2Chronometer.stop()
 
         spo2ResultView.isMeasuring = false
 
