@@ -129,8 +129,7 @@ class Spo2Fragment : Fragment() {
     private fun setupChart() {
         chartView.dataSetInfoList = listOf(
             DataSetInfo(R.string.channel_ir, R.color.channel_ir),
-            DataSetInfo(R.string.channel_red, R.color.channel_red),
-            DataSetInfo(R.string.channel_green, R.color.channel_green)
+            DataSetInfo(R.string.channel_red, R.color.channel_red)
         )
 
         chartView.maximumEntryCount = 100
@@ -276,7 +275,7 @@ class Spo2Fragment : Fragment() {
 
 
     private fun renderSpo2Model(model: HspStreamData) {
-        chartView.addData(model.ir, model.red, model.green)
+        chartView.addData(model.ir, model.red)
 
         spo2ResultView.measurementProgress = model.wspo2PercentageComplete
 
