@@ -111,7 +111,7 @@ class RespiratoryFragment : Fragment() {
         chartView = view.findViewById(R.id.chart_view)
 
         respiratoryRateAlgorithmInitConfig = RespiratoryRateAlgorithmInitConfig(
-            RespiratoryRateAlgorithmInitConfig.SourceOptions.FINGER,
+            RespiratoryRateAlgorithmInitConfig.SourceOptions.WRIST,
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
             RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
         )
