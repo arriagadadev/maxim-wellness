@@ -12,7 +12,7 @@ class DataRecorder(type: String) {
 
     companion object {
         val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp")
-        private val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
+        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
         private val CSV_HEADER_HSP = arrayOf(
             "sample_count",
             "sample_time",

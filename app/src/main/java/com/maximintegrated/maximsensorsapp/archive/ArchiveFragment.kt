@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.maximintegrated.maximsensorsapp.DataRecorder
-import com.maximintegrated.maximsensorsapp.FileListAdapter
-import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.exts.addFragment
 import kotlinx.android.synthetic.main.fragment_archive.*
-import timber.log.Timber
 import java.io.File
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class ArchiveFragment : Fragment() {
     companion object {
@@ -44,9 +44,7 @@ class ArchiveFragment : Fragment() {
         val inputDirectory = DataRecorder.OUTPUT_DIRECTORY
         val directory = File(inputDirectory.absolutePath)
         val files = directory.listFiles().toList().filter { !it.name.contains("1Hz") }
-        for (file in files) {
-            Timber.tag("AAAA").d("File name : ${file.name}")
-        }
+
         initRecyclerView()
         adapter.fileList = files
         adapter.notifyDataSetChanged()
@@ -59,6 +57,32 @@ class ArchiveFragment : Fragment() {
     }
 
     private fun handleListItemClick(file: File) {
-        Timber.tag("ARCHIVE").d("handleListItemClick")
+        val rows = file.readLines().drop(1)
+
+        val offlineDataList: ArrayList<OfflineDataModel> = arrayListOf()
+
+        for (row in rows) {
+            val items = row.split(",")
+            offlineDataList.add(
+                OfflineDataModel(
+                    green = items[2].toFloat(),
+                    ir = items[4].toFloat(),
+                    red = items[5].toFloat(),
+                    hr = items[10].toFloat(),
+                    rr = items[12].toFloat(),
+                    rrConfidence = items[13].toInt(),
+                    spo2 = items[17].toFloat(),
+                    motion = sqrt(
+                        items[6].toFloat().pow(2)
+                                + items[7].toFloat().pow(2)
+                                + items[8].toFloat().pow(2)
+                    ),
+                    steps = items[25].toFloat() + items[26].toFloat(),
+                    date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
+                )
+            )
+        }
+
+        requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
     }
 }
