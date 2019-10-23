@@ -1,9 +1,12 @@
 package com.maximintegrated.maximsensorsapp.archive
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.maximintegrated.maximsensorsapp.*
@@ -13,12 +16,13 @@ import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class ArchiveFragment : Fragment() {
+
+class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     companion object {
         fun newInstance() = ArchiveFragment()
     }
 
-    private val adapter: FileListAdapter by lazy { FileListAdapter(::handleListItemClick) }
+    private val adapter: FileListAdapter by lazy { FileListAdapter(this) }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -46,7 +50,7 @@ class ArchiveFragment : Fragment() {
         val files = directory.listFiles().toList().filter { !it.name.contains("1Hz") }
 
         initRecyclerView()
-        adapter.fileList = files
+        adapter.fileList = files.toMutableList()
         adapter.notifyDataSetChanged()
     }
 
@@ -84,5 +88,51 @@ class ArchiveFragment : Fragment() {
         }
 
         requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
+    }
+
+    override fun onRowClicked(file: File) {
+        handleListItemClick(file)
+    }
+
+    override fun onDeleteClicked(file: File) {
+        showDeleteDialog(file)
+    }
+
+    override fun onShareClicked(file: File) {
+
+        Log.d("AAAAA", "ONSHARE CLICKED")
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "vnd.android.cursor.dir/email"
+            setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            putExtra(Intent.EXTRA_SUBJECT, "MaximSensorsApp Csv File")
+            putExtra(Intent.EXTRA_TEXT, "File Name: ${file.name}")
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().packageName + ".fileprovider",
+                file
+            )
+            putExtra(Intent.EXTRA_STREAM, uri)
+        }
+
+        startActivity(intent)
+    }
+
+    private fun showDeleteDialog(file: File) {
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        alertDialog.setTitle("Delete File")
+        alertDialog.setMessage("Are you sure you want to delete this file ?")
+            .setPositiveButton("Delete") { dialog, which ->
+                val deleted = file.delete()
+                if (deleted) {
+                    adapter.fileList.remove(file)
+                    adapter.notifyDataSetChanged()
+                }
+                dialog.dismiss()
+            }.setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 }

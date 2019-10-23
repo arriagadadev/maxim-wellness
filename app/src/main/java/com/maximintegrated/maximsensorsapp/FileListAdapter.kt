@@ -5,10 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 
-class FileListAdapter(private val itemClickListener: (File) -> Unit) :
+class FileListAdapter(private val itemClickListener: RecyclerViewClickListener) :
     RecyclerView.Adapter<FileListViewHolder>() {
 
-    var fileList: List<File> = listOf()
+    var fileList: MutableList<File> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileListViewHolder {
         return FileListViewHolder(itemClickListener, parent)
