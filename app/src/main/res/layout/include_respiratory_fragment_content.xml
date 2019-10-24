@@ -14,6 +14,7 @@
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="@dimen/signal_chart_height"
+            android:layout_marginTop="60dp"
             app:layout_constraintBottom_toTopOf="@id/respirationResultView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
