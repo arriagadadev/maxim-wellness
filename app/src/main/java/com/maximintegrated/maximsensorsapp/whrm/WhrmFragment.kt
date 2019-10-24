@@ -67,7 +67,7 @@ class WhrmFragment : Fragment() {
             ibiView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
         }
 
-    private var stepCount: Int = 0
+    private var stepCount: Int? = null
         set(value) {
             field = value
             stepsView.emptyValue = value.toString()
@@ -266,8 +266,18 @@ class WhrmFragment : Fragment() {
 
     }
 
-    fun clearChart() {
+    private fun clearChart() {
         chartView.clearChart()
+    }
+
+    private fun clearCardViewValues() {
+        hrConfidence = null
+        ibi = null
+        stepCount = null
+        energy = null
+        activity = null
+        scd = null
+        cadence = null
     }
 
     private fun shouldShowMeasuringProgress(): Boolean {

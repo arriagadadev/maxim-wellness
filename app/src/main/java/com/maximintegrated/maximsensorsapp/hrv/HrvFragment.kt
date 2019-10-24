@@ -325,6 +325,7 @@ class HrvFragment : Fragment() {
         dataRecorder = DataRecorder("Hrv")
 
         clearChart()
+        clearCardViewValues()
 
         startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         hrvChronometer.base = SystemClock.elapsedRealtime()
@@ -374,10 +375,23 @@ class HrvFragment : Fragment() {
 
     }
 
-    fun clearChart() {
+    private fun clearChart() {
         timeChartView.clearChart()
         frequencyChartView.clearChart()
         ibiChartView.clearChart()
     }
 
+    private fun clearCardViewValues() {
+        avnn = null
+        sdnn = null
+        rmssd = null
+        pnn50 = null
+        ulf = null
+        vlf = null
+        lf = null
+        hf = null
+        lfOverHf = null
+        totPwr = null
+
+    }
 }

@@ -63,10 +63,14 @@ class RespiratoryFragment : Fragment() {
 
         }
 
-    private var respiration: Float = 0f
+    private var respiration: Float? = null
         set(value) {
             field = value
-            respirationResultView.emptyValue = "%.2f".format(value)
+            if (value != null) {
+                respirationResultView.emptyValue = "%.2f".format(value)
+            } else {
+                respirationResultView.emptyValue = ResultCardView.EMPTY_VALUE
+            }
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -210,6 +214,7 @@ class RespiratoryFragment : Fragment() {
         dataRecorder = DataRecorder("Respiration_Rate")
 
         clearChart()
+        clearCardViewValues()
 
         startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         respirationChronometer.base = SystemClock.elapsedRealtime()
@@ -252,7 +257,11 @@ class RespiratoryFragment : Fragment() {
 
     }
 
-    fun clearChart() {
+    private fun clearChart() {
         chartView.clearChart()
+    }
+
+    private fun clearCardViewValues(){
+        respiration = null
     }
 }

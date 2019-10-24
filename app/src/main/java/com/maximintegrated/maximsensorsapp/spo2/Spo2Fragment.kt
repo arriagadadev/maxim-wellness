@@ -50,10 +50,14 @@ class Spo2Fragment : Fragment() {
     private var startTime: String? = null
 
 
-    private var rResult: Float = 0f
+    private var rResult: Float? = null
         set(value) {
             field = value
-            rResultView.emptyValue = value.toString()
+            if (value != null) {
+                rResultView.emptyValue = value.toString()
+            } else {
+                rResultView.emptyValue = ResultCardView.EMPTY_VALUE
+            }
         }
 
     private var isMonitoring: Boolean = false
@@ -172,7 +176,9 @@ class Spo2Fragment : Fragment() {
         isMonitoring = true
 
         dataRecorder = DataRecorder("SpO2")
+
         clearChart()
+        clearCardViewValues()
 
         startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         spo2Chronometer.base = SystemClock.elapsedRealtime()
@@ -306,8 +312,12 @@ class Spo2Fragment : Fragment() {
             ?: 0L)) * 100 / WhrmFragment.HR_MEASURING_PERIOD_IN_MILLIS).toInt()
     }
 
-    fun clearChart() {
+    private fun clearChart() {
         chartView.clearChart()
+    }
+
+    private fun clearCardViewValues() {
+        rResult = null
     }
 
     private fun setAlgorithmModeRadioButtonsEnabled(isEnabled: Boolean) {
