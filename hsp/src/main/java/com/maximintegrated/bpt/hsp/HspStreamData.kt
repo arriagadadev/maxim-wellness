@@ -56,7 +56,7 @@ data class HspStreamData(
                 rr = nextFloat(14, 10),
                 rrConfidence = nextInt(8),
                 activity = nextInt(4),
-                r = nextSignedFloat(12, 10),
+                r = nextSignedFloat(12, 1000),
                 wspo2Confidence = nextInt(8),
                 spo2 = nextFloat(11, 10),
                 wspo2PercentageComplete = nextInt(8),
