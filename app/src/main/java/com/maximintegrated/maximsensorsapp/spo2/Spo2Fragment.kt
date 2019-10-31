@@ -154,7 +154,7 @@ class Spo2Fragment : Fragment() {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> stopMonitoring()
+                    R.id.monitoring_stop -> showStopMonitoringDialog()
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.hrm_settings -> showSettingsDialog()
@@ -229,6 +229,21 @@ class Spo2Fragment : Fragment() {
         setAlgorithmModeRadioButtonsEnabled(true)
 
         hspViewModel.stopStreaming()
+    }
+
+    private fun showStopMonitoringDialog() {
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        alertDialog.setTitle("Stop Monitoring")
+        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
+            .setPositiveButton("OK") { dialog, which ->
+                stopMonitoring()
+                dialog.dismiss()
+            }.setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 
     private fun dataLoggingToggled() {

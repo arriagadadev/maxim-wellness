@@ -180,7 +180,7 @@ class WhrmFragment : Fragment() {
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> stopMonitoring()
+                    R.id.monitoring_stop -> showStopMonitoringDialog()
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.hrm_settings -> showSettingsDialog()
@@ -237,6 +237,21 @@ class WhrmFragment : Fragment() {
         dataRecorder = null
 
         hspViewModel.stopStreaming()
+    }
+
+    private fun showStopMonitoringDialog() {
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        alertDialog.setTitle("Stop Monitoring")
+        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
+            .setPositiveButton("OK") { dialog, which ->
+                stopMonitoring()
+                dialog.dismiss()
+            }.setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 
     fun addStreamData(streamData: HspStreamData) {
