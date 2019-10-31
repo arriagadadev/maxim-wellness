@@ -14,10 +14,7 @@ import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
-import com.maximintegrated.maximsensorsapp.BleConnectionInfo
-import com.maximintegrated.maximsensorsapp.DataRecorder
-import com.maximintegrated.maximsensorsapp.R
-import com.maximintegrated.maximsensorsapp.ResultCardView
+import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
@@ -29,7 +26,7 @@ import java.util.*
 import kotlin.math.roundToInt
 
 
-class Spo2Fragment : Fragment() {
+class Spo2Fragment : Fragment(), IOnBackPressed {
 
     companion object {
         fun newInstance() = Spo2Fragment()
@@ -162,9 +159,6 @@ class Spo2Fragment : Fragment() {
                 }
                 return@setOnMenuItemClickListener true
             }
-            setNavigationOnClickListener {
-                onBackPressed()
-            }
             setTitle(R.string.spo2)
         }
 
@@ -259,10 +253,6 @@ class Spo2Fragment : Fragment() {
         fragmentManager?.let { settingsDialog.show(it, "") }
     }
 
-    private fun onBackPressed() {
-
-    }
-
     fun addStreamData(streamData: HspStreamData) {
 
         dataRecorder?.record(streamData)
@@ -339,5 +329,13 @@ class Spo2Fragment : Fragment() {
         for (radioButton in algorithmModeRadioGroup.children) {
             radioButton.isEnabled = isEnabled
         }
+    }
+
+    override fun onBackPressed(): Boolean {
+        return isMonitoring
+    }
+
+    override fun onStopMonitoring() {
+        stopMonitoring()
     }
 }

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -109,12 +108,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        val fragment = (getCurrentFragment() as? IOnBackPressed)
 
-        when (getCurrentFragment()) {
-            is MainFragment -> Log.d("Main", "Main")
-            else -> hspViewModel.stopStreaming()
+        if (fragment != null) {
+            fragment.onBackPressed()?.let {
+                if (it) {
+                    showStopMonitoringDialog()
+                } else {
+                    super.onBackPressed()
+                }
+            }
+        } else {
+            super.onBackPressed()
         }
 
-        super.onBackPressed()
+    }
+
+    private fun showStopMonitoringDialog() {
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+        alertDialog.setTitle("Stop Monitoring")
+        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
+            .setPositiveButton("OK") { dialog, which ->
+                (getCurrentFragment() as? IOnBackPressed)?.onStopMonitoring()
+                dialog.dismiss()
+                super.onBackPressed()
+            }.setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 }

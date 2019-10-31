@@ -16,10 +16,7 @@ import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOu
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
-import com.maximintegrated.maximsensorsapp.BleConnectionInfo
-import com.maximintegrated.maximsensorsapp.DataRecorder
-import com.maximintegrated.maximsensorsapp.R
-import com.maximintegrated.maximsensorsapp.ResultCardView
+import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -29,7 +26,7 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RespiratoryFragment : Fragment() {
+class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     companion object {
         fun newInstance() = RespiratoryFragment()
@@ -171,9 +168,6 @@ class RespiratoryFragment : Fragment() {
                 }
                 return@setOnMenuItemClickListener true
             }
-            setNavigationOnClickListener {
-                onBackPressed()
-            }
             setTitle(R.string.respiratory)
         }
 
@@ -268,15 +262,19 @@ class RespiratoryFragment : Fragment() {
 
     }
 
-    private fun onBackPressed() {
-
-    }
-
     private fun clearChart() {
         chartView.clearChart()
     }
 
     private fun clearCardViewValues() {
         respiration = null
+    }
+
+    override fun onBackPressed(): Boolean {
+        return isMonitoring
+    }
+
+    override fun onStopMonitoring() {
+        stopMonitoring()
     }
 }

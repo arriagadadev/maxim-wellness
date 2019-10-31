@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class WhrmFragment : Fragment() {
+class WhrmFragment : Fragment(), IOnBackPressed {
 
     companion object {
         fun newInstance() = WhrmFragment()
@@ -188,9 +188,6 @@ class WhrmFragment : Fragment() {
                 }
                 return@setOnMenuItemClickListener true
             }
-            setNavigationOnClickListener {
-                onBackPressed()
-            }
             setTitle(R.string.whrm)
         }
 
@@ -277,10 +274,6 @@ class WhrmFragment : Fragment() {
 
     }
 
-    private fun onBackPressed() {
-
-    }
-
     private fun clearChart() {
         chartView.clearChart()
     }
@@ -344,5 +337,13 @@ class WhrmFragment : Fragment() {
         return (System.currentTimeMillis() - lastValidHrTimestamp) > TimeUnit.SECONDS.toMillis(
             hrExpireDuration.toLong()
         )
+    }
+
+    override fun onBackPressed(): Boolean {
+        return isMonitoring
+    }
+
+    override fun onStopMonitoring() {
+        stopMonitoring()
     }
 }
