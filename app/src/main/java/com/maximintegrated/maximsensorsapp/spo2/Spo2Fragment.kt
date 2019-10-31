@@ -198,6 +198,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
 
     private fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020"))
 //        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
