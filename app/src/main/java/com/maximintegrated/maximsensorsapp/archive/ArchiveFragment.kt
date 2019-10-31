@@ -56,7 +56,15 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         val files = directory.listFiles().toList().filter { !it.name.contains("1Hz") }
 
         initRecyclerView()
-        adapter.fileList = files.toMutableList()
+
+        adapter.fileList = files.sortedWith(Comparator<File> { file1, file2 ->
+            when {
+                file1.lastModified() > file2.lastModified() -> -1
+                file1.lastModified() < file2.lastModified() -> 1
+                else -> 0
+            }
+        }).toMutableList()
+
         adapter.notifyDataSetChanged()
     }
 
