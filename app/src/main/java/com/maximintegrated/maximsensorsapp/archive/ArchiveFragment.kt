@@ -2,16 +2,19 @@ package com.maximintegrated.maximsensorsapp.archive
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.maximintegrated.algorithm_sleep_qa.SleepQaAlgorithm
+import com.maximintegrated.algorithm_sleep_qa.SleepQaAlgorithmInput
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import kotlinx.android.synthetic.main.fragment_archive.*
+import timber.log.Timber
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -19,6 +22,9 @@ import kotlin.math.sqrt
 
 class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     companion object {
+        private val OUTPUT_DIRECTORY =
+            File(Environment.getExternalStorageDirectory(), "MaximSleepQa")
+
         fun newInstance() = ArchiveFragment()
     }
 
@@ -100,7 +106,6 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
 
     override fun onShareClicked(file: File) {
 
-        Log.d("AAAAA", "ONSHARE CLICKED")
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "vnd.android.cursor.dir/email"
             setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -115,6 +120,11 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         }
 
         startActivity(intent)
+    }
+
+    override fun onSleepClicked(file: File) {
+        val success = runSleepAlgo(file.absolutePath)
+        showSleepAlgoResultDialog(success)
     }
 
     private fun showDeleteDialog(file: File) {
@@ -133,6 +143,37 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
             }
 
         alertDialog.setCancelable(false)
+        alertDialog.show()
+    }
+
+    private fun runSleepAlgo(inputFilePath: String): Boolean {
+        val outputDirectory = OUTPUT_DIRECTORY
+
+        val input =
+            SleepQaAlgorithmInput(inputFilePath, outputDirectory.absolutePath, 20, 180, 70, 1, 80f)
+
+        val success = SleepQaAlgorithm.run(input)
+
+        Timber.tag("Archive Fragment").d("SleeoQaAlgo run success result: $success")
+
+        return success
+    }
+
+    private fun showSleepAlgoResultDialog(success: Boolean) {
+        var message: String
+
+        if (success) {
+            message = "Algorithm finished successfully"
+        } else {
+            message = "Algorithm did not found a sleep state in the given data"
+        }
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        alertDialog.setTitle("Sleep Algorithm Result")
+        alertDialog.setMessage(message)
+            .setPositiveButton("OK") { dialog, which ->
+                dialog.dismiss()
+            }
+
         alertDialog.show()
     }
 }

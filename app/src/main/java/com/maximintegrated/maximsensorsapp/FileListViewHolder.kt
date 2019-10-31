@@ -23,6 +23,7 @@ class FileListViewHolder(
     private val textViewCreateDate: TextView  by lazy { itemView.file_create_date }
     private val imageViewDelete: ImageView  by lazy { itemView.delete_icon }
     private val imageViewShare: ImageView  by lazy { itemView.share_icon }
+    private val imageViewSleep: ImageView  by lazy { itemView.sleep_icon }
 
     private lateinit var item: File
 
@@ -30,6 +31,7 @@ class FileListViewHolder(
         itemView.setOnClickListener { onItemClicked.onRowClicked(item) }
         imageViewDelete.setOnClickListener { onItemClicked.onDeleteClicked(item) }
         imageViewShare.setOnClickListener { onItemClicked.onShareClicked(item) }
+        imageViewSleep.setOnClickListener { onItemClicked.onSleepClicked(item) }
     }
 
     fun bind(item: File) {
