@@ -8,6 +8,9 @@
     <dimen name="view_signal_margin">4dp</dimen>
     <dimen name="signal_chart_height">250dp</dimen>
 
+    <dimen name="chip_spacing">12dp</dimen>
+    <dimen name="chip_stroke_width">1dp</dimen>
+
 
     <dimen name="measuring_circle_width">120dp</dimen>
     <dimen name="measuring_circle_height">120dp</dimen>

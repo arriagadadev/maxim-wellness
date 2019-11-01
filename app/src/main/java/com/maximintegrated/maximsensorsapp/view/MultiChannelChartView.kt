@@ -1,17 +1,23 @@
 package com.maximintegrated.maximsensorsapp.view
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
+import androidx.core.view.get
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.exts.getThemeColor
 
@@ -24,6 +30,12 @@ class MultiChannelChartView @JvmOverloads constructor(
     companion object {
         const val DEFAULT_MAX_ENTRY_COUNT = 1000
     }
+
+    private val chipGroupView: ChipGroup
+    private val chipStates = arrayOf(
+        intArrayOf(android.R.attr.state_checked),
+        intArrayOf()
+    )
 
     private val lineChartView: LineChart
     private var dataSetList: List<LineDataSet> = emptyList()
@@ -44,6 +56,7 @@ class MultiChannelChartView @JvmOverloads constructor(
     init {
         inflate(context, R.layout.view_multi_channel_chart, this)
 
+        chipGroupView = findViewById(R.id.chip_group_view)
         lineChartView = findViewById(R.id.line_chart_view)
 
         setupChart()
@@ -75,12 +88,12 @@ class MultiChannelChartView @JvmOverloads constructor(
 
     private fun setupDataSets() {
         clearChart()
-//        chipGroupView.removeAllViews()
+        chipGroupView.removeAllViews()
 
         for (index in 0..dataSetInfoList.lastIndex) {
             val dataSet = dataSetInfoList[index]
 
-/*            chipGroupView.addView(
+            chipGroupView.addView(
                 Chip(chipGroupView.context).apply {
                     isCheckable = true
                     isChecked = true
@@ -109,7 +122,7 @@ class MultiChannelChartView @JvmOverloads constructor(
                         }
                     }
                 }
-            )*/
+            )
         }
 
         dataSetList = dataSetInfoList.map {
@@ -187,5 +200,28 @@ class MultiChannelChartView @JvmOverloads constructor(
 
     }
 
+    private fun toggleDataSetVisibility(index: Int, visible: Boolean) {
+        with(lineChartView.data) {
+            if (visible) {
+                if (!dataSets.contains(dataSetList[index])) {
+                    addDataSet(dataSetList[index])
+                }
+            } else if (dataSetCount != 1) {
+                removeDataSet(dataSetList[index])
+            }
+        }
+    }
+
+    private fun areAllChipsUnchecked(): Boolean {
+        return !chipGroupView.children.any { it is Chip && it.isChecked }
+    }
+
+    private fun isChannelAtIndexChecked(index: Int): Boolean {
+        if (index < chipGroupView.childCount) {
+            return (chipGroupView[index] as Chip).isChecked
+        }
+
+        return false
+    }
 
 }
