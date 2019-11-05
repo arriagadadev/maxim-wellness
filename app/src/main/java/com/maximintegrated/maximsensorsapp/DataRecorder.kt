@@ -43,7 +43,8 @@ class DataRecorder(type: String) {
             "running_steps",
             "calorie",
             "cadence",
-            "timestamp"
+            "timestamp",
+            "timestamp_milis"
         )
 
         private val CSV_HEADER_HSP_1Hz = arrayOf(
@@ -108,7 +109,8 @@ class DataRecorder(type: String) {
             data.runSteps,
             data.kCal,
             data.cadence,
-            TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis))
+            TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis)),
+            data.currentTimeMillis
         )
 
         if (count % 25 == 0) {
