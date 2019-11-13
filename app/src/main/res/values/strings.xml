@@ -63,4 +63,8 @@
 
     <string name="ibi">IBI</string>
     <string name="ibiRr">Inter Beat Interval(ms)</string>
+    <string name="write_your_command">Write your command</string>
+    <string name="send_command">Send Command</string>
+    <string name="send_arbitrary_command">Send Arbitrary Command</string>
+    <string name="send">Send</string>
 </resources>

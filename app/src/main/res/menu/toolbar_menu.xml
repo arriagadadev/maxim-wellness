@@ -36,4 +36,10 @@
         android:title="@string/settings"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/send_arbitrary_command"
+        android:checkable="false"
+        android:checked="false"
+        android:title="@string/send_command"
+        app:showAsAction="never" />
 </menu>

@@ -22,7 +22,6 @@ import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -81,11 +80,6 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
                 } else {
                     null
                 }
-            }
-
-        hspViewModel.commandResponse
-            .observe(this) { hspResponse ->
-                Timber.d(hspResponse.toString())
             }
 
         hspViewModel.streamData
@@ -164,6 +158,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.hrm_settings -> showSettingsDialog()
+                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
                 return@setOnMenuItemClickListener true
@@ -248,6 +243,12 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    private fun showArbitraryCommandDialog() {
+        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
+        arbitraryCommandDialog.setTargetFragment(this, 1340)
+        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     private fun dataLoggingToggled() {

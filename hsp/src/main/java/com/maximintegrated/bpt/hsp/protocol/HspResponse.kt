@@ -35,7 +35,7 @@ sealed class HspResponse<out T : HspCommand>(
                 status = Status.fromCode(parameters.last().value.toInt())
             } else {
                 responseParameters = parameters
-                status = Status.SUCCESS
+                status = Status.UNKNOWN_COMMAND_ERROR
             }
 
             return when (command) {

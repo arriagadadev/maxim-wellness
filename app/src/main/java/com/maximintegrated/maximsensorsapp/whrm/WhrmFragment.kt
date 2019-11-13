@@ -111,11 +111,6 @@ class WhrmFragment : Fragment(), IOnBackPressed {
                 }
             }
 
-        hspViewModel.commandResponse
-            .observe(this) { hspResponse ->
-                Timber.d(hspResponse.toString())
-            }
-
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
                 addStreamData(hspStreamData)
@@ -184,6 +179,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.hrm_settings -> showSettingsDialog()
+                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
                 return@setOnMenuItemClickListener true
@@ -249,6 +245,12 @@ class WhrmFragment : Fragment(), IOnBackPressed {
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    private fun showArbitraryCommandDialog() {
+        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
+        arbitraryCommandDialog.setTargetFragment(this, 1338)
+        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     fun addStreamData(streamData: HspStreamData) {

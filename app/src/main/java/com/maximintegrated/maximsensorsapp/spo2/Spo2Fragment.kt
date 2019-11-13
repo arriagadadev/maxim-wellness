@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -20,7 +21,6 @@ import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -45,7 +45,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
     private var measurementStartTimestamp: Long? = null
     private var dataRecorder: DataRecorder? = null
     private var startTime: String? = null
-
 
     private var rResult: Float? = null
         set(value) {
@@ -81,12 +80,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
                 addStreamData(hspStreamData)
-            }
-
-
-        hspViewModel.commandResponse
-            .observe(this) { hspResponse ->
-                Timber.d(hspResponse.toString())
             }
     }
 
@@ -155,6 +148,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.hrm_settings -> showSettingsDialog()
+                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
                 return@setOnMenuItemClickListener true
@@ -198,7 +192,9 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
 
     private fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
+        )
 //        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
@@ -227,7 +223,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
     }
 
     private fun showStopMonitoringDialog() {
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val alertDialog = AlertDialog.Builder(requireContext())
         alertDialog.setTitle("Stop Monitoring")
         alertDialog.setMessage("Are you sure you want to stop monitoring ?")
             .setPositiveButton("OK") { dialog, which ->
@@ -252,6 +248,12 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
     private fun showSettingsDialog() {
         val settingsDialog = Spo2SettingsFragmentDialog.newInstance()
         fragmentManager?.let { settingsDialog.show(it, "") }
+    }
+
+    private fun showArbitraryCommandDialog() {
+        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
+        arbitraryCommandDialog.setTargetFragment(this, 1337)
+        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     fun addStreamData(streamData: HspStreamData) {
@@ -282,9 +284,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         }
 
         rResult = streamData.r
-
     }
-
 
     private fun renderSpo2Model(model: HspStreamData) {
         chartView.addData(model.ir, model.red)
