@@ -76,13 +76,11 @@ class MultiChannelChartView @JvmOverloads constructor(
             isAutoScaleMinMaxEnabled = true
             axisRight.isEnabled = false
             xAxis.isEnabled = false
-            axisLeft.isEnabled = false
 
             xAxis.axisMinimum = 0f
             xAxis.axisMaximum = maximumEntryCount.toFloat()
 
             setVisibleXRangeMaximum(maximumEntryCount.toFloat())
-            setViewPortOffsets(0f, 0f, 0f, 0f)
         }
     }
 
