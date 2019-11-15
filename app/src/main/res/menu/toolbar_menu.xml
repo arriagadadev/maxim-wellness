@@ -30,6 +30,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/enable_scd"
+        android:checkable="true"
+        android:checked="true"
+        android:title="@string/enable_scd"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/hrm_settings"
         android:checkable="false"
         android:checked="false"

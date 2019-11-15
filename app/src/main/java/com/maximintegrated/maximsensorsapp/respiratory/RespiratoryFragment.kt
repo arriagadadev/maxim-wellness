@@ -38,6 +38,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+    private lateinit var menuItemEnabledScd: MenuItem
 
     private var dataRecorder: DataRecorder? = null
 
@@ -150,6 +151,10 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
                 menuItemLogToFile = findItem(R.id.log_to_file)
                 menuItemLogToFlash = findItem(R.id.log_to_flash)
                 menuItemSettings = findItem(R.id.hrm_settings)
+                menuItemEnabledScd = findItem(R.id.enable_scd)
+
+                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
+                menuItemEnabledScd.isEnabled = true
             }
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -157,6 +162,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
                     R.id.monitoring_stop -> showStopMonitoringDialog()
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
+                    R.id.enable_scd -> enableScdToggled()
                     R.id.hrm_settings -> showSettingsDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
@@ -201,6 +207,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Respiration_Rate")
+        menuItemEnabledScd.isEnabled = true
 
         clearChart()
         clearCardViewValues()
@@ -218,6 +225,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     private fun stopMonitoring() {
         isMonitoring = false
+        menuItemEnabledScd.isEnabled = false
 
         dataRecorder?.close()
         dataRecorder = null
@@ -257,6 +265,11 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     private fun flashLoggingToggled() {
 
+    }
+
+    private fun enableScdToggled() {
+        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
+        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
     }
 
     private fun showSettingsDialog() {

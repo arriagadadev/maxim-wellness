@@ -28,7 +28,9 @@ buildscript {
             atsl                 : '1.2.0-beta01', // Android Testing Support Library
             espresso             : '3.2.0-beta01',
             lottie               : '2.5.0',
-            grabner              :  '1.4'
+            grabner              :  '1.4',
+            kotpref              :  '2.2.0',
+            kotprefInitializer   :  '2.2.0'
     ]
 
     ext.deps = [
@@ -56,7 +58,9 @@ buildscript {
             atsl                          : "androidx.test:runner:${versions.atsl}",
             espresso                      : "androidx.test.espresso:espresso-core:${versions.espresso}",
             lottie                        : "com.airbnb.android:lottie:${versions.lottie}",
-            circleProgress                : "com.github.jakob-grabner:Circle-Progress-View:${versions.grabner}"
+            circleProgress                : "com.github.jakob-grabner:Circle-Progress-View:${versions.grabner}",
+            kotpref                       : "com.chibatching.kotpref:kotpref:${versions.kotpref}",
+            kotprefInitializer            : "'com.chibatching.kotpref:initializer:${versions.kotprefInitializer}"
     ]
 
     repositories {

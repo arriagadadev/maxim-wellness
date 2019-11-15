@@ -44,6 +44,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
     private lateinit var menuItemLogToFile: MenuItem
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
+    private lateinit var menuItemEnabledScd: MenuItem
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -171,6 +172,10 @@ class WhrmFragment : Fragment(), IOnBackPressed {
                 menuItemLogToFile = findItem(R.id.log_to_file)
                 menuItemLogToFlash = findItem(R.id.log_to_flash)
                 menuItemSettings = findItem(R.id.hrm_settings)
+                menuItemEnabledScd = findItem(R.id.enable_scd)
+
+                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
+                menuItemEnabledScd.isEnabled = true
             }
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -178,6 +183,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
                     R.id.monitoring_stop -> showStopMonitoringDialog()
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
+                    R.id.enable_scd -> enableScdToggled()
                     R.id.hrm_settings -> showSettingsDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
@@ -200,6 +206,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
+        menuItemEnabledScd.isEnabled = false
 
         clearChart()
 
@@ -222,6 +229,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
 
     private fun stopMonitoring() {
         isMonitoring = false
+        menuItemEnabledScd.isEnabled = true
 
         startTime = null
         whrmChronometer.stop()
@@ -270,6 +278,11 @@ class WhrmFragment : Fragment(), IOnBackPressed {
 
     private fun flashLoggingToggled() {
 
+    }
+
+    private fun enableScdToggled() {
+        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
+        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
     }
 
     private fun showSettingsDialog() {

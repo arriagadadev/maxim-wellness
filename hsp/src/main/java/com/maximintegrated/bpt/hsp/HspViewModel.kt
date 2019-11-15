@@ -4,6 +4,9 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
+import android.content.Context
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +32,9 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     val isDeviceSupported: LiveData<Boolean> get() = isDeviceSupportedMutable
 
     private val hspManager = HspManager(application)
+
+    private val sharedPreferences =
+        application.getSharedPreferences("ScdSettings", Context.MODE_PRIVATE)
 
     val isConnected: Boolean
         get() = connectionState.value?.second == BluetoothAdapter.STATE_CONNECTED
@@ -83,8 +89,14 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun startStreaming() {
-        sendCommand(SetConfigurationCommand("stream", "bin"))
 
+        val isScdEnabled = sharedPreferences.getBoolean("scdEnabled", false)
+
+        if (isScdEnabled) {
+            sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
+        }
+
+        sendCommand(SetConfigurationCommand("stream", "bin"))
         sendCommand(ReadCommand("ppg", 9))
     }
 
