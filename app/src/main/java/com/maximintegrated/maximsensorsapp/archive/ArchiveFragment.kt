@@ -79,26 +79,32 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
 
         val offlineDataList: ArrayList<OfflineDataModel> = arrayListOf()
 
+        var counter = 1
         for (row in rows) {
-            val items = row.split(",")
-            offlineDataList.add(
-                OfflineDataModel(
-                    green = items[2].toFloat(),
-                    ir = items[4].toFloat(),
-                    red = items[5].toFloat(),
-                    hr = items[10].toFloat(),
-                    rr = items[12].toFloat(),
-                    rrConfidence = items[13].toInt(),
-                    spo2 = items[17].toFloat(),
-                    motion = sqrt(
-                        items[6].toFloat().pow(2)
-                                + items[7].toFloat().pow(2)
-                                + items[8].toFloat().pow(2)
-                    ),
-                    steps = items[25].toFloat() + items[26].toFloat(),
-                    date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
+            if (counter % 25 == 0) {
+                val items = row.split(",")
+                offlineDataList.add(
+                    OfflineDataModel(
+                        green = items[2].toFloat(),
+                        ir = items[4].toFloat(),
+                        red = items[5].toFloat(),
+                        hr = items[10].toFloat(),
+                        rr = items[12].toFloat(),
+                        rrConfidence = items[13].toInt(),
+                        spo2 = items[17].toFloat(),
+                        motion = sqrt(
+                            items[6].toFloat().pow(2)
+                                    + items[7].toFloat().pow(2)
+                                    + items[8].toFloat().pow(2)
+                        ),
+                        steps = items[25].toFloat() + items[26].toFloat(),
+                        date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
+                    )
                 )
-            )
+
+                counter = 0
+            }
+            counter++
         }
 
         requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
