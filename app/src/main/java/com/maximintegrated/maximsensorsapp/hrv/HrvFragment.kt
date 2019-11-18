@@ -264,13 +264,17 @@ class HrvFragment : Fragment(), IOnBackPressed {
 
         hrvAlgorithmInput.ibi = streamData.rr
         hrvAlgorithmInput.ibiConfidence = streamData.rrConfidence
-        hrvAlgorithmInput.isIbiValid = true
+
+        if (streamData.rr != 0f) {
+            ibiChartView.addData(streamData.rr.toInt())
+            hrvAlgorithmInput.isIbiValid = true
+        } else {
+            hrvAlgorithmInput.isIbiValid = false
+        }
 
         HrvAlgorithm.run(hrvAlgorithmInput, hrvAlgorithmOutput)
 
         percentCompleted.measurementProgress = hrvAlgorithmOutput.percentCompleted
-
-        ibiChartView.addData(streamData.rr.toInt())
 
         if (hrvAlgorithmOutput.isHrvCalculated) {
             updateTimeDomainHrvMetrics(hrvAlgorithmOutput.timeDomainHrvMetrics)

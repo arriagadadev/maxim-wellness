@@ -46,8 +46,6 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     private lateinit var chartView: MultiChannelChartView
 
-    var calculated: Float = 0f
-
     private var respiratoryRateAlgorithmInitConfig: RespiratoryRateAlgorithmInitConfig? = null
     private val respiratoryRateAlgorithmInput = RespiratoryRateAlgorithmInput()
     private val respiratoryRateAlgorithmOutput = RespiratoryRateAlgorithmOutput()
@@ -184,12 +182,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         respiratoryRateAlgorithmInput.ibi = streamData.rr
         respiratoryRateAlgorithmInput.ibiConfidence = streamData.rrConfidence.toFloat()
 
-        if (calculated == streamData.rr) {
-            respiratoryRateAlgorithmInput.isIbiUpdateFlag = false
-        } else {
-            respiratoryRateAlgorithmInput.isIbiUpdateFlag = true;
-            calculated = streamData.rr
-        }
+        respiratoryRateAlgorithmInput.isIbiUpdateFlag = streamData.rr != 0f
 
         respiratoryRateAlgorithmInput.isPpgUpdateFlag = true
 
@@ -201,7 +194,6 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     private fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
-//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
     private fun startMonitoring() {
