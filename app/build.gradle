@@ -43,6 +43,7 @@ dependencies {
     implementation project(':style')
     implementation project(':bluetooth')
     implementation project(':hsp')
+    implementation project(':polar')
     implementation project(':algorithm_hrv')
     implementation project(':algorithm_respiratory_rate')
     implementation project(':algorithm_sleep_qa')
