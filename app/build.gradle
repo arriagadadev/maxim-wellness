@@ -69,6 +69,7 @@ dependencies {
     implementation deps.bleCommon
 
     implementation deps.bluetoothStateView
+    implementation deps.batteryMeterView
 
     implementation deps.lottie
     implementation deps.mpAndroidChart

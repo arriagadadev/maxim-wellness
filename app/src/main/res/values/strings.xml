@@ -68,4 +68,26 @@
     <string name="send_arbitrary_command">Send Arbitrary Command</string>
     <string name="send">Send</string>
     <string name="enable_scd">Enable Scd</string>
+
+    <string name="polar_title">HRM Chest Strap</string>
+    <string name="polar_contact_detected">Contact Detected?</string>
+    <string name="polar_contact_detected_yes">YES</string>
+    <string name="polar_contact_detected_no">NO</string>
+    <string name="polar_heart_rate">Heart Rate</string>
+    <string name="polar_heart_rate_unit">BPM</string>
+    <string name="polar_empty_value">--</string>
+    <string name="polar_devices">Polar HRM Chest Straps</string>
+
+    <string name="empty_value">--</string>
+    <string name="ble_connection_connect">Connect</string>
+    <string name="ble_connection_connecting_message">Connecting</string>
+    <string name="ble_connection_search_device">Search Device</string>
+
+    <string name="ble_connection_change_device">Change Device</string>
+    <string name="ble_connection_disconnect">Disconnect</string>
+    <string name="ble_connection_unknown_device_name">N/A</string>
+    <string name="ble_connection_battery_level_unknown">Unknown</string>
+    <string name="ble_connection_battery_level">%1$d%%</string>
+    <string name="ble_connection_battery_level_charging">Charging, %1$d%%</string>
+
 </resources>
