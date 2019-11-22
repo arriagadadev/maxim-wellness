@@ -1,5 +1,6 @@
 package com.maximintegrated.maximsensorsapp.spo2
 
+import android.bluetooth.BluetoothDevice
 import android.graphics.Color
 import android.os.Bundle
 import android.os.SystemClock
@@ -7,26 +8,32 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.bluetooth.ble.BleScannerDialog
+import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.bpt.polar.PolarViewModel
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
+import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
 
-class Spo2Fragment : Fragment(), IOnBackPressed {
+class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener {
 
     companion object {
         fun newInstance() = Spo2Fragment()
@@ -35,6 +42,10 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
 
     private lateinit var hspViewModel: HspViewModel
     private lateinit var chartView: MultiChannelChartView
+
+    private lateinit var viewReferenceDevice: ReferenceDeviceView
+    private lateinit var polarViewModel: PolarViewModel
+    private var bleScannerDialog: BleScannerDialog? = null
 
     private lateinit var menuItemStartMonitoring: MenuItem
     private lateinit var menuItemStopMonitoring: MenuItem
@@ -82,6 +93,10 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
             .observe(this) { hspStreamData ->
                 addStreamData(hspStreamData)
             }
+
+        viewReferenceDevice = referenceDeviceView
+
+        setupReferenceDeviceView()
     }
 
     override fun onCreateView(
@@ -90,10 +105,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_spo2, container, false)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -130,7 +141,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         chartView.maximumEntryCount = 100
     }
 
-
     private fun setupToolbar() {
 
         toolbar.apply {
@@ -163,7 +173,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         }
 
         toolbar.pageTitle = requireContext().getString(R.string.spo2)
-
     }
 
     private fun startMonitoring() {
@@ -202,7 +211,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         hspViewModel.sendCommand(
             SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
         )
-//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
     private fun sendAlgoMode() {
@@ -228,6 +236,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
         setAlgorithmModeRadioButtonsEnabled(true)
 
         hspViewModel.stopStreaming()
+        polarViewModel.disconnect()
     }
 
     private fun showStopMonitoringDialog() {
@@ -243,6 +252,56 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    private fun setupReferenceDeviceView() {
+        polarViewModel = ViewModelProviders.of(requireActivity()).get(PolarViewModel::class.java)
+
+        polarViewModel.connectionState
+            .observe(this) { (device, connectionState) ->
+                viewReferenceDevice.bleConnectionInfo =
+                    if (polarViewModel.bluetoothDevice != null) {
+                        BleConnectionInfo(connectionState, device.name, device.address)
+                    } else {
+                        null
+                    }
+            }
+
+        polarViewModel.heartRateMeasurement
+            .observe(this) { heartRateMeasurement ->
+                dataRecorder?.record(heartRateMeasurement)
+                viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+                Timber.d("%s", heartRateMeasurement)
+            }
+
+        polarViewModel.isDeviceSupported
+            .observe(this) {
+                polarViewModel.readBatteryLevel()
+            }
+
+        viewReferenceDevice.onSearchButtonClick {
+            showBleScannerDialog(R.string.polar_devices, "")
+        }
+
+        viewReferenceDevice.onConnectButtonClick {
+            polarViewModel.reconnect()
+        }
+
+        viewReferenceDevice.onDisconnectClick {
+            polarViewModel.disconnect()
+        }
+
+        viewReferenceDevice.onChangeDeviceClick {
+            polarViewModel.disconnect()
+            viewReferenceDevice.bleConnectionInfo = null
+            showBleScannerDialog(R.string.polar_devices, "")
+        }
+    }
+
+    private fun showBleScannerDialog(@StringRes titleRes: Int, deviceNamePrefix: String?) {
+        bleScannerDialog = BleScannerDialog.newInstance(getString(titleRes), deviceNamePrefix)
+        bleScannerDialog?.setTargetFragment(this, 1437)
+        fragmentManager?.let { bleScannerDialog?.show(it, "BleScannerDialog") }
     }
 
     private fun dataLoggingToggled() {
@@ -351,5 +410,17 @@ class Spo2Fragment : Fragment(), IOnBackPressed {
 
     override fun onStopMonitoring() {
         stopMonitoring()
+    }
+
+    override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {
+        val deviceName = bluetoothDevice.name ?: ""
+
+        when {
+            deviceName.startsWith("", false) -> polarViewModel.connect(
+                bluetoothDevice
+            )
+        }
+
+        bleScannerDialog?.dismiss()
     }
 }

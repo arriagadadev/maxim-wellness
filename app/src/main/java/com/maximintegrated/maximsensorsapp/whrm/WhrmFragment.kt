@@ -1,20 +1,26 @@
 package com.maximintegrated.maximsensorsapp.whrm
 
+import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.bluetooth.ble.BleScannerDialog
+import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.bpt.polar.PolarViewModel
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
+import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import timber.log.Timber
@@ -22,7 +28,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class WhrmFragment : Fragment(), IOnBackPressed {
+class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener {
 
     companion object {
         fun newInstance() = WhrmFragment()
@@ -30,7 +36,12 @@ class WhrmFragment : Fragment(), IOnBackPressed {
         val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
     }
 
+    private lateinit var viewReferenceDevice: ReferenceDeviceView
+
     private lateinit var hspViewModel: HspViewModel
+    private lateinit var polarViewModel: PolarViewModel
+    private var bleScannerDialog: BleScannerDialog? = null
+
     private lateinit var chartView: MultiChannelChartView
     private var dataRecorder: DataRecorder? = null
 
@@ -117,6 +128,10 @@ class WhrmFragment : Fragment(), IOnBackPressed {
                 addStreamData(hspStreamData)
                 Timber.d(hspStreamData.toString())
             }
+
+        viewReferenceDevice = referenceDeviceView
+
+        setupReferenceDeviceView()
     }
 
     override fun onCreateView(
@@ -125,10 +140,6 @@ class WhrmFragment : Fragment(), IOnBackPressed {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_whrm, container, false)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -194,13 +205,11 @@ class WhrmFragment : Fragment(), IOnBackPressed {
         }
 
         toolbar.pageTitle = requireContext().getString(R.string.whrm)
-
     }
 
     private fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
-//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
     }
 
     private fun startMonitoring() {
@@ -238,6 +247,7 @@ class WhrmFragment : Fragment(), IOnBackPressed {
         dataRecorder = null
 
         hspViewModel.stopStreaming()
+        polarViewModel.disconnect()
     }
 
     private fun showStopMonitoringDialog() {
@@ -270,6 +280,56 @@ class WhrmFragment : Fragment(), IOnBackPressed {
         activity = Activity.values()[streamData.activity].displayName
         scd = Scd.values()[streamData.scdState].displayName
         cadence = "${streamData.cadence} steps/min"
+    }
+
+    private fun setupReferenceDeviceView() {
+        polarViewModel = ViewModelProviders.of(requireActivity()).get(PolarViewModel::class.java)
+
+        polarViewModel.connectionState
+            .observe(this) { (device, connectionState) ->
+                viewReferenceDevice.bleConnectionInfo =
+                    if (polarViewModel.bluetoothDevice != null) {
+                        BleConnectionInfo(connectionState, device.name, device.address)
+                    } else {
+                        null
+                    }
+            }
+
+        polarViewModel.heartRateMeasurement
+            .observe(this) { heartRateMeasurement ->
+                dataRecorder?.record(heartRateMeasurement)
+                viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+                Timber.d("%s", heartRateMeasurement)
+            }
+
+        polarViewModel.isDeviceSupported
+            .observe(this) {
+                polarViewModel.readBatteryLevel()
+            }
+
+        viewReferenceDevice.onSearchButtonClick {
+            showBleScannerDialog(R.string.polar_devices, "")
+        }
+
+        viewReferenceDevice.onConnectButtonClick {
+            polarViewModel.reconnect()
+        }
+
+        viewReferenceDevice.onDisconnectClick {
+            polarViewModel.disconnect()
+        }
+
+        viewReferenceDevice.onChangeDeviceClick {
+            polarViewModel.disconnect()
+            viewReferenceDevice.bleConnectionInfo = null
+            showBleScannerDialog(R.string.polar_devices, "")
+        }
+    }
+
+    private fun showBleScannerDialog(@StringRes titleRes: Int, deviceNamePrefix: String?) {
+        bleScannerDialog = BleScannerDialog.newInstance(getString(titleRes), deviceNamePrefix)
+        bleScannerDialog?.setTargetFragment(this, 1437)
+        fragmentManager?.let { bleScannerDialog?.show(it, "BleScannerDialog") }
     }
 
     private fun dataLoggingToggled() {
@@ -360,5 +420,17 @@ class WhrmFragment : Fragment(), IOnBackPressed {
 
     override fun onStopMonitoring() {
         stopMonitoring()
+    }
+
+    override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {
+        val deviceName = bluetoothDevice.name ?: ""
+
+        when {
+            deviceName.startsWith("", false) -> polarViewModel.connect(
+                bluetoothDevice
+            )
+        }
+
+        bleScannerDialog?.dismiss()
     }
 }

@@ -2,6 +2,7 @@ package com.maximintegrated.maximsensorsapp
 
 import android.os.Environment
 import com.maximintegrated.bpt.hsp.HspStreamData
+import com.maximintegrated.bpt.polar.HeartRateMeasurement
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import timber.log.Timber
 import java.io.File
@@ -51,11 +52,16 @@ class DataRecorder(type: String) {
             "timestamp",
             "hr"
         )
+
+        private val CSV_HEADER_REFERENCE_DEVICE =
+            arrayOf("timestamp", "heart_rate", "contact_detected")
     }
 
     private val csvWriter: CsvWriter
     private val csvWriter1Hz: CsvWriter
     private var count = 1
+
+    private val referenceDevice: CsvWriter
 
     private val timestamp = TIMESTAMP_FORMAT.format(Date())
 
@@ -68,6 +74,11 @@ class DataRecorder(type: String) {
         csvWriter1Hz = CsvWriter.open(
             getCsvFilePath1Hz(type),
             CSV_HEADER_HSP_1Hz
+        )
+
+        referenceDevice = CsvWriter.open(
+            getCsvFilePath("${type}_reference_device"),
+            CSV_HEADER_REFERENCE_DEVICE
         )
     }
 
@@ -124,10 +135,19 @@ class DataRecorder(type: String) {
         count++
     }
 
+    fun record(data: HeartRateMeasurement) {
+        referenceDevice.write(
+            data.currentTimeMillis,
+            data.heartRate,
+            if (data.contactDetected == true) 1 else 0
+        )
+    }
+
     fun close() {
         try {
             csvWriter.close()
             csvWriter1Hz.close()
+            referenceDevice.close()
         } catch (e: Exception) {
             Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
         }

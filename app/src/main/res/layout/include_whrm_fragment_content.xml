@@ -33,12 +33,21 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            app:layout_constraintBottom_toTopOf="@id/stepsView"
+            app:layout_constraintBottom_toTopOf="@id/referenceDeviceView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardViewWhrm"
             app:mrv_title="HR"
             app:mrv_unit="bpm" />
+
+        <com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
+            android:id="@+id/referenceDeviceView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toTopOf="@id/stepsView"
+            app:layout_constraintTop_toBottomOf="@id/hrResultView" />
 
         <com.maximintegrated.maximsensorsapp.ResultCardView
             android:id="@+id/stepsView"
@@ -51,7 +60,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hrResultView"
+            app:layout_constraintTop_toBottomOf="@id/referenceDeviceView"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_footprint"
             app:rcv_title="Steps" />
@@ -150,7 +159,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cadenceView" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

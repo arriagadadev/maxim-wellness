@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.HspCommand
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
@@ -20,7 +21,7 @@ import com.maximintegrated.maximsensorsapp.exts.replaceFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber.d
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
     private lateinit var bluetoothDevice: BluetoothDevice
 
     private lateinit var hspViewModel: HspViewModel
@@ -123,7 +124,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
-
     }
 
     private fun showStopMonitoringDialog() {
@@ -140,5 +140,10 @@ class MainActivity : AppCompatActivity() {
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {
+        val fragment = (getCurrentFragment() as? OnBluetoothDeviceClickListener)
+        fragment?.onBluetoothDeviceClicked(bluetoothDevice)
     }
 }
