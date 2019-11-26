@@ -152,10 +152,6 @@ class HrvFragment : Fragment(), IOnBackPressed {
         return inflater.inflate(R.layout.fragment_hrv, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -317,7 +313,16 @@ class HrvFragment : Fragment(), IOnBackPressed {
 
     private fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
-//        hspViewModel.sendCommand(SetConfigurationCommand("scdpowersaving", " ", "1 10 5"))
+    }
+
+    private fun sendLogToFlashCommand() {
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "flash",
+                "log",
+                if (menuItemLogToFlash.isChecked) "1" else "0"
+            )
+        )
     }
 
     private fun startMonitoring() {
@@ -341,6 +346,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }
     }
@@ -387,7 +393,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
     }
 
     private fun flashLoggingToggled() {
-
+        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {

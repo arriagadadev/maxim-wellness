@@ -95,10 +95,6 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         return inflater.inflate(R.layout.fragment_respiratory, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -196,6 +192,16 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
     }
 
+    private fun sendLogToFlashCommand() {
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "flash",
+                "log",
+                if (menuItemLogToFlash.isChecked) "1" else "0"
+            )
+        )
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Respiration_Rate")
@@ -211,6 +217,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }
     }

@@ -202,6 +202,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             .observe(this) {
                 sendDefaultSettings()
                 sendAlgoMode()
+                sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }
     }
@@ -219,6 +220,16 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         } else if (algorithmModeOneShotRadioButton.isChecked) {
             hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "1"))
         }
+    }
+
+    private fun sendLogToFlashCommand() {
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "flash",
+                "log",
+                if (menuItemLogToFlash.isChecked) "1" else "0"
+            )
+        )
     }
 
     private fun stopMonitoring() {
@@ -309,7 +320,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     }
 
     private fun flashLoggingToggled() {
-
+        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {

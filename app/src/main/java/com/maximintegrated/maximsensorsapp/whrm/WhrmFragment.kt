@@ -229,6 +229,16 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         }
     }
 
+    private fun sendLogToFlashCommand() {
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "flash",
+                "log",
+                if (menuItemLogToFlash.isChecked) "1" else "0"
+            )
+        )
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
@@ -250,6 +260,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             .observe(this) {
                 sendDefaultSettings()
                 sendAlgoMode()
+                sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }
     }
@@ -364,7 +375,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     }
 
     private fun flashLoggingToggled() {
-
+        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {
