@@ -2,6 +2,7 @@ package com.maximintegrated.maximsensorsapp.whrm
 
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -56,6 +57,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     private lateinit var menuItemLogToFlash: MenuItem
     private lateinit var menuItemSettings: MenuItem
     private lateinit var menuItemEnabledScd: MenuItem
+
+    private var countDownTimer: CountDownTimer? = null
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -128,6 +131,12 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
                 addStreamData(hspStreamData)
                 Timber.d(hspStreamData.toString())
             }
+
+        radioButtonSampledMode.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                setupTimer()
+            }
+        }
 
         viewReferenceDevice = referenceDeviceView
 
@@ -212,6 +221,14 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
     }
 
+    private fun sendAlgoMode() {
+        if (radioButtonNormalMode.isChecked) {
+            hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "2"))
+        } else if (radioButtonSampledMode.isChecked) {
+            hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "3"))
+        }
+    }
+
     private fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
@@ -232,8 +249,22 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendAlgoMode()
                 hspViewModel.startStreaming()
             }
+    }
+
+
+    fun setupTimer() {
+        val timeInterval = WhrmSettings.sampledModeTimeInterval
+        countDownTimer = object : CountDownTimer(timeInterval, 1000) {
+            override fun onFinish() {
+                startMonitoring()
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+            }
+        }
     }
 
     private fun stopMonitoring() {
@@ -242,6 +273,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         startTime = null
         whrmChronometer.stop()
+
+        countDownTimer?.cancel()
 
         dataRecorder?.close()
         dataRecorder = null
@@ -263,12 +296,6 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         alertDialog.setCancelable(false)
         alertDialog.show()
-    }
-
-    private fun showArbitraryCommandDialog() {
-        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
-        arbitraryCommandDialog.setTargetFragment(this, 1338)
-        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     fun addStreamData(streamData: HspStreamData) {
@@ -346,7 +373,15 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     }
 
     private fun showSettingsDialog() {
+        val whrmSettingsDialog = WhrmSettingsFragmentDialog.newInstance()
+        whrmSettingsDialog.setTargetFragment(this, 1560)
+        fragmentManager?.let { whrmSettingsDialog.show(it, "whrmSettingsDialog") }
+    }
 
+    private fun showArbitraryCommandDialog() {
+        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
+        arbitraryCommandDialog.setTargetFragment(this, 1338)
+        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     private fun clearChart() {
@@ -388,6 +423,11 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             hrResultView.result = null
         } else {
             hrConfidence = streamData.hrConfidence
+            //TODO this logic should be based on isReliableHrCalculated flag. ME11 will be updated.
+            if (radioButtonSampledMode.isChecked) {
+                stopMonitoring()
+                countDownTimer?.start()
+            }
         }
 
         if (isHrConfidenceHighEnough(streamData) && !shouldShowMeasuringProgress) {

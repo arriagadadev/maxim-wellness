@@ -28,6 +28,49 @@
 
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/algorithmModeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginTop="@dimen/algorithm_mode_title_top_margin"
+            android:text="@string/whrm_algorithm_mode"
+            android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Title"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/algorithmModeRadioGroup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardViewWhrm" />
+
+        <RadioGroup
+            android:id="@+id/algorithmModeRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spo2_radio_group_top_margin"
+            android:layout_marginBottom="@dimen/spo2_radio_group_bottom_margin"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/algorithmModeTitle">
+
+            <RadioButton
+                android:id="@+id/radioButtonNormalMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
+                android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
+                android:checked="true"
+                android:text="@string/whrm_algorithm_mode_normal" />
+
+            <RadioButton
+                android:id="@+id/radioButtonSampledMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
+                android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
+                android:text="@string/whrm_algorithm_mode_sampled" />
+
+        </RadioGroup>
+
         <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
             android:id="@+id/hrResultView"
             android:layout_width="0dp"
@@ -36,7 +79,7 @@
             app:layout_constraintBottom_toTopOf="@id/referenceDeviceView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardViewWhrm"
+            app:layout_constraintTop_toBottomOf="@id/algorithmModeRadioGroup"
             app:mrv_title="HR"
             app:mrv_unit="bpm" />
 

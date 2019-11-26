@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
         val fragment = (getCurrentFragment() as? IOnBackPressed)
 
         if (fragment != null) {
-            fragment.onBackPressed()?.let {
+            fragment.onBackPressed().let {
                 if (it) {
                     showStopMonitoringDialog()
                 } else {
