@@ -85,10 +85,14 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                 }
             }
         } else {
-            startActivity(
-                Intent(this, ScannerActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                })
+            if (getCurrentFragment() as? MainFragment != null) {
+                startActivity(
+                    Intent(this, ScannerActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    })
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 
