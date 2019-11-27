@@ -5,16 +5,17 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProviders
 import com.maximintegrated.bluetooth.R
 import com.maximintegrated.bluetooth.common.BluetoothScannerDelegate
 import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bluetooth.extension.hasPermission
+import com.maximintegrated.bluetooth.extension.hasPermissions
 import com.maximintegrated.bluetooth.livedata.BleAvailableDevicesLiveData
 import com.maximintegrated.bluetooth.util.verifyPermissions
 import kotlinx.android.synthetic.main.activity_bluetooth_scanner.*
@@ -23,6 +24,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
 
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
+        const val REQUEST_STORAGE_PERMISSION = 2
         private const val DEVICE_NAME_PREFIX_HSP = "HSP"
 
         fun start(context: Context) {
@@ -37,8 +39,10 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bluetooth_scanner)
 
-        scannerDelegate = BluetoothScannerDelegate(this,
-                ViewModelProviders.of(this).get(BleScannerViewModel::class.java), DEVICE_NAME_PREFIX_HSP).apply {
+        scannerDelegate = BluetoothScannerDelegate(
+            this,
+            ViewModelProviders.of(this).get(BleScannerViewModel::class.java), DEVICE_NAME_PREFIX_HSP
+        ).apply {
             deviceClickListener = this@BleScannerActivity
             scanStateChangeHandler = this@BleScannerActivity::invalidateOptionsMenu
         }
@@ -54,19 +58,42 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
 
         if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             scannerDelegate.showLocationPermissionMessage(View.OnClickListener {
-                ActivityCompat.requestPermissions(this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION
+                )
+            })
+        } else if (!hasPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
+            scannerDelegate.showStoragePermissionMessage(View.OnClickListener {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    REQUEST_STORAGE_PERMISSION
+                )
             })
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == REQUEST_LOCATION_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted
             scannerDelegate.hideLocationPermissionMessage()
+        }
+        if (requestCode == REQUEST_STORAGE_PERMISSION && verifyPermissions(grantResults)) {
+            // permission was granted
+            scannerDelegate.hideStoragePermissionMessage()
         }
     }
 

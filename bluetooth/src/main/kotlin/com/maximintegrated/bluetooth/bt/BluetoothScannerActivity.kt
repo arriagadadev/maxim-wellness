@@ -15,6 +15,7 @@ import com.maximintegrated.bluetooth.R
 import com.maximintegrated.bluetooth.common.BluetoothScannerDelegate
 import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bluetooth.extension.hasPermission
+import com.maximintegrated.bluetooth.extension.hasPermissions
 import com.maximintegrated.bluetooth.util.cancelBluetoothDeviceDiscovery
 import com.maximintegrated.bluetooth.util.startBluetoothDeviceDiscovery
 import com.maximintegrated.bluetooth.util.verifyPermissions
@@ -24,6 +25,7 @@ open class BluetoothScannerActivity : AppCompatActivity(), OnBluetoothDeviceClic
 
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
+        const val REQUEST_STORAGE_PERMISSION = 2
 
         fun start(context: Context) {
             val intent = Intent(context, BluetoothScannerActivity::class.java)
@@ -39,8 +41,10 @@ open class BluetoothScannerActivity : AppCompatActivity(), OnBluetoothDeviceClic
 
         setTitle(R.string.bluetooth_title)
 
-        scannerDelegate = BluetoothScannerDelegate(this,
-                ViewModelProviders.of(this).get(BluetoothScannerViewModel::class.java)).apply {
+        scannerDelegate = BluetoothScannerDelegate(
+            this,
+            ViewModelProviders.of(this).get(BluetoothScannerViewModel::class.java)
+        ).apply {
             deviceClickListener = this@BluetoothScannerActivity
             scanStateChangeHandler = this@BluetoothScannerActivity::invalidateOptionsMenu
         }
@@ -55,18 +59,41 @@ open class BluetoothScannerActivity : AppCompatActivity(), OnBluetoothDeviceClic
         super.onResume()
         if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             scannerDelegate.showLocationPermissionMessage(View.OnClickListener {
-                ActivityCompat.requestPermissions(this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION
+                )
+            })
+        } else if (!hasPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
+            scannerDelegate.showStoragePermissionMessage(View.OnClickListener {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    REQUEST_STORAGE_PERMISSION
+                )
             })
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_LOCATION_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted
             scannerDelegate.hideLocationPermissionMessage()
+        }
+        if (requestCode == REQUEST_STORAGE_PERMISSION && verifyPermissions(grantResults)) {
+            // permission was granted
+            scannerDelegate.hideStoragePermissionMessage()
         }
     }
 

@@ -30,6 +30,12 @@ class BluetoothScannerDelegate(
         R.string.bluetooth_location_permission_action
     )
 
+    private val storagePermissionErrorModel = ErrorModel(
+        R.drawable.ic_storage,
+        R.string.bluetooth_storage_permission_message,
+        R.string.bluetooth_storage_permission_action
+    )
+
     private var isBluetoothOn = false
         set(value) {
             field = value
@@ -47,11 +53,14 @@ class BluetoothScannerDelegate(
     val isShowingLocationPermissionMessage
         get() = deviceListController.errorModel == locationPermissionErrorModel
 
+    val isShowingStoragePermissionMessage
+        get() = deviceListController.errorModel == storagePermissionErrorModel
+
     val isScanStartVisible
-        get() = !isShowingLocationPermissionMessage && isBluetoothOn && !isDiscovering
+        get() = !isShowingStoragePermissionMessage && isBluetoothOn && !isDiscovering
 
     val isScanStopVisible
-        get() = !isShowingLocationPermissionMessage && isBluetoothOn && isDiscovering
+        get() = !isShowingStoragePermissionMessage && isBluetoothOn && isDiscovering
 
     var deviceClickListener
         get() = deviceListController.deviceClickListener
@@ -109,12 +118,24 @@ class BluetoothScannerDelegate(
         deviceListController.errorButtonClickListener = null
         deviceListController.errorModel = null
         scanStateChangeHandler?.invoke()
+    }
+
+    fun showStoragePermissionMessage(actionClickListener: View.OnClickListener) {
+        deviceListController.errorButtonClickListener = actionClickListener
+        deviceListController.errorModel = storagePermissionErrorModel
+        scanStateChangeHandler?.invoke()
+    }
+
+    fun hideStoragePermissionMessage() {
+        deviceListController.errorButtonClickListener = null
+        deviceListController.errorModel = null
+        scanStateChangeHandler?.invoke()
         showBluetoothOffErrorIfNeeded()
     }
 
     private fun showBluetoothOffErrorIfNeeded() {
         // ignore if location permission message is shown
-        if (isShowingLocationPermissionMessage) return
+        if (isShowingStoragePermissionMessage) return
 
         if (isBluetoothOn) {
             deviceListController.errorButtonClickListener = null
@@ -125,5 +146,4 @@ class BluetoothScannerDelegate(
             deviceListController.errorModel = bluetoothOffErrorModel
         }
     }
-
 }

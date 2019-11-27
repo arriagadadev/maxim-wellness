@@ -17,4 +17,7 @@
 
     <string name="bluetooth_location_permission_message">Location permission is required to discover nearby devices</string>
     <string name="bluetooth_location_permission_action">Grant</string>
+
+    <string name="bluetooth_storage_permission_message">Storage permission is required for logging</string>
+    <string name="bluetooth_storage_permission_action">Grant</string>
 </resources>

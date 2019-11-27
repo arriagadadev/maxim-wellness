@@ -11,3 +11,6 @@ fun Context.getDimension(@DimenRes id: Int): Int = this.resources.getDimensionPi
 fun Context.hasPermission(permission: String) =
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
+fun Context.hasPermissions(vararg permissions: String): Boolean = permissions.all {
+    ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+}

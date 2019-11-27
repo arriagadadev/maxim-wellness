@@ -1,15 +1,11 @@
 package com.maximintegrated.maximsensorsapp
 
-import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
@@ -28,7 +24,6 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
 
     companion object {
         private const val KEY_BLUETOOTH_DEVICE = "com.maximintegrated.hsp.BLUETOOTH_DEVICE"
-        const val REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 3
 
         fun start(context: Context, bluetoothDevice: BluetoothDevice) {
             context.startActivity(
@@ -66,38 +61,6 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
 
         d("Connected bluetooth device $bluetoothDevice")
         showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                REQUEST_READ_EXTERNAL_STORAGE_PERMISSION
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    ) {
-        when (requestCode) {
-            REQUEST_READ_EXTERNAL_STORAGE_PERMISSION -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                } else {
-                    // permission denied, boo!
-                }
-                return
-            }
-            else -> {
-                // Ignore all other requests.
-            }
-        }
     }
 
     private fun showMenuItems(deviceSensors: List<String>, firmwareAlgorithms: List<String>) {
