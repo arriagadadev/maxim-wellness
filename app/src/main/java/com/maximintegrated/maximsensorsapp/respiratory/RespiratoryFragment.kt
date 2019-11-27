@@ -105,7 +105,6 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
             RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
         )
-        RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
 
         initializeChronometer()
         setupChart()
@@ -213,6 +212,8 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         respirationChronometer.base = SystemClock.elapsedRealtime()
         respirationChronometer.start()
+
+        RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
 
         hspViewModel.isDeviceSupported
             .observe(this) {

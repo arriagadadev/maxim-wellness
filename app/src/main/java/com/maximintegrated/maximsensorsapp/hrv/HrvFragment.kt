@@ -156,7 +156,6 @@ class HrvFragment : Fragment(), IOnBackPressed {
         super.onViewCreated(view, savedInstanceState)
 
         hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 60, 15)
-        HrvAlgorithm.init(hrvAlgorithmInitConfig)
 
         timeChartView = view.findViewById(R.id.time_chart_view)
         frequencyChartView = view.findViewById(R.id.frequency_chart_view)
@@ -337,6 +336,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
         hrvChronometer.base = SystemClock.elapsedRealtime()
         hrvChronometer.start()
 
+        HrvAlgorithm.init(hrvAlgorithmInitConfig)
 
         percentCompleted.measurementProgress = 0
         percentCompleted.isMeasuring = true
