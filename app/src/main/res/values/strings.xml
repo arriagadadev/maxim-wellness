@@ -70,7 +70,7 @@
     <string name="send">Send</string>
     <string name="enable_scd">Enable Scd</string>
 
-    <string name="polar_title">HRM Chest Strap</string>
+    <string name="reference_device_title">HRM Reference Device</string>
     <string name="polar_contact_detected">Contact Detected?</string>
     <string name="polar_contact_detected_yes">YES</string>
     <string name="polar_contact_detected_no">NO</string>

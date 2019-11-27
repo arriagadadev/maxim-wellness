@@ -23,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/card_logo_title_spacing"
-            android:text="@string/polar_title"
+            android:text="@string/reference_device_title"
             android:textAppearance="?textAppearanceHeadline6"
             android:textColor="?android:textColorSecondary"
             app:layout_constraintBottom_toTopOf="@id/contact_detected_title_view"
