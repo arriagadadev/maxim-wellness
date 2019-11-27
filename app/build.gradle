@@ -47,6 +47,7 @@ dependencies {
     implementation project(':algorithm_hrv')
     implementation project(':algorithm_respiratory_rate')
     implementation project(':algorithm_sleep_qa')
+    implementation project(':algorithm_stress')
 
     implementation deps.kotlinStdLib
     implementation deps.appcompat
