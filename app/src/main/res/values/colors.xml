@@ -13,4 +13,8 @@
 
     <color name="error_text">#d32f2f</color>
 
+    <color name="stress_red">#d2222d</color>
+    <color name="stress_orange">#ffbf00</color>
+    <color name="stress_green">#238823</color>
+
 </resources>

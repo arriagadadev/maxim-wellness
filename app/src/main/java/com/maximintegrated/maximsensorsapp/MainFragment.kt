@@ -17,6 +17,7 @@ import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
+import com.maximintegrated.maximsensorsapp.stress.StressFragment
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_main_fragment_content.*
@@ -117,12 +118,7 @@ class MainFragment : Fragment() {
         }
 
         stressMenuItemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.component = ComponentName(
-                "com.maximintegrated.sportscoaching",
-                "com.maximintegrated.sportscoaching.view.MainActivity"
-            )
-            startActivity(intent)
+            requireActivity().addFragment(StressFragment.newInstance())
         }
 
         sportsCoachingMenuItemView.setOnClickListener {
