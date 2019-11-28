@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -113,8 +114,17 @@ class MainFragment : Fragment() {
             val intent = Intent(Intent.ACTION_SEND)
             intent.component =
                 ComponentName("maximintegrated.com", "maximintegrated.com.MainActivity")
-            startActivity(intent)
-
+            try {
+                startActivity(intent)
+            } catch (ignore: Exception) {
+                if (context != null) {
+                    Toast.makeText(
+                        context!!,
+                        "Sleep Quality Assessment does not exist",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         stressMenuItemView.setOnClickListener {
@@ -127,7 +137,17 @@ class MainFragment : Fragment() {
                 "com.maximintegrated.sportscoaching",
                 "com.maximintegrated.sportscoaching.view.MainActivity"
             )
-            startActivity(intent)
+            try {
+                startActivity(intent)
+            } catch (ignore: Exception) {
+                if (context != null) {
+                    Toast.makeText(
+                        context!!,
+                        "Sports Coaching does not exist",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         archiveMenuItemView.setOnClickListener {
