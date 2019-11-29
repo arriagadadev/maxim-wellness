@@ -44,6 +44,9 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val inputDirectory = File(DataRecorder.OUTPUT_DIRECTORY, "RAW")
+        if(!inputDirectory.exists()){
+            inputDirectory.mkdirs()
+        }
         val directory = File(inputDirectory.absolutePath)
         val files = directory.listFiles().toList().filter { !it.name.contains("1Hz") }
 
