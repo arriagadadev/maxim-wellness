@@ -77,17 +77,22 @@ class DataRecorder(type: String) {
         )
 
         referenceDevice = CsvWriter.open(
-            getCsvFilePath("${type}_reference_device"),
+            getCsvFilePathReferenceDevice(type),
             CSV_HEADER_REFERENCE_DEVICE
         )
     }
 
     private fun getCsvFilePath(type: String) =
-        File(OUTPUT_DIRECTORY, "MaximSensorsApp_${timestamp}_$type.csv").absolutePath
+        File(OUTPUT_DIRECTORY, "/RAW/MaximSensorsApp_${timestamp}_$type.csv").absolutePath
 
     private fun getCsvFilePath1Hz(type: String) =
-        File(OUTPUT_DIRECTORY, "MaximSensorsApp_${timestamp}_${type}_1Hz.csv").absolutePath
+        File(OUTPUT_DIRECTORY, "/1Hz/MaximSensorsApp_${timestamp}_${type}_1Hz.csv").absolutePath
 
+    private fun getCsvFilePathReferenceDevice(type: String) =
+        File(
+            OUTPUT_DIRECTORY,
+            "/REFERENCE_DEVICE/MaximSensorsApp_${timestamp}_${type}_reference_device.csv"
+        ).absolutePath
 
     fun record(data: HspStreamData) {
         csvWriter.write(
@@ -151,6 +156,5 @@ class DataRecorder(type: String) {
         } catch (e: Exception) {
             Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
         }
-
     }
 }

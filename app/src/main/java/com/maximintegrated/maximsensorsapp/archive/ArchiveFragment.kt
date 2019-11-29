@@ -30,11 +30,6 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
 
     private val adapter: FileListAdapter by lazy { FileListAdapter(this) }
 
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,15 +38,10 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         return inflater.inflate(R.layout.fragment_archive, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val inputDirectory = DataRecorder.OUTPUT_DIRECTORY
+        val inputDirectory = File(DataRecorder.OUTPUT_DIRECTORY, "RAW")
         val directory = File(inputDirectory.absolutePath)
         val files = directory.listFiles().toList().filter { !it.name.contains("1Hz") }
 
@@ -67,7 +57,6 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
 
         adapter.notifyDataSetChanged()
     }
-
 
     private fun initRecyclerView() {
         fileRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -101,7 +90,6 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
                         date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
                     )
                 )
-
                 counter = 0
             }
             counter++
@@ -174,7 +162,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     }
 
     private fun showSleepAlgoResultDialog(success: Boolean) {
-        var message: String
+        val message: String
 
         if (success) {
             message = "Algorithm finished successfully"
