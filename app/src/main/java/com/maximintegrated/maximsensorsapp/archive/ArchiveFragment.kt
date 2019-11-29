@@ -14,6 +14,8 @@ import com.maximintegrated.algorithm_sleep_qa.SleepQaAlgorithmInput
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import kotlinx.android.synthetic.main.fragment_archive.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import timber.log.Timber
 import java.io.File
 import kotlin.math.pow
@@ -64,38 +66,44 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     }
 
     private fun handleListItemClick(file: File) {
-        val rows = file.readLines().drop(1)
+        progressBar.visibility = View.VISIBLE
+        doAsync {
+            val rows = file.readLines().drop(1)
 
-        val offlineDataList: ArrayList<OfflineDataModel> = arrayListOf()
+            val offlineDataList: ArrayList<OfflineDataModel> = arrayListOf()
 
-        var counter = 1
-        for (row in rows) {
-            if (counter % 25 == 0) {
-                val items = row.split(",")
-                offlineDataList.add(
-                    OfflineDataModel(
-                        green = items[2].toFloat(),
-                        ir = items[4].toFloat(),
-                        red = items[5].toFloat(),
-                        hr = items[10].toFloat(),
-                        rr = items[12].toFloat(),
-                        rrConfidence = items[13].toInt(),
-                        spo2 = items[17].toFloat(),
-                        motion = sqrt(
-                            items[6].toFloat().pow(2)
-                                    + items[7].toFloat().pow(2)
-                                    + items[8].toFloat().pow(2)
-                        ),
-                        steps = items[25].toFloat() + items[26].toFloat(),
-                        date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
+            var counter = 1
+            for (row in rows) {
+                if (counter % 25 == 0) {
+                    val items = row.split(",")
+                    offlineDataList.add(
+                        OfflineDataModel(
+                            green = items[2].toFloat(),
+                            ir = items[4].toFloat(),
+                            red = items[5].toFloat(),
+                            hr = items[10].toFloat(),
+                            rr = items[12].toFloat(),
+                            rrConfidence = items[13].toInt(),
+                            spo2 = items[17].toFloat(),
+                            motion = sqrt(
+                                items[6].toFloat().pow(2)
+                                        + items[7].toFloat().pow(2)
+                                        + items[8].toFloat().pow(2)
+                            ),
+                            steps = items[25].toFloat() + items[26].toFloat(),
+                            date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
+                        )
                     )
-                )
-                counter = 0
+                    counter = 0
+                }
+                counter++
             }
-            counter++
-        }
 
-        requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
+            uiThread {
+                progressBar.visibility = View.GONE
+                requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
+            }
+        }
     }
 
     override fun onRowClicked(file: File) {
@@ -125,8 +133,14 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     }
 
     override fun onSleepClicked(file: File) {
-        val success = runSleepAlgo(file.absolutePath)
-        showSleepAlgoResultDialog(success)
+        progressBar.visibility = View.VISIBLE
+        doAsync {
+            val success = runSleepAlgo(file.absolutePath)
+            uiThread {
+                progressBar.visibility = View.GONE
+                showSleepAlgoResultDialog(success)
+            }
+        }
     }
 
     private fun showDeleteDialog(file: File) {
