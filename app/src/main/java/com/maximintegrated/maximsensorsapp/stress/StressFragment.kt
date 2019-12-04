@@ -162,7 +162,7 @@ class StressFragment : Fragment(), IOnBackPressed {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 60, 15)
+        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 90, 30)
 
         initializeChronometer()
         setupToolbar()
