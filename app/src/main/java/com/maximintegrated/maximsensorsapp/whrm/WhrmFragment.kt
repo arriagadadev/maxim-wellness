@@ -313,7 +313,10 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         renderHrmModel(streamData)
         dataRecorder?.record(streamData)
         stepCount = streamData.runSteps + streamData.walkSteps
-        ibi = "${streamData.rr} msec"
+
+        if (streamData.rr != 0f) {
+            ibi = "${streamData.rr} msec"
+        }
         energy = "${streamData.kCal} cal"
         activity = Activity.values()[streamData.activity].displayName
         scd = Scd.values()[streamData.scdState].displayName
