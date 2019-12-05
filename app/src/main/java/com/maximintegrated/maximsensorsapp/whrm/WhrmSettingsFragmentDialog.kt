@@ -8,6 +8,7 @@ import androidx.fragment.app.DialogFragment
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.WhrmSettings
 import kotlinx.android.synthetic.main.dialog_whrm_settings.*
+import kotlinx.android.synthetic.main.dialog_whrm_settings.view.*
 
 class WhrmSettingsFragmentDialog : DialogFragment() {
 
@@ -22,6 +23,7 @@ class WhrmSettingsFragmentDialog : DialogFragment() {
 
         val contentView = LayoutInflater.from(context)
             .inflate(R.layout.dialog_whrm_settings, null)
+        contentView.editTextCycleTime.setText((WhrmSettings.sampledModeTimeInterval/1000).toString())
 
         val settingsDialog = AlertDialog.Builder(requireContext())
             .setTitle(R.string.whrm_settings)
@@ -29,7 +31,7 @@ class WhrmSettingsFragmentDialog : DialogFragment() {
             .setPositiveButton(R.string.save) { dialog, which ->
                 val d = dialog as AlertDialog
                 val editText = d.editTextCycleTime
-                WhrmSettings.sampledModeTimeInterval = editText.text.toString().toLong() * 1000 * 60
+                WhrmSettings.sampledModeTimeInterval = editText.text.toString().toLong() * 1000
 
                 val fragment = targetFragment as WhrmFragment
                 fragment.setupTimer()

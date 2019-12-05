@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
@@ -245,12 +246,16 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         menuItemEnabledScd.isEnabled = false
 
         clearChart()
+        
+        countDownTimer?.cancel()
 
         hrResultView.measurementProgress = 0
 
         measurementStartTimestamp = null
         hrResultView.measurementProgress = getMeasurementProgress()
         hrResultView.result = null
+
+        setAlgorithmModeRadioButtonsEnabled(false)
 
         startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
         whrmChronometer.base = SystemClock.elapsedRealtime()
@@ -285,6 +290,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         startTime = null
         whrmChronometer.stop()
 
+        setAlgorithmModeRadioButtonsEnabled(true)
+
         countDownTimer?.cancel()
 
         dataRecorder?.close()
@@ -307,6 +314,12 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    private fun setAlgorithmModeRadioButtonsEnabled(isEnabled: Boolean) {
+        for (radioButton in algorithmModeRadioGroup.children) {
+            radioButton.isEnabled = isEnabled
+        }
     }
 
     fun addStreamData(streamData: HspStreamData) {
@@ -429,29 +442,33 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         chartView.addData(streamData.green, streamData.green2)
 
-        val shouldShowMeasuringProgress = shouldShowMeasuringProgress()
-        if (shouldShowMeasuringProgress) {
-            hrConfidence = null
+        if (radioButtonNormalMode.isChecked) {
+            val shouldShowMeasuringProgress = shouldShowMeasuringProgress()
+            if (shouldShowMeasuringProgress) {
+                hrConfidence = null
 
-            hrResultView.measurementProgress = getMeasurementProgress()
-            hrResultView.result = null
+                hrResultView.measurementProgress = getMeasurementProgress()
+                hrResultView.result = null
+            } else {
+                hrConfidence = streamData.hrConfidence
+            }
+
+            if (isHrConfidenceHighEnough(streamData) && !shouldShowMeasuringProgress) {
+                hrResultView.result = streamData.hr
+
+                lastValidHrTimestamp = System.currentTimeMillis()
+            } else if (isHrObsolete()) {
+                // show HR as empty
+                hrResultView.result = null
+            }
         } else {
-            hrConfidence = streamData.hrConfidence
-            //TODO this logic should be based on isReliableHrCalculated flag. ME11 will be updated.
-            if (radioButtonSampledMode.isChecked) {
+            hrResultView.result = streamData.hr
+            if (streamData.hrConfidence == 100 && radioButtonSampledMode.isChecked) {
                 stopMonitoring()
                 countDownTimer?.start()
             }
         }
 
-        if (isHrConfidenceHighEnough(streamData) && !shouldShowMeasuringProgress) {
-            hrResultView.result = streamData.hr
-
-            lastValidHrTimestamp = System.currentTimeMillis()
-        } else if (isHrObsolete()) {
-            // show HR as empty
-            hrResultView.result = null
-        }
     }
 
     private fun isHrConfidenceHighEnough(hrmModel: HspStreamData): Boolean {

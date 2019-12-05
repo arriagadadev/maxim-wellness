@@ -65,7 +65,7 @@
                 android:id="@+id/radioButtonSampledMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:enabled="false"
+                android:enabled="true"
                 android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
                 android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
                 android:text="@string/whrm_algorithm_mode_sampled" />
