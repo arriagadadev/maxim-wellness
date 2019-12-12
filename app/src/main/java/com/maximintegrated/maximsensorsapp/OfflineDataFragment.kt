@@ -9,25 +9,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
-import com.maximintegrated.algorithm_hrv.HrvAlgorithm
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmInitConfig
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmInput
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmOutput
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithm
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInitConfig
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInput
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOutput
+import com.maximintegrated.algorithms.AlgorithmInitConfig
+import com.maximintegrated.algorithms.AlgorithmInput
+import com.maximintegrated.algorithms.AlgorithmOutput
+import com.maximintegrated.algorithms.MaximAlgorithms
+import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
+import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
 import kotlinx.android.synthetic.main.fragment_offline_data.*
 
 class OfflineDataFragment : Fragment() {
 
-    private var hrvAlgorithmInitConfig: HrvAlgorithmInitConfig? = null
-    private val hrvAlgorithmInput = HrvAlgorithmInput()
-    private val hrvAlgorithmOutput = HrvAlgorithmOutput()
-
-    private var respiratoryRateAlgorithmInitConfig: RespiratoryRateAlgorithmInitConfig? = null
-    private val respiratoryRateAlgorithmInput = RespiratoryRateAlgorithmInput()
-    private val respiratoryRateAlgorithmOutput = RespiratoryRateAlgorithmOutput()
+    private var algorithmInitConfig: AlgorithmInitConfig? = null
+    private val algorithmInput = AlgorithmInput()
+    private val algorithmOutput = AlgorithmOutput()
 
     var calculated: Float = 0f
 
@@ -69,16 +63,13 @@ class OfflineDataFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         savedInstanceState?.clear()
 
-        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 60, 15)
-        HrvAlgorithm.init(hrvAlgorithmInitConfig)
-
-        respiratoryRateAlgorithmInitConfig = RespiratoryRateAlgorithmInitConfig(
+        algorithmInitConfig = AlgorithmInitConfig()
+        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 60, 15)
+        algorithmInitConfig?.respConfig = RespiratoryRateAlgorithmInitConfig(
             RespiratoryRateAlgorithmInitConfig.SourceOptions.WRIST,
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
             RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
         )
-
-        RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
 
         initRecyclerView()
 
@@ -169,62 +160,63 @@ class OfflineDataFragment : Fragment() {
     }
 
     private fun runHrvAlgo(): List<HrvOfflineChartData> {
+        algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_HRV
+        MaximAlgorithms.init(algorithmInitConfig)
+
         val resultList: ArrayList<HrvOfflineChartData> = arrayListOf()
 
         for (data in offlineDataList) {
-            hrvAlgorithmInput.ibi = data.rr
-            hrvAlgorithmInput.ibiConfidence = data.rrConfidence
-            hrvAlgorithmInput.isIbiValid = true
+            algorithmInput.rr = (data.rr * 1000f).toInt()
+            algorithmInput.rrConfidence = data.rrConfidence
 
-            HrvAlgorithm.run(hrvAlgorithmInput, hrvAlgorithmOutput)
+            MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
-            if (hrvAlgorithmOutput.isHrvCalculated) {
+            if (algorithmOutput.hrv.isHrvCalculated) {
                 resultList.add(
                     HrvOfflineChartData(
-                        avnn = hrvAlgorithmOutput.timeDomainHrvMetrics.avnn,
-                        sdnn = hrvAlgorithmOutput.timeDomainHrvMetrics.sdnn,
-                        rmssd = hrvAlgorithmOutput.timeDomainHrvMetrics.rmssd,
-                        pnn50 = hrvAlgorithmOutput.timeDomainHrvMetrics.pnn50,
-                        ulf = hrvAlgorithmOutput.freqDomainHrvMetrics.ulf,
-                        vlf = hrvAlgorithmOutput.freqDomainHrvMetrics.vlf,
-                        lf = hrvAlgorithmOutput.freqDomainHrvMetrics.lf,
-                        hf = hrvAlgorithmOutput.freqDomainHrvMetrics.hf,
-                        lfOverHf = hrvAlgorithmOutput.freqDomainHrvMetrics.lfOverHf,
-                        totPwr = hrvAlgorithmOutput.freqDomainHrvMetrics.totPwr
+                        avnn = algorithmOutput.hrv.timeDomainHrvMetrics.avnn,
+                        sdnn = algorithmOutput.hrv.timeDomainHrvMetrics.sdnn,
+                        rmssd = algorithmOutput.hrv.timeDomainHrvMetrics.rmssd,
+                        pnn50 = algorithmOutput.hrv.timeDomainHrvMetrics.pnn50,
+                        ulf = algorithmOutput.hrv.freqDomainHrvMetrics.ulf,
+                        vlf = algorithmOutput.hrv.freqDomainHrvMetrics.vlf,
+                        lf = algorithmOutput.hrv.freqDomainHrvMetrics.lf,
+                        hf = algorithmOutput.hrv.freqDomainHrvMetrics.hf,
+                        lfOverHf = algorithmOutput.hrv.freqDomainHrvMetrics.lfOverHf,
+                        totPwr = algorithmOutput.hrv.freqDomainHrvMetrics.totPwr
                     )
                 )
             }
 
         }
 
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV)
+
         return resultList
     }
 
 
     private fun runRrAlgo(): List<Float> {
+        algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_RESP
+        MaximAlgorithms.init(algorithmInitConfig)
+
         val resultList: ArrayList<Float> = arrayListOf()
 
         for (data in offlineDataList) {
-            respiratoryRateAlgorithmInput.ppg = data.green.toFloat()
-            respiratoryRateAlgorithmInput.ibi = data.rr
-            respiratoryRateAlgorithmInput.ibiConfidence = data.rrConfidence.toFloat()
+            algorithmInput.green = data.green.toInt()
+            algorithmInput.rr = (data.rr * 1000f).toInt()
+            algorithmInput.rrConfidence = data.rrConfidence
 
-            if (calculated == data.rr) {
-                respiratoryRateAlgorithmInput.isIbiUpdateFlag = false
-            } else {
-                respiratoryRateAlgorithmInput.isIbiUpdateFlag = true;
-                calculated = data.rr
-            }
-
-            respiratoryRateAlgorithmInput.isPpgUpdateFlag = true
-
-            RespiratoryRateAlgorithm.run(
-                respiratoryRateAlgorithmInput,
-                respiratoryRateAlgorithmOutput
+            MaximAlgorithms.run(
+                algorithmInput,
+                algorithmOutput
             )
 
-            resultList.add(respiratoryRateAlgorithmOutput.respirationRate)
+            resultList.add(algorithmOutput.respiratory.respirationRate)
         }
+
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_RESP)
+
         return resultList
     }
 
