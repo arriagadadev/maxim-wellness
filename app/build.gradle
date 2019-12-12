@@ -44,10 +44,7 @@ dependencies {
     implementation project(':bluetooth')
     implementation project(':hsp')
     implementation project(':polar')
-    implementation project(':algorithm_hrv')
-    implementation project(':algorithm_respiratory_rate')
-    implementation project(':algorithm_sleep_qa')
-    implementation project(':algorithm_stress')
+    implementation project(':algorithms')
 
     implementation deps.kotlinStdLib
     implementation deps.appcompat
