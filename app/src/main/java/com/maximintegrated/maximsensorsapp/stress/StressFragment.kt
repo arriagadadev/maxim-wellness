@@ -12,17 +12,16 @@ import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
-import com.maximintegrated.algorithm_hrv.HrvAlgorithm
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmInitConfig
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmInput
-import com.maximintegrated.algorithm_hrv.HrvAlgorithmOutput
-import com.maximintegrated.algorithm_stress.StressAlgorithm
-import com.maximintegrated.algorithm_stress.StressAlgorithmInput
-import com.maximintegrated.algorithm_stress.StressAlgorithmOutput
+import com.maximintegrated.algorithms.AlgorithmInitConfig
+import com.maximintegrated.algorithms.AlgorithmInput
+import com.maximintegrated.algorithms.AlgorithmOutput
+import com.maximintegrated.algorithms.MaximAlgorithms
+import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_stress_fragment_content.*
@@ -50,10 +49,9 @@ class StressFragment : Fragment(), IOnBackPressed {
     private lateinit var menuItemSettings: MenuItem
     private lateinit var menuItemEnabledScd: MenuItem
 
-    private var hrvAlgorithmInitConfig: HrvAlgorithmInitConfig? = null
-    private val hrvAlgorithmInput = HrvAlgorithmInput()
-    private val hrvAlgorithmOutput = HrvAlgorithmOutput()
-    private val stressAlgorithmOutput = StressAlgorithmOutput()
+    private var algorithmInitConfig: AlgorithmInitConfig? = null
+    private val algorithmInput = AlgorithmInput()
+    private val algorithmOutput = AlgorithmOutput()
 
     private var dataRecorder: DataRecorder? = null
 
@@ -162,7 +160,10 @@ class StressFragment : Fragment(), IOnBackPressed {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 90, 30)
+        algorithmInitConfig = AlgorithmInitConfig()
+        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 90, 30)
+        algorithmInitConfig?.enableAlgorithmsFlag =
+            MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS
 
         initializeChronometer()
         setupToolbar()
@@ -220,17 +221,14 @@ class StressFragment : Fragment(), IOnBackPressed {
         renderHrmModel(streamData)
         dataRecorder?.record(streamData)
 
-        hrvAlgorithmInput.ibi = streamData.rr
-        hrvAlgorithmInput.ibiConfidence = streamData.rrConfidence
-        hrvAlgorithmInput.isIbiValid = streamData.rr != 0f
+        algorithmInput.set(streamData)
 
-        HrvAlgorithm.run(hrvAlgorithmInput, hrvAlgorithmOutput)
+        val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
-        percentCompleted.measurementProgress = hrvAlgorithmOutput.percentCompleted
+        percentCompleted.measurementProgress = algorithmOutput.hrv.percentCompleted
 
-        if (hrvAlgorithmOutput.isHrvCalculated) {
-            StressAlgorithm.run(StressAlgorithmInput(hrvAlgorithmOutput), stressAlgorithmOutput)
-            stress = stressAlgorithmOutput.stressScore
+        if (success) {
+            stress = algorithmOutput.stress.stressScore
         }
     }
 
@@ -299,8 +297,7 @@ class StressFragment : Fragment(), IOnBackPressed {
         stressChronometer.base = SystemClock.elapsedRealtime()
         stressChronometer.start()
 
-        HrvAlgorithm.init(hrvAlgorithmInitConfig)
-        StressAlgorithm.init()
+        MaximAlgorithms.init(algorithmInitConfig)
 
         percentCompleted.measurementProgress = 0
         percentCompleted.isMeasuring = true
@@ -326,8 +323,7 @@ class StressFragment : Fragment(), IOnBackPressed {
         stressChronometer.stop()
 
         percentCompleted.isMeasuring = false
-        HrvAlgorithm.end()
-        StressAlgorithm.end()
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS)
 
         hspViewModel.stopStreaming()
     }

@@ -9,12 +9,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
-import com.maximintegrated.algorithm_hrv.*
+import com.maximintegrated.algorithms.AlgorithmInitConfig
+import com.maximintegrated.algorithms.AlgorithmInput
+import com.maximintegrated.algorithms.AlgorithmOutput
+import com.maximintegrated.algorithms.MaximAlgorithms
+import com.maximintegrated.algorithms.hrv.FreqDomainHrvMetrics
+import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
+import com.maximintegrated.algorithms.hrv.TimeDomainHrvMetrics
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
-import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -37,9 +43,9 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private lateinit var menuItemSettings: MenuItem
     private lateinit var menuItemEnabledScd: MenuItem
 
-    private var hrvAlgorithmInitConfig: HrvAlgorithmInitConfig? = null
-    private val hrvAlgorithmInput = HrvAlgorithmInput()
-    private val hrvAlgorithmOutput = HrvAlgorithmOutput()
+    private var algorithmInitConfig: AlgorithmInitConfig? = null
+    private val algorithmInput = AlgorithmInput()
+    private val algorithmOutput = AlgorithmOutput()
 
     private lateinit var timeChartView: MultiChannelChartView
     private lateinit var frequencyChartView: MultiChannelChartView
@@ -155,7 +161,9 @@ class HrvFragment : Fragment(), IOnBackPressed {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        hrvAlgorithmInitConfig = HrvAlgorithmInitConfig(40f, 60, 15)
+        algorithmInitConfig = AlgorithmInitConfig()
+        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 60, 15)
+        algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_HRV
 
         timeChartView = view.findViewById(R.id.time_chart_view)
         frequencyChartView = view.findViewById(R.id.frequency_chart_view)
@@ -257,23 +265,19 @@ class HrvFragment : Fragment(), IOnBackPressed {
 
         dataRecorder?.record(streamData)
 
-        hrvAlgorithmInput.ibi = streamData.rr
-        hrvAlgorithmInput.ibiConfidence = streamData.rrConfidence
+        algorithmInput.set(streamData)
 
         if (streamData.rr != 0f) {
             ibiChartView.addData(streamData.rr.toInt())
-            hrvAlgorithmInput.isIbiValid = true
-        } else {
-            hrvAlgorithmInput.isIbiValid = false
         }
 
-        HrvAlgorithm.run(hrvAlgorithmInput, hrvAlgorithmOutput)
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
-        percentCompleted.measurementProgress = hrvAlgorithmOutput.percentCompleted
+        percentCompleted.measurementProgress = algorithmOutput.hrv.percentCompleted
 
-        if (hrvAlgorithmOutput.isHrvCalculated) {
-            updateTimeDomainHrvMetrics(hrvAlgorithmOutput.timeDomainHrvMetrics)
-            updateFrequencyDomainHrvMetrics(hrvAlgorithmOutput.freqDomainHrvMetrics)
+        if (algorithmOutput.hrv.isHrvCalculated) {
+            updateTimeDomainHrvMetrics(algorithmOutput.hrv.timeDomainHrvMetrics)
+            updateFrequencyDomainHrvMetrics(algorithmOutput.hrv.freqDomainHrvMetrics)
         }
     }
 
@@ -336,7 +340,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
         hrvChronometer.base = SystemClock.elapsedRealtime()
         hrvChronometer.start()
 
-        HrvAlgorithm.init(hrvAlgorithmInitConfig)
+        MaximAlgorithms.init(algorithmInitConfig)
 
         percentCompleted.measurementProgress = 0
         percentCompleted.isMeasuring = true
@@ -362,7 +366,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
         hrvChronometer.stop()
 
         percentCompleted.isMeasuring = false
-        HrvAlgorithm.end()
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV)
 
         hspViewModel.stopStreaming()
     }

@@ -9,9 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.HspCommand
+import com.maximintegrated.bpt.hsp.protocol.Status
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,6 +23,10 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
     private lateinit var bluetoothDevice: BluetoothDevice
 
     private lateinit var hspViewModel: HspViewModel
+
+    private var param1: ByteArray? = null
+
+    private var param2: ByteArray? = null
 
     companion object {
         private const val KEY_BLUETOOTH_DEVICE = "com.maximintegrated.hsp.BLUETOOTH_DEVICE"
@@ -56,6 +62,27 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                     serverVersion.text =
                         getString(R.string.server_version, response.parameters[0].value)
                     hubVersion.text = getString(R.string.hub_version, response.parameters[1].value)
+                    hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhparams"))
+                } else if (response.command.name == HspCommand.COMMAND_GET_CFG && response.parameters.isNotEmpty() && response.status == Status.SUCCESS) {
+
+                    if (response.command.parameters[0].value == "sh_dhparams") {
+                        val auth =
+                            MaximAlgorithms.getAuthInitials(response.parameters[0].valueAsByteArray)
+                        hspViewModel.sendCommand(HspCommand.fromText("set_cfg sh_dhlpublic ${auth.toHexString()}"))
+                    } else if (response.command.parameters[0].value == "sh_dhrpublic") {
+                        param1 = response.parameters[0].valueAsByteArray
+                        hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_auth"))
+                    } else if (response.command.parameters[0].value == "sh_auth") {
+                        param2 = response.parameters[0].valueAsByteArray
+                        if (param1 != null && param2 != null) {
+                            MaximAlgorithms.authenticate(param1, param2)
+                        }
+                    }
+
+                } else if (response.command.name == HspCommand.COMMAND_SET_CFG) {
+                    if (response.command.parameters[0].value == "sh_dhlpublic") {
+                        hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhrpublic"))
+                    }
                 }
             }
 

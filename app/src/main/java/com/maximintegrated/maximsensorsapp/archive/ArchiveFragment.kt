@@ -9,14 +9,11 @@ import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.maximintegrated.algorithm_sleep_qa.SleepQaAlgorithm
-import com.maximintegrated.algorithm_sleep_qa.SleepQaAlgorithmInput
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import kotlinx.android.synthetic.main.fragment_archive.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import timber.log.Timber
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -44,7 +41,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val inputDirectory = File(DataRecorder.OUTPUT_DIRECTORY, "RAW")
-        if(!inputDirectory.exists()){
+        if (!inputDirectory.exists()) {
             inputDirectory.mkdirs()
         }
         val directory = File(inputDirectory.absolutePath)
@@ -168,14 +165,14 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     private fun runSleepAlgo(inputFilePath: String): Boolean {
         val outputDirectory = OUTPUT_DIRECTORY
 
-        val input =
-            SleepQaAlgorithmInput(inputFilePath, outputDirectory.absolutePath, 20, 180, 70, 1, 80f)
+        //val input =
+        //   SleepQaAlgorithmInput(inputFilePath, outputDirectory.absolutePath, 20, 180, 70, 1, 80f)
 
-        val success = SleepQaAlgorithm.run(input)
+        //val success = SleepQaAlgorithm.run(input)
 
-        Timber.tag("Archive Fragment").d("SleeoQaAlgo run success result: $success")
+        //Timber.tag("Archive Fragment").d("SleeoQaAlgo run success result: $success")
 
-        return success
+        return false//success
     }
 
     private fun showSleepAlgoResultDialog(success: Boolean) {

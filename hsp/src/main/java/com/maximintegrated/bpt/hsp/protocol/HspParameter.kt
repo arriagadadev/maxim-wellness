@@ -27,6 +27,18 @@ data class HspParameter(val key: String?, val value: String) {
         get() = value.toIntOrNull()
             ?: throw InvalidParameterFormatException("$value is not an integer")
 
+    val valueAsByteArray: ByteArray
+        get() {
+            val array = ByteArray(value.length / 2)
+            for (i in array.indices) {
+                val index = i * 2
+                val j = value.substring(index, index + 2).toIntOrNull(16)
+                    ?: throw InvalidParameterFormatException("$value is not a HEX string")
+                array[i] = j.toByte()
+            }
+            return array
+        }
+
     val valueAsList: List<String>
         get() = value.split(SEPARATOR_VALUE_LIST)
 

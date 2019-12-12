@@ -7,6 +7,7 @@ sealed class HspCommand(val name: String, val parameters: List<HspParameter> = e
         const val COMMAND_DUMP_REG = "dump_reg"
         const val COMMAND_GET_REG = "get_reg"
         const val COMMAND_SET_REG = "set_reg"
+        const val COMMAND_GET_CFG = "get_cfg"
         const val COMMAND_SET_CFG = "set_cfg"
         const val COMMAND_GET_FORMAT = "get_format"
         const val COMMAND_READ = "read"
@@ -51,6 +52,10 @@ sealed class HspCommand(val name: String, val parameters: List<HspParameter> = e
                         registerValue = parameters[2].valueAsHex
                     )
                 }
+                COMMAND_GET_CFG -> {
+                    checkCommandParameters(command, parameters, 1)
+                    GetConfigurationCommand(parameters[0].value)
+                }
                 COMMAND_SET_CFG -> {
                     checkCommandParameters(command, parameters, 2)
 
@@ -59,11 +64,15 @@ sealed class HspCommand(val name: String, val parameters: List<HspParameter> = e
                             sensorName = parameters[0].value,
                             configuration = parameters[1].value
                         )
-                    } else {
+                    } else{
+                        var v : String? = null
+                        if("err" != parameters[2].key){
+                            v = parameters[2].value
+                        }
                         SetConfigurationCommand(
                             sensorName = parameters[0].value,
                             configuration = parameters[1].value,
-                            value = parameters[2].value
+                            value = v
                         )
                     }
                 }
@@ -162,6 +171,14 @@ data class SetRegisterCommand(
             HspParameter(sensorName),
             HspParameter(Integer.toHexString(registerAddress)),
             HspParameter(Integer.toHexString(registerValue))
+        )
+    )
+
+data class GetConfigurationCommand(val configuration: String) :
+    HspCommand(
+        COMMAND_GET_CFG,
+        listOf(
+            HspParameter(configuration)
         )
     )
 

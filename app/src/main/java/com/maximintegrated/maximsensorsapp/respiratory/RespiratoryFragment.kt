@@ -9,14 +9,16 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithm
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInitConfig
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmInput
-import com.maximintegrated.algorithm_respiratory_rate.RespiratoryRateAlgorithmOutput
+import com.maximintegrated.algorithms.AlgorithmInitConfig
+import com.maximintegrated.algorithms.AlgorithmInput
+import com.maximintegrated.algorithms.AlgorithmOutput
+import com.maximintegrated.algorithms.MaximAlgorithms
+import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -46,9 +48,9 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
     private lateinit var chartView: MultiChannelChartView
 
-    private var respiratoryRateAlgorithmInitConfig: RespiratoryRateAlgorithmInitConfig? = null
-    private val respiratoryRateAlgorithmInput = RespiratoryRateAlgorithmInput()
-    private val respiratoryRateAlgorithmOutput = RespiratoryRateAlgorithmOutput()
+    private var algorithmInitConfig: AlgorithmInitConfig? = null
+    private val algorithmInput = AlgorithmInput()
+    private val algorithmOutput = AlgorithmOutput()
 
     private var isMonitoring: Boolean = false
         set(value) {
@@ -100,11 +102,13 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         chartView = view.findViewById(R.id.chart_view)
 
-        respiratoryRateAlgorithmInitConfig = RespiratoryRateAlgorithmInitConfig(
+        algorithmInitConfig = AlgorithmInitConfig()
+        algorithmInitConfig?.respConfig = RespiratoryRateAlgorithmInitConfig(
             RespiratoryRateAlgorithmInitConfig.SourceOptions.WRIST,
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
             RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
         )
+        algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_RESP
 
         initializeChronometer()
         setupChart()
@@ -173,18 +177,12 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         dataRecorder?.record(streamData)
 
-        respiratoryRateAlgorithmInput.ppg = streamData.green.toFloat()
-        respiratoryRateAlgorithmInput.ibi = streamData.rr
-        respiratoryRateAlgorithmInput.ibiConfidence = streamData.rrConfidence.toFloat()
+        algorithmInput.set(streamData)
 
-        respiratoryRateAlgorithmInput.isIbiUpdateFlag = streamData.rr != 0f
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
-        respiratoryRateAlgorithmInput.isPpgUpdateFlag = true
-
-        RespiratoryRateAlgorithm.run(respiratoryRateAlgorithmInput, respiratoryRateAlgorithmOutput)
-
-        chartView.addData(respiratoryRateAlgorithmOutput.respirationRate.toInt())
-        respiration = respiratoryRateAlgorithmOutput.respirationRate
+        chartView.addData(algorithmOutput.respiratory.respirationRate.toInt())
+        respiration = algorithmOutput.respiratory.respirationRate
     }
 
     private fun sendDefaultSettings() {
@@ -213,7 +211,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         respirationChronometer.base = SystemClock.elapsedRealtime()
         respirationChronometer.start()
 
-        RespiratoryRateAlgorithm.init(respiratoryRateAlgorithmInitConfig)
+        MaximAlgorithms.init(algorithmInitConfig)
 
         hspViewModel.isDeviceSupported
             .observe(this) {
@@ -233,7 +231,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         startTime = null
         respirationChronometer.stop()
 
-        RespiratoryRateAlgorithm.end()
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_RESP)
 
         hspViewModel.stopStreaming()
     }

@@ -1,5 +1,7 @@
 package com.maximintegrated.bpt.hsp.protocol
 
+import timber.log.Timber
+
 
 sealed class HspResponse<out T : HspCommand>(
     val command: T,
@@ -73,6 +75,16 @@ sealed class HspResponse<out T : HspCommand>(
                 is ResumeCommand -> ResumeResponse(command, status)
                 is StopCommand -> StopResponse(command, status)
                 is UnknownCommand -> UnknownResponse(command, status)
+                is GetConfigurationCommand -> {
+                    val cfgValue = responseParameters.firstOrNull {
+                        it.key == GetConfigurationResponse.KEY_CFG_VALUE
+                    }
+                    GetConfigurationResponse(
+                        command,
+                        cfgValue?.value,
+                        status
+                    )
+                }
             }
         }
     }
@@ -191,6 +203,21 @@ class SetRegisterResponse(command: SetRegisterCommand, status: Status) :
 // TODO: implement response parsing
 class DumpRegistersResponse(command: DumpRegistersCommand, status: Status) :
     HspResponse<DumpRegistersCommand>(command, status = status)
+
+class GetConfigurationResponse(
+    command: GetConfigurationCommand,
+    val value: String? = null,
+    status: Status
+) :
+    HspResponse<GetConfigurationCommand>(
+        command, listOf(HspParameter(KEY_CFG_VALUE, value ?: "")), status
+    ) {
+
+    companion object {
+        const val KEY_CFG_VALUE = "value"
+    }
+
+}
 
 class SetConfigurationResponse(command: SetConfigurationCommand, status: Status) :
     HspResponse<SetConfigurationCommand>(command, status = status)
