@@ -50,7 +50,7 @@ set_target_properties(libRrm PROPERTIES IMPORTED_LOCATION
 
 add_library(libSleep SHARED IMPORTED)
 set_target_properties(libSleep PROPERTIES IMPORTED_LOCATION
-        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libSleepQAAndroidLib.so)
+        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libSleepQA.so)
 
 add_library(libStress SHARED IMPORTED)
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 //#include <memory.h>
 #include <string.h>
-#include "../../../libs/algorithms/include/SSauthentication.h"
+#include "SSauthentication.h"
 
 
 DH_PARAMS sessionAuthParams;
@@ -186,5 +186,192 @@ void shuffleDeshuffle( const BYTE* const input , BYTE* output , const int iolen 
 
     return;
 }
+
+
+BYTE get_dummy_byte_1(void) {
+   static const BYTE dummyByte = 0x8f;
+   return dummyByte;
+}
+
+BYTE get_dummy_byte_2(void) {
+   static const BYTE dummyByte = 0x01;
+   return dummyByte;
+}
+BYTE get_dummy_byte_3(void) {
+   static const BYTE dummyByte = 0xde;
+   return dummyByte;
+}
+BYTE get_dummy_byte_4(void) {
+   static const BYTE dummyByte = 0x78;
+   return dummyByte;
+}
+BYTE get_dummy_byte_5(void) {
+   static const BYTE dummyByte = 0x22;
+   return dummyByte;
+}
+BYTE get_dummy_byte_6(void) {
+   static const BYTE dummyByte = 0xbf;
+   return dummyByte;
+}
+BYTE get_dummy_byte_7(void) {
+   static const BYTE dummyByte = 0x03;
+   return dummyByte;
+}
+BYTE get_dummy_byte_8(void) {
+   static const BYTE dummyByte = 0x8f;
+   return dummyByte;
+}
+BYTE get_dummy_byte_9(void) {
+   static const BYTE dummyByte = 0xea;
+   return dummyByte;
+}
+BYTE get_dummy_byte_10(void) {
+   static const BYTE dummyByte = 0xaa;
+   return dummyByte;
+}
+BYTE get_dummy_byte_11(void) {
+   static const BYTE dummyByte = 0x40;
+   return dummyByte;
+}
+BYTE get_dummy_byte_12(void) {
+   static const BYTE dummyByte = 0x41;
+   return dummyByte;
+}
+BYTE get_dummy_byte_13(void) {
+   static const BYTE dummyByte = 0xcf;
+   return dummyByte;
+}
+BYTE get_dummy_byte_14(void) {
+   static const BYTE dummyByte = 0x5d;
+   return dummyByte;
+}
+BYTE get_dummy_byte_15(void) {
+   static const BYTE dummyByte = 0x41;
+   return dummyByte;
+}
+BYTE get_dummy_byte_16(void) {
+   static const BYTE dummyByte = 0x41;
+   return dummyByte;
+}
+BYTE get_dummy_byte_17(void) {
+   static const BYTE dummyByte = 0x77;
+   return dummyByte;
+}
+BYTE get_dummy_byte_18(void) {
+   static const BYTE dummyByte = 0xb1;
+   return dummyByte;
+}
+BYTE get_dummy_byte_19(void) {
+   static const BYTE dummyByte = 0x61;
+   return dummyByte;
+}
+BYTE get_dummy_byte_20(void) {
+   static const BYTE dummyByte = 0xa3;
+   return dummyByte;
+}
+BYTE get_dummy_byte_21(void) {
+   static const BYTE dummyByte = 0x23;
+   return dummyByte;
+}
+
+BYTE get_dummy_byte_22(void) {
+   static const BYTE dummyByte = 0x78;
+   return dummyByte;
+}
+BYTE get_dummy_byte_23(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_24(void) {
+   static const BYTE dummyByte = 0xde;
+   return dummyByte;
+}
+BYTE get_dummy_byte_25(void) {
+   static const BYTE dummyByte = 0xbf;
+   return dummyByte;
+}
+BYTE get_dummy_byte_26(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_27(void) {
+   static const BYTE dummyByte = 0x5a;
+   return dummyByte;
+}
+BYTE get_dummy_byte_28(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_29(void) {
+   static const BYTE dummyByte = 0xb0;
+   return dummyByte;
+}
+BYTE get_dummy_byte_30(void) {
+   static const BYTE dummyByte = 0xae;
+   return dummyByte;
+}
+BYTE get_dummy_byte_31(void) {
+   static const BYTE dummyByte = 0xb7;
+   return dummyByte;
+}
+BYTE get_dummy_byte_32(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_33(void) {
+   static const BYTE dummyByte = 0x22;
+   return dummyByte;
+}
+BYTE get_dummy_byte_34(void) {
+   static const BYTE dummyByte = 0x23;
+   return dummyByte;
+}
+BYTE get_dummy_byte_35(void) {
+   static const BYTE dummyByte = 0x16;
+   return dummyByte;
+}
+BYTE get_dummy_byte_36(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_37(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_38(void) {
+   static const BYTE dummyByte = 0xba;
+   return dummyByte;
+}
+BYTE get_dummy_byte_39(void) {
+   static const BYTE dummyByte = 0xae;
+   return dummyByte;
+}
+BYTE get_dummy_byte_40(void) {
+   static const BYTE dummyByte = 0x41;
+   return dummyByte;
+}
+
+
+
+void* get_dummmy_func(void) {
+
+	typedef BYTE (*dummyFunc)(void);
+
+	static dummyFunc dummyFuncArray[20] = { get_dummy_byte_32 , get_dummy_byte_22, get_dummy_byte_35, get_dummy_byte_25 , get_dummy_byte_1, get_dummy_byte_2 ,
+			                         get_dummy_byte_13, get_dummy_byte_9, get_dummy_byte_40, get_dummy_byte_12, get_dummy_byte_11, get_dummy_byte_3 ,
+									 get_dummy_byte_14, get_dummy_byte_39, get_dummy_byte_5, get_dummy_byte_21, get_dummy_byte_29, get_dummy_byte_7,
+									 get_dummy_byte_19, get_dummy_byte_20};
+
+    return  ((void*) &dummyFuncArray[0]);
+
+}
+
+
+
+
+
+
+
+
 
 

@@ -186,6 +186,8 @@ extern void LIBMXMSTRESS_EXPORTED mxm_stress_monitoring_get_version(mxm_stress_m
  ******************************************* SLEEP ALGORITHM DEFINITIONS ***************************************
  ***************************************************************************************************************/
 
+#define SLEEP_INPUT_FRAME_ARRAY_LENGTH ((uint32_t) 1)
+
 /**
 * @public
 * @ingroup sleepQAManager
@@ -240,9 +242,24 @@ typedef struct _mxm_sleep_manager_input_data_str {
 
 } mxm_sleep_manager_input_data_str;
 
+/**
+* @public
+* @ingroup sleepQAManager
+* @brief   Sleep Quality Assessment Manager Input DataFrame
+*/
+typedef struct _mxm_sleep_manager_input_dataframe {
+    mxm_sleep_manager_input_data_str * input_data_arr;  /**< Array of observations containing descriptors (HR, IBI, ACC. and etc.)*/
+
+    unsigned int input_data_arr_length;                 /**< Length of the observations*/
+
+    uint64_t date_info;                                 /**< Date Info is the time for the initial
+                                                        mxm_sleep_manager_input_data_str unix timestamp*/
+
+}mxm_sleep_manager_input_dataframe;
+
 
 SLEEP_MANAGER_API mxm_sleep_manager_return SLEEP_MANAGER_CALL mxm_sleep_manager_init(mxm_sleep_manager_config* sleep_confg);
-SLEEP_MANAGER_API mxm_sleep_manager_return SLEEP_MANAGER_CALL mxm_sleep_manager_run(mxm_sleep_manager_input_data_str *input_str_ptr, mxm_sleep_manager_output_data_str *output_str_ptr);
+SLEEP_MANAGER_API mxm_sleep_manager_return SLEEP_MANAGER_CALL mxm_sleep_manager_run(const mxm_sleep_manager_input_dataframe * const input_str_ptr, mxm_sleep_manager_output_dataframe *const output_str_ptr);
 SLEEP_MANAGER_API mxm_sleep_manager_return SLEEP_MANAGER_CALL mxm_sleep_manager_end();
 
 SLEEP_MANAGER_API void SLEEP_MANAGER_CALL ver_mxm_sleep_manager(mxm_sleep_manager_version_str *version_ptr);

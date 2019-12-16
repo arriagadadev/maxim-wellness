@@ -179,10 +179,10 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         algorithmInput.set(streamData)
 
-        MaximAlgorithms.run(algorithmInput, algorithmOutput)
-
-        chartView.addData(algorithmOutput.respiratory.respirationRate.toInt())
-        respiration = algorithmOutput.respiratory.respirationRate
+        if(MaximAlgorithms.run(algorithmInput, algorithmOutput)){
+            chartView.addData(algorithmOutput.respiratory.respirationRate.toInt())
+            respiration = algorithmOutput.respiratory.respirationRate
+        }
     }
 
     private fun sendDefaultSettings() {

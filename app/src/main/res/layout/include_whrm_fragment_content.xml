@@ -59,7 +59,7 @@
                 android:layout_marginStart="@dimen/spo2_radio_button_start_margin"
                 android:layout_marginEnd="@dimen/spo2_radio_button_end_margin"
                 android:checked="true"
-                android:text="@string/whrm_algorithm_mode_normal" />
+                android:text="@string/whrm_algorithm_mode_continuous" />
 
             <RadioButton
                 android:id="@+id/radioButtonSampledMode"

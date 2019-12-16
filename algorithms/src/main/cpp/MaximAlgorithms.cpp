@@ -106,7 +106,8 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
                                                         jint wspo2_low_pi, jint wspo2_unreliable_r,
                                                         jint wspo2_state, jint scd_state,
                                                         jint walk_steps, jint run_steps, jint k_cal,
-                                                        jint cadence, jobject joutput) {
+                                                        jint cadence, jint timestamp_upper,
+                                                        jint timestamp_lower, jobject joutput) {
     mxm_algosuite_input_data input;
     input.inp_sample_count = (uint32_t) sample_count;
     input.grn_count = (uint32_t) green;
@@ -136,6 +137,8 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
     input.run_steps = (uint32_t) run_steps;
     input.kcal = (uint32_t) k_cal;
     input.cadence = (uint32_t) cadence;
+    input.timestampUpper32bit = (uint32_t) timestamp_upper;
+    input.timestampLower32bit = (uint32_t) timestamp_lower;
 
     mxm_algosuite_output_data output;
     mxm_algosuite_return_code status;
@@ -173,10 +176,15 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
             LOGD("RESP RUN FAIL");
             return JNI_FALSE;
         } else {
+            if(output.resp_out_sample.respiration_rate < 0){
+                output.resp_out_sample.respiration_rate = 0;
+            }else if(output.resp_out_sample.respiration_rate > 1000){
+                output.resp_out_sample.respiration_rate = 0;
+            }
             env->CallVoidMethod(joutput, updateRespOutputMethodId,
                                 output.resp_out_sample.respiration_rate,
                                 output.resp_out_sample.confidence_level);
-            LOGD("RESP RUN SUCCESS");
+            LOGD("RESP RUN SUCCESS--> rate: %f  conf: %f", output.resp_out_sample.respiration_rate, output.resp_out_sample.confidence_level);
         }
     }
     if ((initData.enabledAlgorithms & MXM_ALGOSUITE_ENABLE_STRESS) > 0) {
@@ -197,16 +205,18 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
             return JNI_FALSE;
         } else {
             env->CallVoidMethod(joutput, updateSleepOutputMethodId,
-                                (int) output.sleep_out_Sample.sleep_wake_decision_status,
-                                (int) output.sleep_out_Sample.sleep_wake_decision,
-                                output.sleep_out_Sample.sleep_wake_detection_latency,
-                                output.sleep_out_Sample.sleep_wake_output_conf_level,
-                                (int) output.sleep_out_Sample.sleep_phase_output_status,
-                                (int) output.sleep_out_Sample.sleep_phase_output,
-                                output.sleep_out_Sample.sleep_phase_output_conf_level,
-                                output.sleep_out_Sample.hr,
-                                output.sleep_out_Sample.acc_mag,
-                                output.sleep_out_Sample.interbeat_interval);
+                                (int) output.sleep_out_Sample.output_data_arr->sleep_wake_decision_status,
+                                (int) output.sleep_out_Sample.output_data_arr->sleep_wake_decision,
+                                output.sleep_out_Sample.output_data_arr->sleep_wake_detection_latency,
+                                output.sleep_out_Sample.output_data_arr->sleep_wake_output_conf_level,
+                                (int) output.sleep_out_Sample.output_data_arr->sleep_phase_output_status,
+                                (int) output.sleep_out_Sample.output_data_arr->sleep_phase_output,
+                                output.sleep_out_Sample.output_data_arr->sleep_phase_output_conf_level,
+                                output.sleep_out_Sample.output_data_arr->hr,
+                                output.sleep_out_Sample.output_data_arr->acc_mag,
+                                output.sleep_out_Sample.output_data_arr->interbeat_interval,
+                                output.sleep_out_Sample.output_data_arr_length,
+                                output.sleep_out_Sample.date_info);
             LOGD("SLEEP RUN SUCCESS");
         }
     }
@@ -308,7 +318,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
                                                   "(ZIF)V");
 
     updateSleepOutputMethodId = env->GetMethodID(outputClass, "sleepUpdate",
-                                                 "(IIIFIIFFFF)V");
+                                                 "(IIIFIIFFFFIJ)V");
 
     setVersionMethodId = env->GetMethodID(versionClass, "set",
                                           "([CIII)V");

@@ -45,6 +45,8 @@ LONGWORD dh_compute( LONGWORD a,  WORD32 m,  WORD32 n);
 void shuffleDeshuffle( const BYTE* const input , BYTE* output , const int iolen );
 
 extern DH_PARAMS sessionAuthParams;
-extern BYTE isAuthenticationCompleted;
+
+
+void* get_dummmy_func(void);
 
 #endif /* INTERFACES_SSAUTHENTICATION_SSAUTHENTICATION_H_ */

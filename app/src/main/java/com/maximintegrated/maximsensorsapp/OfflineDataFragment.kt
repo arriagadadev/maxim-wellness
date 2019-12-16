@@ -166,7 +166,7 @@ class OfflineDataFragment : Fragment() {
         val resultList: ArrayList<HrvOfflineChartData> = arrayListOf()
 
         for (data in offlineDataList) {
-            algorithmInput.rr = (data.rr * 1000f).toInt()
+            algorithmInput.rr = (data.rr * 10f).toInt()
             algorithmInput.rrConfidence = data.rrConfidence
 
             MaximAlgorithms.run(algorithmInput, algorithmOutput)
@@ -204,7 +204,7 @@ class OfflineDataFragment : Fragment() {
 
         for (data in offlineDataList) {
             algorithmInput.green = data.green.toInt()
-            algorithmInput.rr = (data.rr * 1000f).toInt()
+            algorithmInput.rr = (data.rr * 10f).toInt()
             algorithmInput.rrConfidence = data.rrConfidence
 
             MaximAlgorithms.run(

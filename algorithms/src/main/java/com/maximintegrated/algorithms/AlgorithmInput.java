@@ -30,12 +30,13 @@ public class AlgorithmInput {
     private int runSteps;
     private int kCal;
     private int cadence;
+    private long timestamp;
 
     public AlgorithmInput() {
 
     }
 
-    public AlgorithmInput(int sampleCount, int sampleTime, int green, int green2, int ir, int red, int accelerationX, int accelerationY, int accelerationZ, int operationMode, int hr, int hrConfidence, int rr, int rrConfidence, int activity, int r, int wspo2Confidence, int spo2, int wspo2PercentageComplete, int wspo2LowSnr, int wspo2Motion, int wspo2LowPi, int wspo2UnreliableR, int wspo2State, int scdState, int walkSteps, int runSteps, int kCal, int cadence) {
+    public AlgorithmInput(int sampleCount, int sampleTime, int green, int green2, int ir, int red, int accelerationX, int accelerationY, int accelerationZ, int operationMode, int hr, int hrConfidence, int rr, int rrConfidence, int activity, int r, int wspo2Confidence, int spo2, int wspo2PercentageComplete, int wspo2LowSnr, int wspo2Motion, int wspo2LowPi, int wspo2UnreliableR, int wspo2State, int scdState, int walkSteps, int runSteps, int kCal, int cadence, long timestamp) {
         this.sampleCount = sampleCount;
         this.sampleTime = sampleTime;
         this.green = green;
@@ -65,6 +66,7 @@ public class AlgorithmInput {
         this.runSteps = runSteps;
         this.kCal = kCal;
         this.cadence = cadence;
+        this.timestamp = timestamp;
     }
 
     public int getSampleCount() {
@@ -297,5 +299,21 @@ public class AlgorithmInput {
 
     public void setCadence(int cadence) {
         this.cadence = cadence;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public int getTimeStampUpper(){
+        return (int) (timestamp >> 32);
+    }
+
+    public int getTimeStampLower(){
+        return (int) (timestamp);
     }
 }

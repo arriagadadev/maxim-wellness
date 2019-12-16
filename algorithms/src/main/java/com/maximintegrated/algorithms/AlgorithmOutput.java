@@ -2,16 +2,16 @@ package com.maximintegrated.algorithms;
 
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmOutput;
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmOutput;
-import com.maximintegrated.algorithms.sleep.SleepAlgorithmOutput;
+import com.maximintegrated.algorithms.sleep.SleepAlgorithmOutputFrame;
 import com.maximintegrated.algorithms.stress.StressAlgorithmOutput;
 
 public class AlgorithmOutput {
     private HrvAlgorithmOutput hrv;
     private RespiratoryRateAlgorithmOutput respiratory;
     private StressAlgorithmOutput stress;
-    private SleepAlgorithmOutput sleep;
+    private SleepAlgorithmOutputFrame sleep;
 
-    public AlgorithmOutput(HrvAlgorithmOutput hrv, RespiratoryRateAlgorithmOutput respiratory, StressAlgorithmOutput stress, SleepAlgorithmOutput sleep) {
+    public AlgorithmOutput(HrvAlgorithmOutput hrv, RespiratoryRateAlgorithmOutput respiratory, StressAlgorithmOutput stress, SleepAlgorithmOutputFrame sleep) {
         this.hrv = hrv;
         this.respiratory = respiratory;
         this.stress = stress;
@@ -22,7 +22,7 @@ public class AlgorithmOutput {
         hrv = new HrvAlgorithmOutput();
         respiratory = new RespiratoryRateAlgorithmOutput();
         stress = new StressAlgorithmOutput();
-        sleep = new SleepAlgorithmOutput();
+        sleep = new SleepAlgorithmOutputFrame();
     }
 
     public HrvAlgorithmOutput getHrv() {
@@ -49,11 +49,11 @@ public class AlgorithmOutput {
         this.stress = stress;
     }
 
-    public SleepAlgorithmOutput getSleep() {
+    public SleepAlgorithmOutputFrame getSleep() {
         return sleep;
     }
 
-    public void setSleep(SleepAlgorithmOutput sleep) {
+    public void setSleep(SleepAlgorithmOutputFrame sleep) {
         this.sleep = sleep;
     }
 
@@ -79,7 +79,12 @@ public class AlgorithmOutput {
         stress.update(stressClass, stressScore, stressScorePrc);
     }
 
-    public void sleepUpdate(int sleepWakeDecisionStatus, int sleepWakeDecision, int sleepWakeDetentionLatency, float sleepWakeOutputConfLevel, int sleepPhaseOutputStatus, int sleepPhaseOutput, float sleepPhaseOutputConfLevel, float hr, float accMag, float ibi) {
-        sleep.update(sleepWakeDecisionStatus, sleepWakeDecision, sleepWakeDetentionLatency, sleepWakeOutputConfLevel, sleepPhaseOutputStatus, sleepPhaseOutput, sleepPhaseOutputConfLevel, hr, accMag, ibi);
+    public void sleepUpdate(int sleepWakeDecisionStatus, int sleepWakeDecision, int sleepWakeDetentionLatency,
+                            float sleepWakeOutputConfLevel, int sleepPhaseOutputStatus, int sleepPhaseOutput,
+                            float sleepPhaseOutputConfLevel, float hr, float accMag, float ibi,
+                            int arrayLength, long dateInfo) {
+        sleep.update(sleepWakeDecisionStatus, sleepWakeDecision, sleepWakeDetentionLatency,
+                sleepWakeOutputConfLevel, sleepPhaseOutputStatus, sleepPhaseOutput,
+                sleepPhaseOutputConfLevel, hr, accMag, ibi, arrayLength, dateInfo);
     }
 }

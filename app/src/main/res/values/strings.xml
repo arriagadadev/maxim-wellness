@@ -92,7 +92,7 @@
     <string name="ble_connection_battery_level">%1$d%%</string>
     <string name="ble_connection_battery_level_charging">Charging, %1$d%%</string>
     <string name="whrm_algorithm_mode">Whrm Algorithm Mode</string>
-    <string name="whrm_algorithm_mode_normal">Normal Mode</string>
+    <string name="whrm_algorithm_mode_continuous">Continuous Mode</string>
     <string name="whrm_algorithm_mode_sampled">Sampled Mode</string>
 
 </resources>

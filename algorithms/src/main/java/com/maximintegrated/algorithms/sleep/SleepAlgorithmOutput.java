@@ -16,7 +16,7 @@ public class SleepAlgorithmOutput {
     public enum SleepWakeDecision {
         WAKE(0),
         RESTLESS(1),
-        SLEEP(1);
+        SLEEP(2);
 
         int value;
 
@@ -37,9 +37,11 @@ public class SleepAlgorithmOutput {
     }
 
     public enum SleepPhaseOutput {
-        NOT_CALCULATED(0),
-        READY(1);
-
+        UNDEFINED(-1),
+        WAKE(0),
+        REM(2),
+        LIGHT(3),
+        DEEP(4);
         int value;
 
         SleepPhaseOutput(int value) {
@@ -73,6 +75,86 @@ public class SleepAlgorithmOutput {
 
     public SleepAlgorithmOutput() {
 
+    }
+
+    public int getSleepWakeDecisionStatus() {
+        return sleepWakeDecisionStatus;
+    }
+
+    public void setSleepWakeDecisionStatus(int sleepWakeDecisionStatus) {
+        this.sleepWakeDecisionStatus = sleepWakeDecisionStatus;
+    }
+
+    public int getSleepWakeDecision() {
+        return sleepWakeDecision;
+    }
+
+    public void setSleepWakeDecision(int sleepWakeDecision) {
+        this.sleepWakeDecision = sleepWakeDecision;
+    }
+
+    public int getSleepWakeDetentionLatency() {
+        return sleepWakeDetentionLatency;
+    }
+
+    public void setSleepWakeDetentionLatency(int sleepWakeDetentionLatency) {
+        this.sleepWakeDetentionLatency = sleepWakeDetentionLatency;
+    }
+
+    public float getSleepWakeOutputConfLevel() {
+        return sleepWakeOutputConfLevel;
+    }
+
+    public void setSleepWakeOutputConfLevel(float sleepWakeOutputConfLevel) {
+        this.sleepWakeOutputConfLevel = sleepWakeOutputConfLevel;
+    }
+
+    public int getSleepPhaseOutputStatus() {
+        return sleepPhaseOutputStatus;
+    }
+
+    public void setSleepPhaseOutputStatus(int sleepPhaseOutputStatus) {
+        this.sleepPhaseOutputStatus = sleepPhaseOutputStatus;
+    }
+
+    public int getSleepPhaseOutput() {
+        return sleepPhaseOutput;
+    }
+
+    public void setSleepPhaseOutput(int sleepPhaseOutput) {
+        this.sleepPhaseOutput = sleepPhaseOutput;
+    }
+
+    public float getSleepPhaseOutputConfLevel() {
+        return sleepPhaseOutputConfLevel;
+    }
+
+    public void setSleepPhaseOutputConfLevel(float sleepPhaseOutputConfLevel) {
+        this.sleepPhaseOutputConfLevel = sleepPhaseOutputConfLevel;
+    }
+
+    public float getHr() {
+        return hr;
+    }
+
+    public void setHr(float hr) {
+        this.hr = hr;
+    }
+
+    public float getAccMag() {
+        return accMag;
+    }
+
+    public void setAccMag(float accMag) {
+        this.accMag = accMag;
+    }
+
+    public float getIbi() {
+        return ibi;
+    }
+
+    public void setIbi(float ibi) {
+        this.ibi = ibi;
     }
 
     public void update(int sleepWakeDecisionStatus, int sleepWakeDecision, int sleepWakeDetentionLatency, float sleepWakeOutputConfLevel, int sleepPhaseOutputStatus, int sleepPhaseOutput, float sleepPhaseOutputConfLevel, float hr, float accMag, float ibi) {

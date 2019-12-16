@@ -27,6 +27,7 @@ extern "C" {
 #else    /* Android */
 #define MXM_ALGOSUITE_API __attribute__((__visibility__("default")))
 #define MXM_ALGOSUITE_CALL
+#define COMPILER_INLINED __attribute__(( always_inline))
 #endif
 
 #include <stdbool.h>
@@ -69,6 +70,8 @@ typedef struct {
 	uint32_t run_steps            		;
 	uint32_t kcal                 		;
 	uint32_t cadence              		;
+	uint32_t timestampUpper32bit        ;
+	uint32_t timestampLower32bit        ;
 
 } mxm_algosuite_input_data;
 
@@ -100,7 +103,7 @@ typedef struct {
 
  typedef struct {
  	MxmHrvOutData 						       hrv_out_sample;
- 	mxm_sleep_manager_output_data_str          sleep_out_Sample;
+ 	mxm_sleep_manager_output_dataframe         sleep_out_Sample;
  	mxm_respiration_rate_manager_out_data_str  resp_out_sample;
  	mxm_mxm_stress_monitoring_run_output       stress_out_sample;
 
