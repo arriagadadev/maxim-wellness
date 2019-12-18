@@ -94,5 +94,8 @@
     <string name="whrm_algorithm_mode">Whrm Algorithm Mode</string>
     <string name="whrm_algorithm_mode_continuous">Continuous Mode</string>
     <string name="whrm_algorithm_mode_sampled">Sampled Mode</string>
+    <string name="freq_metrics_unit">-- ms²</string>
+    <string name="time_metrics_unit">-- ms</string>
+    <string name="rr_unit">breath/min</string>
 
 </resources>

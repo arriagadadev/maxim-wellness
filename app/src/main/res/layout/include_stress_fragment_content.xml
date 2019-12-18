@@ -50,7 +50,7 @@
             app:layout_constraintTop_toBottomOf="@id/stressView"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_heart_rate"
-            app:rcv_title="HR(bpm)" />
+            app:rcv_title="HR (bpm)" />
 
 
         <Chronometer

@@ -79,17 +79,17 @@ class OfflineDataFragment : Fragment() {
         val list: List<OfflineChartData> = arrayListOf(
             OfflineChartData(
                 offlineDataList.mapIndexed { idx, it -> Pair(it.hr, idx.toFloat()) },
-                "HR",
+                "HR (bpm)",
                 ""
             ),
             OfflineChartData(
                 offlineDataList.mapIndexed { idx, it -> Pair(it.spo2, idx.toFloat()) },
-                "SpO2",
+                "SpO2 (%)",
                 ""
             ),
             OfflineChartData(
                 offlineDataList.mapIndexed { idx, it -> Pair(it.rr, idx.toFloat()) },
-                "IBI",
+                "IBI (ms)",
                 ""
             ),
             OfflineChartData(offlineDataList.mapIndexed { idx, it ->
@@ -103,43 +103,43 @@ class OfflineDataFragment : Fragment() {
                     it.motion,
                     idx.toFloat()
                 )
-            }, "MOTION", ""),
+            }, "MOTION (g)", ""),
 
             OfflineChartData(runRrAlgo().mapIndexed { idx, it ->
                 Pair(it, idx.toFloat())
-            }, "RESPIRATION RATE", ""),
+            }, "RESPIRATION RATE \n(breath/min)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.rmssd, idx.toFloat())
-            }, "RMSSD", ""),
+            }, "RMSSD (ms)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.sdnn, idx.toFloat())
-            }, "SDNN", ""),
+            }, "SDNN (ms)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.avnn, idx.toFloat())
-            }, "AVNN", ""),
+            }, "AVNN (ms)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.pnn50, idx.toFloat())
-            }, "PNN50", ""),
+            }, "PNN50 (ms)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.ulf, idx.toFloat())
-            }, "ULF", ""),
+            }, "ULF (ms²)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.vlf, idx.toFloat())
-            }, "VLF", ""),
+            }, "VLF (ms²)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.lf, idx.toFloat())
-            }, "LF", ""),
+            }, "LF (ms²)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.hf, idx.toFloat())
-            }, "HF", ""),
+            }, "HF (ms²)", ""),
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.lfOverHf, idx.toFloat())
@@ -147,7 +147,7 @@ class OfflineDataFragment : Fragment() {
 
             OfflineChartData(resultList.mapIndexed { idx, it ->
                 Pair(it.totPwr, idx.toFloat())
-            }, "TOTPWR", "")
+            }, "TOTPWR (ms²)", "")
 
 
         )

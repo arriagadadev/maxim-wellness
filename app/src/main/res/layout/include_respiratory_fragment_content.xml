@@ -41,7 +41,7 @@
             app:layout_constraintTop_toBottomOf="@id/cardView"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_respiration"
-            app:rcv_title="Respiration Rate" />
+            app:rcv_title="Respiration Rate\n(breath/min)"/>
 
         <Chronometer
             android:id="@+id/respirationChronometer"

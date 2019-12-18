@@ -66,56 +66,64 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private var avnn: String? = null
         set(value) {
             field = value
-            avnnView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms"
+            avnnView.text = text
 
         }
 
     private var sdnn: String? = null
         set(value) {
             field = value
-            sdnnView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms"
+            sdnnView.text = text
 
         }
 
     private var rmssd: String? = null
         set(value) {
             field = value
-            rmssdView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms"
+            rmssdView.text = text
 
         }
 
     private var pnn50: String? = null
         set(value) {
             field = value
-            pnn50View.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms"
+            pnn50View.text = text
         }
 
 
     private var ulf: String? = null
         set(value) {
             field = value
-            ulfView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms²"
+            ulfView.text = text
 
         }
 
     private var vlf: String? = null
         set(value) {
             field = value
-            vlfView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms²"
+            vlfView.text = text
 
         }
 
     private var lf: String? = null
         set(value) {
             field = value
-            lfView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms²"
+            lfView.text = text
 
         }
 
     private var hf: String? = null
         set(value) {
             field = value
-            hfView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms²"
+            hfView.text = text
         }
 
     private var lfOverHf: String? = null
@@ -128,7 +136,8 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private var totPwr: String? = null
         set(value) {
             field = value
-            totPwrView.text = value ?: ResultCardView.EMPTY_VALUE
+            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms²"
+            totPwrView.text = text
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
