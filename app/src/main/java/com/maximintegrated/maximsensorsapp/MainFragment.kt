@@ -73,8 +73,8 @@ class MainFragment : Fragment() {
         stressMenuItemView.isEnabled = true
         stressMenuItemView.isVisible = true
 
-        sportsCoachingMenuItemView.isEnabled = true
-        sportsCoachingMenuItemView.isVisible = true
+        sportsCoachingMenuItemView.isEnabled = false
+        sportsCoachingMenuItemView.isVisible = false
 
         archiveMenuItemView.isEnabled = true
         archiveMenuItemView.isVisible = true
