@@ -78,7 +78,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/algorithmModeRadioGroup"
             app:mrv_title="SpO2"
-            app:mrv_unit="%" />
+            app:mrv_unit="%"
+            app:mrv_enable_flash="true"/>
 
         <TextView
             android:id="@+id/lowSnr"
@@ -142,7 +143,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/unreliableR"
             app:mrv_title="HR"
-            app:mrv_unit="bpm" />
+            app:mrv_unit="bpm"
+            app:mrv_enable_flash="false"/>
 
         <com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
             android:id="@+id/referenceDeviceView"

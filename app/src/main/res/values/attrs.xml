@@ -8,6 +8,7 @@
     <declare-styleable name="MeasurementResultView">
         <attr name="mrv_title" format="string" />
         <attr name="mrv_unit" format="string" />
+        <attr name="mrv_enable_flash" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="ResultCardView">

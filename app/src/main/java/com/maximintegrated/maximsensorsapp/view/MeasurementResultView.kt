@@ -2,6 +2,8 @@ package com.maximintegrated.maximsensorsapp.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import androidx.core.text.buildSpannedString
 import androidx.core.text.scale
 import androidx.core.view.isVisible
@@ -48,7 +50,12 @@ class MeasurementResultView @JvmOverloads constructor(
             field = value
             updateResultText()
             updateViewVisibilities()
+            flashResultView(flash)
         }
+
+    var flash = false
+
+    var alphaAnimation: Animation
 
     init {
         inflate(context, R.layout.view_measurement_result, this)
@@ -63,9 +70,15 @@ class MeasurementResultView @JvmOverloads constructor(
         ) {
             title = getText(R.styleable.MeasurementResultView_mrv_title)
             unit = getString(R.styleable.MeasurementResultView_mrv_unit) ?: ""
-
+            flash = getBoolean(R.styleable.MeasurementResultView_mrv_enable_flash, false)
             recycle()
         }
+
+        alphaAnimation = AlphaAnimation(0.1f, 1f)
+        alphaAnimation.duration = 1000L
+        alphaAnimation.startOffset = 0
+        alphaAnimation.repeatMode = Animation.RESTART
+        alphaAnimation.repeatCount = 0
     }
 
     private fun showAsReadyToMeasure() {
@@ -109,6 +122,14 @@ class MeasurementResultView @JvmOverloads constructor(
         timeoutGroup.isVisible = false
 
         resultView.isVisible = true
+    }
+
+    private fun flashResultView(flashEnabled: Boolean) {
+        if (flashEnabled && resultView.isVisible) {
+            if (!alphaAnimation.hasStarted() || alphaAnimation.hasEnded()) {
+                resultView.startAnimation(alphaAnimation)
+            }
+        }
     }
 
     private fun updateResultText() {
