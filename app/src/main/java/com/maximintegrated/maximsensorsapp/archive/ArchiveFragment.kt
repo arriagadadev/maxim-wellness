@@ -37,7 +37,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         private val OUTPUT_DIRECTORY =
             File(Environment.getExternalStorageDirectory(), "MaximSleepQa")
 
-        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
+        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy/MM/dd/HH/mm/ss", Locale.US)
 
         private val CSV_HEADER_SLEEP = arrayOf(
             "Timestamp",
@@ -48,7 +48,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
             "phase_output",
             "hr",
             "ibi",
-            " ",
+            "spo2",
             "acc_magnitude"
         )
 
@@ -207,10 +207,8 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         var meaningfulHrCount = 0
         var restingHr: Float? = null
         for (input in inputs) {
-            if (input.hrConfidence > 50) {
-                hrSum += input.hr
-                meaningfulHrCount++
-            }
+            hrSum += input.hr
+            meaningfulHrCount++
         }
 
         if (meaningfulHrCount != 0) {
@@ -237,6 +235,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         for (input in inputs) {
             val algorithmOutput = AlgorithmOutput()
             val status = MaximAlgorithms.run(input, algorithmOutput)
+            //TODO: check the sample code for this
             if(status){
                 if (algorithmOutput.sleep.outputDataArrayLength > 0) {
                     if (algorithmOutput.sleep.output.sleepWakeDetentionLatency >= 0) {
@@ -256,7 +255,8 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
                 outputDirectory.mkdirs()
             }
             val outputFile = File(outputDirectory, file.name)
-            val csvWriter = CsvWriter.open(outputFile.absolutePath, CSV_HEADER_SLEEP)
+            val csvWriter = CsvWriter.open(outputFile.absolutePath)
+            Timber.d("OUTPUT SIZE: ${outputs.size}")
             for (output in outputs) {
                 csvWriter.write(
                     TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
@@ -271,9 +271,10 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
                     output.sleep.output.accMag
                 )
             }
+            //TODO: number of line in csv file is not the same as outputs.size
         }
 
-        Timber.tag("Archive Fragment").d("SleeoQaAlgo run success result: $sleepFound")
+        Timber.tag("Archive Fragment").d("SleepQaAlgo run success result: $sleepFound")
 
         return sleepFound
     }

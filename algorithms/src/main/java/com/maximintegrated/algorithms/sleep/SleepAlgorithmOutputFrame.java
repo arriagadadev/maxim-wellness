@@ -8,7 +8,7 @@ public class SleepAlgorithmOutputFrame {
 
     public SleepAlgorithmOutputFrame() {
         output = new SleepAlgorithmOutput();
-        outputDataArrayLength = 1;
+        outputDataArrayLength = 0;
         dateInfo = 0;
     }
 
