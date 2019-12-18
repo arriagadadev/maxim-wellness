@@ -3,7 +3,7 @@
     <string name="server_version">Server: %1$s</string>
     <string name="hub_version">Hub Version: %1$s</string>
 
-    <string name="app_name">MaximSensorsApp</string>
+    <string name="app_name">Wellness Suite</string>
     <string name="maxim_hsp">Maxim Health Sensor Platform</string>
     <string name="spo2">Pulse Oximetry</string>
     <string name="whrm">Optical HRM</string>
