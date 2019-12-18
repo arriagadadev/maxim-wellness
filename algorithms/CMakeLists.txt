@@ -20,8 +20,6 @@ add_library( # Sets the name of the library.
 
         # Provides a relative path to your source file(s).
         src/main/cpp/MaximAlgorithms.cpp
-        src/main/cpp/SSauthentication.cpp
-        src/main/cpp/AlgoWrapper.cpp
         )
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -40,22 +38,9 @@ find_library( # Sets the name of the path variable.
 # refer to app/build.gradle, jniLibs section for that purpose.
 # ${ANDROID_ABI} is handy for our purpose here. Probably this ${ANDROID_ABI} is
 # the most valuable thing of this sample, the rest are pretty much normal cmake
-add_library(libHrv SHARED IMPORTED)
-set_target_properties(libHrv PROPERTIES IMPORTED_LOCATION
-        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libhrv.so)
-
-add_library(libRrm SHARED IMPORTED)
-set_target_properties(libRrm PROPERTIES IMPORTED_LOCATION
-        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libMxmRRM.so)
-
-add_library(libSleep SHARED IMPORTED)
-set_target_properties(libSleep PROPERTIES IMPORTED_LOCATION
-        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libSleepQA.so)
-
-add_library(libStress SHARED IMPORTED)
-
-set_target_properties(libStress PROPERTIES IMPORTED_LOCATION
-        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libmxmstress.a)
+add_library(libMxmWellnessSuite STATIC IMPORTED)
+set_target_properties(libMxmWellnessSuite PROPERTIES IMPORTED_LOCATION
+        ${LIBS_DIR}/algorithms/lib/${ANDROID_ABI}/libMxmWellnessSuite.a)
 
 target_include_directories(MaximAlgorithms PRIVATE
         ${LIBS_DIR}/algorithms/include)
@@ -63,10 +48,7 @@ target_include_directories(MaximAlgorithms PRIVATE
 
 target_link_libraries( # Specifies the target library.
         MaximAlgorithms
-        libHrv
-        libRrm
-        libSleep
-        libStress
+        libMxmWellnessSuite
         # Links the target library to the log library
         # included in the NDK.
         ${libLog})
