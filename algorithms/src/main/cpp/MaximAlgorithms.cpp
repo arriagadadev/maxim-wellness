@@ -8,7 +8,7 @@
 #include <AlgoWrapper.h>
 
 #define TAG "ALGORITHMS"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , TAG, __VA_ARGS__)
+#define LOGD(...) //__android_log_print(ANDROID_LOG_DEBUG  , TAG, __VA_ARGS__)
 
 static mxm_algosuite_init_data initData;
 
@@ -217,7 +217,8 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
                                 output.sleep_out_Sample.output_data_arr->interbeat_interval,
                                 output.sleep_out_Sample.output_data_arr_length,
                                 output.sleep_out_Sample.date_info);
-            LOGD("SLEEP RUN SUCCESS");
+
+            LOGD("SLEEP RUN SUCCESS: %ld", output.sleep_out_Sample.date_info);
         }
     }
     return JNI_TRUE;
