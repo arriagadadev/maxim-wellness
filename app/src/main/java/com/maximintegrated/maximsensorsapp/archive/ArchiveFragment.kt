@@ -29,9 +29,12 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 
-class ArchiveFragment : RecyclerViewClickListener, Fragment() {
+class ArchiveFragment : RecyclerViewClickListener, Fragment(),
+    CsvWriter.Companion.CsvWriterListener {
 
     var algorithmInitConfig = AlgorithmInitConfig()
+
+    var algoResult = false
 
     companion object {
         private val OUTPUT_DIRECTORY =
@@ -166,11 +169,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
     override fun onSleepClicked(file: File) {
         progressBar.visibility = View.VISIBLE
         doAsync {
-            val success = runSleepAlgo(file)
-            uiThread {
-                progressBar.visibility = View.GONE
-                showSleepAlgoResultDialog(success)
-            }
+            algoResult = runSleepAlgo(file)
         }
     }
 
@@ -197,31 +196,21 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
         val outputDirectory = OUTPUT_DIRECTORY
 
         val inputs = readAlgorithmInputsFromFile(file)
-        val outputs: ArrayList<AlgorithmOutput> = arrayListOf()
+        //val outputs: ArrayList<AlgorithmOutput> = arrayListOf()
 
         if (inputs.isEmpty()) {
             return false
         }
 
-        var hrSum = 0L
-        var meaningfulHrCount = 0
-        var restingHr: Float? = null
-        for (input in inputs) {
-            hrSum += input.hr
-            meaningfulHrCount++
-        }
-
-        if (meaningfulHrCount != 0) {
-            restingHr = hrSum.toFloat() / meaningfulHrCount
-        }
+        val restingHr = inputs.map { it.hr }.average().toFloat()
 
         val userInfo =
-            SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr ?: 0f)
+            SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr)
 
         algorithmInitConfig.sleepConfig = SleepAlgorithmInitConfig(
             SleepAlgorithmInitConfig.DetectableSleepDuration.MINIMUM_30_MIN,
             userInfo,
-            true,
+            restingHr != 0f,
             true,
             true,
             true
@@ -232,46 +221,48 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
 
         var sleepFound = false
 
+        if (!outputDirectory.exists()) {
+            outputDirectory.mkdirs()
+        }
+
+        val outputFile = File(outputDirectory, file.name)
+        val csvWriter = CsvWriter.open(outputFile.absolutePath)
+        csvWriter.listener = this
+        val output = AlgorithmOutput()
+        var count = 0
         for (input in inputs) {
-            val algorithmOutput = AlgorithmOutput()
-            val status = MaximAlgorithms.run(input, algorithmOutput)
+            val status = MaximAlgorithms.run(input, output)
             //TODO: check the sample code for this
-            if(status){
-                if (algorithmOutput.sleep.outputDataArrayLength > 0) {
-                    if (algorithmOutput.sleep.output.sleepWakeDetentionLatency >= 0) {
+            if (status) {
+                if (output.sleep.outputDataArrayLength > 0) {
+                    count++
+                    if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
                         sleepFound = true
                     } else {
-                        algorithmOutput.sleep.output.sleepWakeDetentionLatency = -1
+                        output.sleep.output.sleepWakeDetentionLatency = -1
                     }
-                    outputs.add(algorithmOutput)
+                    csvWriter.write(
+                        TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
+                        output.sleep.output.sleepWakeDecisionStatus,
+                        output.sleep.output.sleepWakeDetentionLatency,
+                        output.sleep.output.sleepWakeDecision,
+                        output.sleep.output.sleepPhaseOutputStatus,
+                        output.sleep.output.sleepPhaseOutput,
+                        output.sleep.output.hr,
+                        output.sleep.output.ibi,
+                        0,
+                        output.sleep.output.accMag
+                    )
                 }
             }
         }
-
+        inputs.clear()
         MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
 
-        if (sleepFound) {
-            if (!outputDirectory.exists()) {
-                outputDirectory.mkdirs()
-            }
-            val outputFile = File(outputDirectory, file.name)
-            val csvWriter = CsvWriter.open(outputFile.absolutePath)
-            Timber.d("OUTPUT SIZE: ${outputs.size}")
-            for (output in outputs) {
-                csvWriter.write(
-                    TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
-                    output.sleep.output.sleepWakeDecisionStatus,
-                    output.sleep.output.sleepWakeDetentionLatency,
-                    output.sleep.output.sleepWakeDecision,
-                    output.sleep.output.sleepPhaseOutputStatus,
-                    output.sleep.output.sleepPhaseOutput,
-                    output.sleep.output.hr,
-                    output.sleep.output.ibi,
-                    0,
-                    output.sleep.output.accMag
-                )
-            }
-            //TODO: number of line in csv file is not the same as outputs.size
+        csvWriter.close()
+
+        if (!sleepFound && outputFile.exists()) {
+            outputFile.delete()
         }
 
         Timber.tag("Archive Fragment").d("SleepQaAlgo run success result: $sleepFound")
@@ -295,5 +286,14 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment() {
             }
 
         alertDialog.show()
+    }
+
+    override fun onCompleted() {
+        doAsync {
+            uiThread {
+                progressBar.visibility = View.GONE
+                showSleepAlgoResultDialog(algoResult)
+            }
+        }
     }
 }

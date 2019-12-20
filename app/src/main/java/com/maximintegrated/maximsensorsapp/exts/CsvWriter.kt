@@ -15,6 +15,10 @@ class CsvWriter private constructor(filePath: String) {
             }
             return csvWriter
         }
+
+        interface CsvWriterListener {
+            fun onCompleted()
+        }
     }
 
     private val linesQueue = LinkedBlockingDeque<Any>()
@@ -22,6 +26,7 @@ class CsvWriter private constructor(filePath: String) {
     var isOpen = true
         private set
 
+    var listener: CsvWriterListener? = null
 
     init {
         ioThread {
@@ -45,6 +50,7 @@ class CsvWriter private constructor(filePath: String) {
                     }
 
                 }
+                listener?.onCompleted()
             }
         }
     }

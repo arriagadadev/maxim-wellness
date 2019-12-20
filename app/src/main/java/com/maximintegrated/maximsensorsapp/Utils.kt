@@ -5,7 +5,7 @@ import java.io.File
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
-fun readAlgorithmInputsFromFile(file: File): List<AlgorithmInput> {
+fun readAlgorithmInputsFromFile(file: File): ArrayList<AlgorithmInput> {
     val rows = file.readLines().drop(1)
     val inputs: ArrayList<AlgorithmInput> = arrayListOf()
     for (row in rows) {
