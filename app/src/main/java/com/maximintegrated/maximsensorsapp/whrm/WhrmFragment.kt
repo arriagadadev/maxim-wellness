@@ -504,4 +504,9 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         bleScannerDialog?.dismiss()
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        countDownTimer?.cancel()
+    }
 }
