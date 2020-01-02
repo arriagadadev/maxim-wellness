@@ -229,6 +229,7 @@ class StressFragment : Fragment(), IOnBackPressed {
 
         if (success) {
             stress = algorithmOutput.stress.stressScore
+            stopMonitoring()
         }
     }
 
