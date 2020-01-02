@@ -10,6 +10,7 @@
     <color name="channel_ir">#607D8B</color>
     <color name="channel_red">#F44336</color>
     <color name="channel_green">#4CAF50</color>
+    <color name="channel_green2">#23DD23</color>
 
     <color name="error_text">#d32f2f</color>
 

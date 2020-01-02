@@ -25,6 +25,7 @@ import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
+import kotlinx.android.synthetic.main.view_measurement_result.view.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -159,6 +160,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         initializeChronometer()
         setupToolbar()
         setupChart()
+        hrResultView.measuringWarningMessageView.text = ""
     }
 
     private fun initializeChronometer() {
@@ -176,8 +178,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     private fun setupChart() {
         chartView.dataSetInfoList = listOf(
-            DataSetInfo(R.string.channel_ir, R.color.channel_ir),
-            DataSetInfo(R.string.channel_green, R.color.channel_green)
+            DataSetInfo(R.string.channel_green1, R.color.channel_green),
+            DataSetInfo(R.string.channel_green2, R.color.channel_green2)
         )
 
         chartView.maximumEntryCount = 100
@@ -211,10 +213,10 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
                 }
                 return@setOnMenuItemClickListener true
             }
-            setTitle(R.string.whrm)
+            setTitle(R.string.whrm_toolbar)
         }
 
-        toolbar.pageTitle = requireContext().getString(R.string.whrm)
+        toolbar.pageTitle = requireContext().getString(R.string.whrm_toolbar)
     }
 
     private fun sendDefaultSettings() {
