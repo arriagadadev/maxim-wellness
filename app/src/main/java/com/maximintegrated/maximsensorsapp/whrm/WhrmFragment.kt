@@ -220,7 +220,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     }
 
     private fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
     }
 

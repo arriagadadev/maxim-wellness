@@ -324,7 +324,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
     }
 
     private fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", "1"))
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
     }
 
     private fun sendLogToFlashCommand() {
