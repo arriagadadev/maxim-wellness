@@ -82,6 +82,7 @@
     <string name="polar_empty_value">--</string>
     <string name="polar_devices">Polar HRM Chest Straps</string>
     <string name="write_sampled_mode_cycle_time">Write Sample Mode Cycle Time</string>
+    <string name="write_low_power_cycle_time">Write Low Power Cycle Time</string>
 
     <string name="empty_value">--</string>
     <string name="ble_connection_connect">Connect</string>
@@ -97,6 +98,7 @@
     <string name="whrm_algorithm_mode">WHRM Algorithm Mode</string>
     <string name="whrm_algorithm_mode_continuous">Continuous Mode</string>
     <string name="whrm_algorithm_mode_sampled">Sampled Mode</string>
+    <string name="whrm_algorithm_mode_low_power">Low Power Mode</string>
     <string name="freq_metrics_unit">-- ms²</string>
     <string name="time_metrics_unit">-- ms</string>
     <string name="rr_unit">breath/min</string>
