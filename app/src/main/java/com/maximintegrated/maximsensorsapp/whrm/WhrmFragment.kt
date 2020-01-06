@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -30,6 +31,7 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 
 class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener {
 
@@ -37,6 +39,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         fun newInstance() = WhrmFragment()
 
         val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
+        val TIMEOUT_INTERVAL_IN_MILLIS = TimeUnit.SECONDS.toMillis(40)
+        val MIN_CYCLE_TIME_IN_MILLIS = TimeUnit.SECONDS.toMillis(60)
     }
 
     private lateinit var viewReferenceDevice: ReferenceDeviceView
@@ -220,7 +224,13 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     }
 
     private fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
     }
 
@@ -248,8 +258,11 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         menuItemEnabledScd.isEnabled = false
 
         clearChart()
-        
+
         countDownTimer?.cancel()
+        if (radioButtonSampledMode.isChecked) {
+            countDownTimer?.start()
+        }
 
         hrResultView.measurementProgress = 0
 
@@ -274,7 +287,8 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
 
     fun setupTimer() {
-        val timeInterval = WhrmSettings.sampledModeTimeInterval
+        val timeInterval = max(WhrmSettings.sampledModeTimeInterval, MIN_CYCLE_TIME_IN_MILLIS)
+        countDownTimer?.cancel()
         countDownTimer = object : CountDownTimer(timeInterval, 1000) {
             override fun onFinish() {
                 startMonitoring()
@@ -282,6 +296,9 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
             override fun onTick(millisUntilFinished: Long) {
             }
+        }
+        if (isMonitoring && radioButtonSampledMode.isChecked) {
+            countDownTimer?.start()
         }
     }
 
@@ -293,9 +310,6 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         whrmChronometer.stop()
 
         setAlgorithmModeRadioButtonsEnabled(true)
-
-        countDownTimer?.cancel()
-
         dataRecorder?.close()
         dataRecorder = null
 
@@ -465,12 +479,14 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             }
         } else {
             hrResultView.result = streamData.hr
-            if (streamData.hrConfidence == 100 && radioButtonSampledMode.isChecked) {
+            if (streamData.hrConfidence == 100) {
                 stopMonitoring()
-                countDownTimer?.start()
+            } else if (System.currentTimeMillis() - measurementStartTimestamp!! >= TIMEOUT_INTERVAL_IN_MILLIS) {
+                hrResultView.result = null
+                Toast.makeText(context, "TIME OUT", Toast.LENGTH_SHORT).show()
+                stopMonitoring()
             }
         }
-
     }
 
     private fun isHrConfidenceHighEnough(hrmModel: HspStreamData): Boolean {
