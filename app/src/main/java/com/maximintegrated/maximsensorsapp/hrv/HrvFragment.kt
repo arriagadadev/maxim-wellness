@@ -277,7 +277,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
         algorithmInput.set(streamData)
 
         if (streamData.rr != 0f) {
-            ibiChartView.addData(streamData.rr.toInt())
+            ibiChartView.addData(streamData.rr)
         }
 
         MaximAlgorithms.run(algorithmInput, algorithmOutput)

@@ -13,13 +13,16 @@ import androidx.core.view.get
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.exts.getThemeColor
+import java.text.DecimalFormat
 
 data class DataSetInfo(@StringRes val nameRes: Int, @ColorRes val colorRes: Int)
 
@@ -82,6 +85,10 @@ class MultiChannelChartView @JvmOverloads constructor(
 
             setVisibleXRangeMaximum(maximumEntryCount.toFloat())
         }
+    }
+
+    fun setFormatterForYAxis(formatter: ValueFormatter) {
+        lineChartView.axisLeft.valueFormatter = formatter
     }
 
     private fun setupDataSets() {
@@ -198,6 +205,43 @@ class MultiChannelChartView @JvmOverloads constructor(
 
     }
 
+    fun addData(vararg channelData: Float) {
+        if (dataSetList.isEmpty() || channelData.size != dataSetList.size) return
+
+        lineChartView.isVisible = true
+
+        with(lineChartView.data) {
+            if (dataSets.isEmpty()) {
+                for (index in 0..dataSetList.lastIndex) {
+                    val dataSet = dataSetList[index]
+                    addDataSet(dataSet)
+
+                }
+            }
+        }
+
+        val newEntryX = if (dataSetList[0].entryCount != 0) {
+            dataSetList[0].getEntryForIndex(dataSetList[0].entryCount - 1).x + 1f
+        } else {
+            1f
+        }
+
+        for (index in 0..channelData.lastIndex) {
+            addEntryToDataSet(dataSetList[index], newEntryX, channelData[index])
+        }
+
+        with(lineChartView) {
+            if (newEntryX > maximumEntryCount) {
+                xAxis.resetAxisMinimum()
+                xAxis.resetAxisMaximum()
+            }
+
+            data.notifyDataChanged()
+            notifyDataSetChanged()
+            moveViewToX(newEntryX)
+        }
+    }
+
     private fun toggleDataSetVisibility(index: Int, visible: Boolean) {
         with(lineChartView.data) {
             if (visible) {
@@ -222,4 +266,11 @@ class MultiChannelChartView @JvmOverloads constructor(
         return false
     }
 
+}
+
+class FloatValueFormatter(private val decimalFormat: DecimalFormat) : ValueFormatter() {
+
+    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+        return decimalFormat.format(value)
+    }
 }

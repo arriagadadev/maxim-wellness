@@ -20,10 +20,12 @@ import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
+import com.maximintegrated.maximsensorsapp.view.FloatValueFormatter
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -52,6 +54,8 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
     private val algorithmInput = AlgorithmInput()
     private val algorithmOutput = AlgorithmOutput()
 
+    private val decimalFormat = DecimalFormat("0.0")
+
     private var isMonitoring: Boolean = false
         set(value) {
             field = value
@@ -64,7 +68,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         set(value) {
             field = value
             if (value != null) {
-                respirationResultView.emptyValue = "%.2f".format(value)
+                respirationResultView.emptyValue = decimalFormat.format(value)
             } else {
                 respirationResultView.emptyValue = ResultCardView.EMPTY_VALUE
             }
@@ -136,6 +140,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         chartView.titleView.text = getString(R.string.respiration_rate)
         chartView.maximumEntryCount = 4500
+        chartView.setFormatterForYAxis(FloatValueFormatter(decimalFormat))
     }
 
     private fun setupToolbar() {
@@ -179,8 +184,11 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
 
         algorithmInput.set(streamData)
 
-        if(MaximAlgorithms.run(algorithmInput, algorithmOutput)){
-            chartView.addData(algorithmOutput.respiratory.respirationRate.toInt())
+        if (MaximAlgorithms.run(algorithmInput, algorithmOutput)) {
+            if (algorithmOutput.respiratory.respirationRate < 0.01f) {
+                algorithmOutput.respiratory.respirationRate = 0f
+            }
+            chartView.addData(algorithmOutput.respiratory.respirationRate)
             respiration = algorithmOutput.respiratory.respirationRate
         }
     }
