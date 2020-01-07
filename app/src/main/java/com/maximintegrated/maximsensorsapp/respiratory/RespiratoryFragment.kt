@@ -211,6 +211,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
         isMonitoring = true
         dataRecorder = DataRecorder("Respiration_Rate")
         menuItemEnabledScd.isEnabled = true
+        menuItemLogToFlash.isEnabled = true
 
         clearChart()
         clearCardViewValues()
@@ -232,6 +233,7 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
     private fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = false
+        menuItemLogToFlash.isEnabled = false
 
         dataRecorder?.close()
         dataRecorder = null
@@ -270,7 +272,8 @@ class RespiratoryFragment : Fragment(), IOnBackPressed {
     }
 
     private fun flashLoggingToggled() {
-
+        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
+        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {

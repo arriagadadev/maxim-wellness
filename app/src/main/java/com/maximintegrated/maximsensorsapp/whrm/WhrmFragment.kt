@@ -135,7 +135,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         hspViewModel.streamData
             .observe(this) { hspStreamData ->
                 addStreamData(hspStreamData)
-                Timber.d(hspStreamData.toString())
+                //Timber.d(hspStreamData.toString())
             }
 
         radioButtonSampledMode.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -256,6 +256,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
         menuItemEnabledScd.isEnabled = false
+        menuItemLogToFlash.isEnabled = false
 
         clearChart()
 
@@ -305,6 +306,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     private fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
+        menuItemLogToFlash.isEnabled = true
 
         startTime = null
         whrmChronometer.stop()
@@ -408,6 +410,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     private fun flashLoggingToggled() {
         menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
+        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {

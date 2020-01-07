@@ -340,6 +340,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private fun startMonitoring() {
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
+        menuItemLogToFlash.isEnabled = false
         dataRecorder = DataRecorder("Hrv")
 
         clearChart()
@@ -367,6 +368,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
+        menuItemLogToFlash.isEnabled = true
 
         dataRecorder?.close()
         dataRecorder = null
@@ -407,6 +409,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
 
     private fun flashLoggingToggled() {
         menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
+        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {

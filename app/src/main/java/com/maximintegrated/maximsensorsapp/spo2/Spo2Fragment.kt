@@ -178,6 +178,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     private fun startMonitoring() {
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
+        menuItemLogToFlash.isEnabled = false
 
         dataRecorder = DataRecorder("SpO2")
 
@@ -235,6 +236,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
     private fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
+        menuItemLogToFlash.isEnabled = true
 
         dataRecorder?.close()
         dataRecorder = null
@@ -321,6 +323,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     private fun flashLoggingToggled() {
         menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
+        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
     }
 
     private fun enableScdToggled() {
