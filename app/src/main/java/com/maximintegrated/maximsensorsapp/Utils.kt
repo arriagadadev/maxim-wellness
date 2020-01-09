@@ -5,9 +5,12 @@ import java.io.File
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
-fun readAlgorithmInputsFromFile(file: File): ArrayList<AlgorithmInput> {
-    val rows = file.readLines().drop(1)
+fun readAlgorithmInputsFromFile(file: File?): ArrayList<AlgorithmInput> {
     val inputs: ArrayList<AlgorithmInput> = arrayListOf()
+    if(file == null){
+        return inputs
+    }
+    val rows = file.readLines().drop(1)
     for (row in rows) {
         val items = row.split(",")
         if (items.size < 31) continue
