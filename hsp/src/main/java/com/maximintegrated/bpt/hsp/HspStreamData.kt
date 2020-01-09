@@ -34,13 +34,13 @@ data class HspStreamData(
     val currentTimeMillis: Long = System.currentTimeMillis()
 ) {
 
-    var sampleTimeInt: Int = 0
-    var accelerationXInt: Int = 0
-    var accelerationYInt: Int = 0
-    var accelerationZInt: Int = 0
-    var rrInt: Int = 0
-    var rInt: Int = 0
-    var spo2Int: Int = 0
+    var sampleTimeInt = sampleTime.toInt()
+    var accelerationXInt = (accelerationX * 1000f).toInt()
+    var accelerationYInt = (accelerationY * 1000f).toInt()
+    var accelerationZInt = (accelerationZ * 1000f).toInt()
+    var rrInt = (rr * 10f).toInt()
+    var rInt = (r * 1000f).toInt()
+    var spo2Int = (spo2 * 10f).toInt()
 
     companion object {
 
@@ -49,8 +49,8 @@ data class HspStreamData(
         //{wspo2lowSNR,1},{wspo2motion,1},{wspo2lowpi,1},{wspo2unreliableR,1},{wspo2state,4},{scdstate,4},
         //{wSteps,24},{rSteps,24},{kCal,24},{cadence,24}
 
-        fun fromPacket(packet: ByteArray):HspStreamData{
-            var hsp = with(BitStreamReader(packet, 8)) {
+        fun fromPacket(packet: ByteArray): HspStreamData {
+            return with(BitStreamReader(packet, 8)) {
                 HspStreamData(
                     sampleCount = nextInt(8),
                     sampleTime = nextFloat(32, 1),
@@ -83,14 +83,6 @@ data class HspStreamData(
                     cadence = nextInt(24)
                 )
             }
-            hsp.sampleTimeInt = hsp.sampleTime.toInt()
-            hsp.accelerationXInt = (hsp.accelerationX * 1000f).toInt()
-            hsp.accelerationYInt = (hsp.accelerationY * 1000f).toInt()
-            hsp.accelerationZInt = (hsp.accelerationZ * 1000f).toInt()
-            hsp.rrInt = (hsp.rr * 10f).toInt()
-            hsp.rInt = (hsp.r * 1000f).toInt()
-            hsp.spo2Int = (hsp.spo2 * 10f).toInt()
-            return hsp
         }
     }
 }
