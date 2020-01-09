@@ -103,4 +103,24 @@
     <string name="time_metrics_unit">-- ms</string>
     <string name="rr_unit">breath/min</string>
 
+    <string-array name="chart_titles">
+        <item>Select the chart</item>
+        <item>HR</item>
+        <item>SpO2</item>
+        <item>IBI</item>
+        <item>Steps</item>
+        <item>Motion</item>
+        <item>Resp. Rate</item>
+        <item>RMSSD</item>
+        <item>SDNN</item>
+        <item>AVNN</item>
+        <item>PNN50</item>
+        <item>ULF</item>
+        <item>VLF</item>
+        <item>LF</item>
+        <item>HF</item>
+        <item>LF/HF</item>
+        <item>Total Power</item>
+        <item>Stress</item>
+    </string-array>
 </resources>

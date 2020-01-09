@@ -8,15 +8,46 @@
     android:focusable="true"
     android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/chartRecyclerView"
+    <Spinner
+        android:id="@+id/chartSpinner"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="40dp"
+        android:background="@android:drawable/editbox_background"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/chartSpinner"
+        app:layout_constraintEnd_toEndOf="@id/chartSpinner"
+        app:layout_constraintBottom_toBottomOf="@id/chartSpinner"
+        android:src="@drawable/ic_arrow_drop_down"
+        android:layout_marginEnd="10dp"
+        />
+
+    <com.maximintegrated.maximsensorsapp.view.OfflineDataView
+        android:id="@+id/offlineChart"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_margin="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:indeterminate="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

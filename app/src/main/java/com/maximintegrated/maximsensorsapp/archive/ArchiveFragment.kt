@@ -14,6 +14,7 @@ import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmInitConfig
 import com.maximintegrated.algorithms.sleep.SleepUserInfo
+import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.addFragment
@@ -40,7 +41,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         private val OUTPUT_DIRECTORY =
             File(Environment.getExternalStorageDirectory(), "MaximSleepQa")
 
-        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy/MM/dd/HH/mm/ss", Locale.US)
+        val SLEEP_TIMESTAMP_FORMAT = SimpleDateFormat("yyyy/MM/dd/HH/mm/ss", Locale.US)
 
         private val CSV_HEADER_SLEEP = arrayOf(
             "Timestamp",
@@ -97,47 +98,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
     }
 
     private fun handleListItemClick(file: File) {
-        progressBar.visibility = View.VISIBLE
-        doAsync {
-            val rows = file.readLines().drop(1)
-
-            val offlineDataList: ArrayList<OfflineDataModel> = arrayListOf()
-
-            var counter = 1
-            var accMagSum = 0f
-            for (row in rows) {
-                val items = row.split(",")
-                accMagSum += sqrt(
-                    items[6].toFloat().pow(2)
-                            + items[7].toFloat().pow(2)
-                            + items[8].toFloat().pow(2)
-                )
-                if (counter % 25 == 0) {
-                    offlineDataList.add(
-                        OfflineDataModel(
-                            green = items[2].toFloat(),
-                            ir = items[4].toFloat(),
-                            red = items[5].toFloat(),
-                            hr = items[10].toFloat(),
-                            rr = items[12].toFloat(),
-                            rrConfidence = items[13].toInt(),
-                            spo2 = items[17].toFloat(),
-                            motion = accMagSum / 25f,
-                            steps = items[25].toFloat() + items[26].toFloat(),
-                            date = DataRecorder.TIMESTAMP_FORMAT.parse(items[29]).time.toFloat()
-                        )
-                    )
-                    accMagSum = 0f
-                    counter = 0
-                }
-                counter++
-            }
-
-            uiThread {
-                progressBar.visibility = View.GONE
-                requireActivity().addFragment(OfflineDataFragment.newInstance(offlineDataList))
-            }
-        }
+        requireActivity().addFragment(OfflineDataFragment.newInstance(file))
     }
 
     override fun onRowClicked(file: File) {
@@ -242,7 +203,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
                         output.sleep.output.sleepWakeDetentionLatency = -1
                     }
                     csvWriter.write(
-                        TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
+                        SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
                         output.sleep.output.sleepWakeDecisionStatus,
                         output.sleep.output.sleepWakeDetentionLatency,
                         output.sleep.output.sleepWakeDecision,

@@ -14,7 +14,8 @@
         android:roundIcon="@mipmap/ic_maxim_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MaximSensorsApp"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:largeHeap="true">
 
         <provider
             android:name="androidx.core.content.FileProvider"

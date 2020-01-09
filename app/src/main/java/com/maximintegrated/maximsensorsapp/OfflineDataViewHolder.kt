@@ -32,7 +32,8 @@ class OfflineDataViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
         dataSet.label = data.title
         dataSet.setDrawFilled(false)
         dataSet.lineWidth = 2f
-        dataSet.values = data.dataSetValues.map { Entry(it.second, it.first) }
+        dataSet.values = data.dataSetValues
+        //dataSet.values = data.dataSetValues.map { Entry(it.second, it.first) }
 
         chartTitle.text = data.title
 

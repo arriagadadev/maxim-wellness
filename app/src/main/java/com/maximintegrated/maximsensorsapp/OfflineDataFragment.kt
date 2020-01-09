@@ -4,11 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SnapHelper
+import com.github.mikephil.charting.data.Entry
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
 import com.maximintegrated.algorithms.AlgorithmOutput
@@ -16,31 +15,33 @@ import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
 import kotlinx.android.synthetic.main.fragment_offline_data.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import timber.log.Timber
+import java.io.File
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-class OfflineDataFragment : Fragment() {
+class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private var algorithmInitConfig: AlgorithmInitConfig? = null
-    private val algorithmInput = AlgorithmInput()
     private val algorithmOutput = AlgorithmOutput()
 
     var calculated: Float = 0f
 
-    private val offlineDataList: ArrayList<OfflineDataModel>
-        get() = arguments?.getParcelableArrayList(KEY_DATA_MODEL_LIST) ?: arrayListOf()
+    private var logFile: File? = null
+
+    private var offlineDataList: ArrayList<AlgorithmInput> = arrayListOf()
 
     companion object {
-        private const val KEY_DATA_MODEL_LIST = "DataModelList"
-        fun newInstance(offlineDataList: ArrayList<OfflineDataModel>): OfflineDataFragment {
+        fun newInstance(logFile: File): OfflineDataFragment {
             val fragment = OfflineDataFragment()
-            fragment.arguments = Bundle().apply {
-                putParcelableArrayList(KEY_DATA_MODEL_LIST, offlineDataList)
-            }
-
+            fragment.logFile = logFile
             return fragment
         }
     }
 
-    private val adapter: OfflineDataAdapter by lazy { OfflineDataAdapter() }
+    //private val adapter: OfflineDataAdapter by lazy { OfflineDataAdapter() }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -64,111 +65,161 @@ class OfflineDataFragment : Fragment() {
         savedInstanceState?.clear()
 
         algorithmInitConfig = AlgorithmInitConfig()
-        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 60, 15)
         algorithmInitConfig?.respConfig = RespiratoryRateAlgorithmInitConfig(
             RespiratoryRateAlgorithmInitConfig.SourceOptions.WRIST,
             RespiratoryRateAlgorithmInitConfig.LedCodes.GREEN,
             RespiratoryRateAlgorithmInitConfig.SamplingRateOption.Hz_25
         )
 
-        initRecyclerView()
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.chart_titles,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            chartSpinner.adapter = adapter
+        }
 
-        val resultList = runHrvAlgo()
+        chartSpinner.onItemSelectedListener = this
 
+        progressBar.visibility = View.VISIBLE
+        doAsync {
 
-        val list: List<OfflineChartData> = arrayListOf(
-            OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Pair(it.hr, idx.toFloat()) },
+            offlineDataList = readAlgorithmInputsFromFile(logFile)
+
+            val resultList = runHrvAlgo()
+
+            offlineChart.put(1, OfflineChartData(
+                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.hr.toFloat()) },
                 "HR (bpm)",
                 ""
-            ),
-            OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Pair(it.spo2, idx.toFloat()) },
+            ))
+
+            offlineChart.put(2, OfflineChartData(
+                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
                 "SpO2 (%)",
                 ""
-            ),
-            OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Pair(it.rr, idx.toFloat()) },
+            ))
+
+            offlineChart.put(3, OfflineChartData(
+                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rr / 10f) },
                 "IBI (ms)",
                 ""
-            ),
-            OfflineChartData(offlineDataList.mapIndexed { idx, it ->
-                Pair(
-                    it.steps,
-                    idx.toFloat()
-                )
-            }, "STEPS", ""),
-            OfflineChartData(offlineDataList.mapIndexed { idx, it ->
-                Pair(
-                    it.motion,
-                    idx.toFloat()
-                )
-            }, "MOTION (g)", ""),
+            ))
 
-            OfflineChartData(runRrAlgo().mapIndexed { idx, it ->
-                Pair(it, idx.toFloat())
-            }, "RESPIRATION RATE \n(breath/min)", ""),
+            offlineChart.put(4,  OfflineChartData(
+                offlineDataList.mapIndexed { idx, it ->
+                    Entry(
+                        idx.toFloat(),
+                        (it.walkSteps + it.runSteps).toFloat()
+                    )
+                },
+                "STEPS",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.rmssd, idx.toFloat())
-            }, "RMSSD (ms)", ""),
+            offlineChart.put(5,  OfflineChartData(
+                offlineDataList.mapIndexed { idx, it ->
+                    Entry(
+                        idx.toFloat(), sqrt(
+                            (it.accelerationX / 1000f).pow(2) + (it.accelerationY / 1000f).pow(2) +
+                                    (it.accelerationZ / 1000f).pow(2)
+                        )
+                    )
+                },
+                "MOTION (g)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.sdnn, idx.toFloat())
-            }, "SDNN (ms)", ""),
+            offlineChart.put(6,  OfflineChartData(
+                runRrAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it) },
+                "RESPIRATION RATE \n(breath/min)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.avnn, idx.toFloat())
-            }, "AVNN (ms)", ""),
+            offlineChart.put(7,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rmssd) },
+                "RMSSD (ms)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.pnn50, idx.toFloat())
-            }, "PNN50 (ms)", ""),
+            offlineChart.put(8,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.sdnn) },
+                "SDNN (ms)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.ulf, idx.toFloat())
-            }, "ULF (ms²)", ""),
+            offlineChart.put(9,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.avnn) },
+                "AVNN (ms)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.vlf, idx.toFloat())
-            }, "VLF (ms²)", ""),
+            offlineChart.put(10,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.pnn50) },
+                "PNN50 (ms)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.lf, idx.toFloat())
-            }, "LF (ms²)", ""),
+            offlineChart.put(11,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.ulf) },
+                "ULF (ms²)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.hf, idx.toFloat())
-            }, "HF (ms²)", ""),
+            offlineChart.put(12,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.vlf) },
+                "VLF (ms²)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.lfOverHf, idx.toFloat())
-            }, "LFOVERHF", ""),
+            offlineChart.put(13,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lf) },
+                "LF (ms²)",
+                ""
+            ))
 
-            OfflineChartData(resultList.mapIndexed { idx, it ->
-                Pair(it.totPwr, idx.toFloat())
-            }, "TOTPWR (ms²)", "")
+            offlineChart.put(14,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.hf) },
+                "HF (ms²)",
+                ""
+            ))
 
+            offlineChart.put(15,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lfOverHf) },
+                "LF/HF",
+                ""
+            ))
 
-        )
+            offlineChart.put(16,  OfflineChartData(
+                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.totPwr) },
+                "TOTAL POWER (ms²)",
+                ""
+            ))
 
-        offlineDataList.clear()
+            offlineChart.put(17,  OfflineChartData(
+                runStressAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it.toFloat()) },
+                "STRESS SCORE",
+                ""
+            ))
 
+            resultList.clear()
 
-        adapter.dataSetList = list
-        adapter.notifyDataSetChanged()
+            uiThread {
+                progressBar.visibility = View.GONE
+                chartSpinner.setSelection(1)
+            }
+        }
     }
 
-    private fun runHrvAlgo(): List<HrvOfflineChartData> {
+    private fun runHrvAlgo(): ArrayList<HrvOfflineChartData> {
+        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 60, 15)
         algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_HRV
         MaximAlgorithms.init(algorithmInitConfig)
 
         val resultList: ArrayList<HrvOfflineChartData> = arrayListOf()
 
-        for (data in offlineDataList) {
-            algorithmInput.rr = (data.rr * 10f).toInt()
-            algorithmInput.rrConfidence = data.rrConfidence
-
+        for (algorithmInput in offlineDataList) {
             MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
             if (algorithmOutput.hrv.isHrvCalculated) {
@@ -195,6 +246,26 @@ class OfflineDataFragment : Fragment() {
         return resultList
     }
 
+    private fun runStressAlgo(): List<Int> {
+        algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 90, 30)
+        algorithmInitConfig?.enableAlgorithmsFlag =
+            MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS
+        MaximAlgorithms.init(algorithmInitConfig)
+
+        val resultList: ArrayList<Int> = arrayListOf()
+
+        for (algorithmInput in offlineDataList) {
+            if (MaximAlgorithms.run(algorithmInput, algorithmOutput)) {
+                Timber.d("Stress score = ${algorithmOutput.stress.stressScore}")
+                resultList.add(algorithmOutput.stress.stressScore)
+            }
+        }
+
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS)
+
+        return resultList
+    }
+
 
     private fun runRrAlgo(): List<Float> {
         algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_RESP
@@ -202,11 +273,7 @@ class OfflineDataFragment : Fragment() {
 
         val resultList: ArrayList<Float> = arrayListOf()
 
-        for (data in offlineDataList) {
-            algorithmInput.green = data.green.toInt()
-            algorithmInput.rr = (data.rr * 10f).toInt()
-            algorithmInput.rrConfidence = data.rrConfidence
-
+        for (algorithmInput in offlineDataList) {
             MaximAlgorithms.run(
                 algorithmInput,
                 algorithmOutput
@@ -220,11 +287,13 @@ class OfflineDataFragment : Fragment() {
         return resultList
     }
 
-    private fun initRecyclerView() {
-        chartRecyclerView.layoutManager =
-            LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-        val snapHelper: SnapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(chartRecyclerView)
-        chartRecyclerView.adapter = adapter
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        if(position != 0){
+            offlineChart.display(position)
+        }
     }
 }
