@@ -90,7 +90,7 @@ class HrvFragment : Fragment(), IOnBackPressed {
     private var pnn50: String? = null
         set(value) {
             field = value
-            val text = (value ?: ResultCardView.EMPTY_VALUE) + " ms"
+            val text = (value ?: ResultCardView.EMPTY_VALUE)
             pnn50View.text = text
         }
 
