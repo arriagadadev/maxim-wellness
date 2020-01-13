@@ -205,6 +205,7 @@ class StressFragment : Fragment(), IOnBackPressed {
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.enable_scd -> enableScdToggled()
                     R.id.hrm_settings -> showSettingsDialog()
+                    R.id.info_menu_item -> showInfoDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
@@ -362,6 +363,11 @@ class StressFragment : Fragment(), IOnBackPressed {
 
     private fun showSettingsDialog() {
 
+    }
+
+    private fun showInfoDialog() {
+        val helpDialog = HelpDialog.newInstance(getString(R.string.stress_info), getString(R.string.info))
+        fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 
     private fun showArbitraryCommandDialog() {

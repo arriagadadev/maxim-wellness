@@ -44,6 +44,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/info_menu_item"
+        android:checkable="false"
+        android:checked="false"
+        android:title="@string/info"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/send_arbitrary_command"
         android:checkable="false"
         android:checked="false"

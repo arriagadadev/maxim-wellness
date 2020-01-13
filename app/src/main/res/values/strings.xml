@@ -34,6 +34,7 @@
 
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 
     <string name="measurement_result_ready_to_start_message">Ready to Start</string>
     <string name="measurement_result_measuring_message">Measuring…</string>
@@ -103,6 +104,38 @@
     <string name="time_metrics_unit">-- ms</string>
     <string name="rr_unit">breath/min</string>
     <string name="single_selection">Single Selection</string>
+    <string name="info">Info</string>
+    <string name="whrm_info">  Maxim Wearable Heart Rate Monitoring (WHRM) algorithm utilizes
+        synchronized 3-axis accelerometer and PPG data to provide several end-user friendly
+        fitness tracking outputs like heart rate and activity related statistics e.g. step count,
+        burned calories and activity class of the user. The PPG (photoplethysmography) signal can be
+        gathered from contractions of ventricles in finger, wrist, ear, toe, chest etc. </string>
+    <string name="spo2_info">  Pulse oximeter is a lightweight, small and noninvasive optical devices
+        to monitor the amount of oxygen carried in the blood. Pulse oximeter devices measure oxygen
+        saturation by illuminating the skin with red and near-infrared (IR) lights and measure
+        changes in light absorption of oxygenated (oxy-hemoglobin, HbO2) and deoxygenated blood
+        (deoxy-hemoglobin, RHb) using two light wavelengths. </string>
+    <string name="hrv_info">  HRV tends to be low when we\'re in a fight-or-flight mode and high when
+        we\'re more relaxed. High HRV is generally associated with greater cardiovascular fitness.
+        The electrocardiogram test is the gold standard for assessing HRV. However, wearable devices
+        with sophisticated algorithms are now making this data more accessible to more people. Since
+        HRV provides insights into our ANS, which regulates our heart rate (HR) and blood pressure,
+        it can be considered as the most important general wellness parameter.HRV gives us some
+        clues about potential cardiac conditions. Over time, higher HRV can indicate increased
+        resilience, while lower HRV can point to chronic stress. HRV can be increased by changes in
+        behavior: quitting smoking, losing weight if needed, exercising, and managing stress
+        and etc. </string>
+    <string name="resp_info">  Using PPG, we can measure respiration induced features. One of these
+        features is Respiratory Sinus Arrhythmia (RSA) which causes heart rate change during
+        respiratory events. Another feature we can measure is that the effect on the venous volume
+        of intrathoracic pressure changes during respiratory cycle. After processing these features,
+        our solution can report very accurate respiration rate estimates. </string>
+    <string name="stress_info">  Stress releases a hormone called adrenaline that quickens breath
+        increases HR and Blood Pressure, known as \"fight or flight response\". Deep breathing
+        exercise therefore can be suggested to shift body and mind into more relaxed state.\n
+        In literature, most of the wearable stress monitoring studies use galvanic skin response,
+        muscle tension, blood pressure and skin temperature devices as well as HR monitoring devices.
+        Maxim\'s stress estimation methods use accelerometer and PPG data (HR, HRV) solely.</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

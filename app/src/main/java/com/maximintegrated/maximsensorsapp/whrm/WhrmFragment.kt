@@ -212,6 +212,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.enable_scd -> enableScdToggled()
                     R.id.hrm_settings -> showSettingsDialog()
+                    R.id.info_menu_item -> showInfoDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
@@ -422,6 +423,11 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         val whrmSettingsDialog = WhrmSettingsFragmentDialog.newInstance()
         whrmSettingsDialog.setTargetFragment(this, 1560)
         fragmentManager?.let { whrmSettingsDialog.show(it, "whrmSettingsDialog") }
+    }
+
+    private fun showInfoDialog() {
+        val helpDialog = HelpDialog.newInstance(getString(R.string.whrm_info), getString(R.string.info))
+        fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 
     private fun showArbitraryCommandDialog() {
