@@ -4,14 +4,14 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.View
+import android.widget.PopupMenu
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.get
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.Entry
@@ -22,6 +22,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.exts.getThemeColor
+import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import java.text.DecimalFormat
 
 data class DataSetInfo(@StringRes val nameRes: Int, @ColorRes val colorRes: Int)
@@ -56,14 +57,56 @@ class MultiChannelChartView @JvmOverloads constructor(
             setupChart()
         }
 
+    var isSingleSelection = false
+        set(value) {
+            field = value
+            if (value) {
+                uncheckedAllChipsExceptTheFirst()
+            }
+        }
+
     init {
         inflate(context, R.layout.view_multi_channel_chart, this)
 
         chipGroupView = findViewById(R.id.chip_group_view)
         lineChartView = findViewById(R.id.line_chart_view)
-
+        with(
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.MultiChannelChartView,
+                defStyleAttr,
+                0
+            )
+        ) {
+            isSingleSelection =
+                getBoolean(R.styleable.MultiChannelChartView_mcv_single_selection, false)
+            settingsView.visibility = if (getBoolean(
+                    R.styleable.MultiChannelChartView_mcv_show_settings,
+                    false
+                )
+            ) View.VISIBLE else View.INVISIBLE
+            recycle()
+        }
         setupChart()
+        settingsView.setOnClickListener {
+            showSettingsMenu(it)
+        }
     }
+
+    private fun showSettingsMenu(view: View) {
+        val popupMenu = PopupMenu(context, view)
+        popupMenu.menuInflater.inflate(R.menu.chart_menu, popupMenu.menu)
+        popupMenu.menu[0].isChecked = isSingleSelection
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.single_selection_item -> isSingleSelection = !isSingleSelection
+                else -> return@setOnMenuItemClickListener false
+            }
+            return@setOnMenuItemClickListener true
+        }
+        popupMenu.show()
+    }
+
 
     private fun setupChart() {
         with(lineChartView) {
@@ -101,7 +144,7 @@ class MultiChannelChartView @JvmOverloads constructor(
             chipGroupView.addView(
                 Chip(chipGroupView.context).apply {
                     isCheckable = true
-                    isChecked = true
+                    isChecked = !isSingleSelection
                     checkedIcon = null
 
                     text = context.getString(dataSet.nameRes)
@@ -120,10 +163,17 @@ class MultiChannelChartView @JvmOverloads constructor(
                     )
 
                     setOnCheckedChangeListener { chipView, isChecked ->
-                        if (!isChecked && areAllChipsUnchecked()) {
-                            chipView.isChecked = true
-                        } else {
+                        if (isSingleSelection) {
                             toggleDataSetVisibility(index, isChecked)
+                            if (isChecked) {
+                                uncheckedAllChipsExcept(chipView as Chip)
+                            }
+                        } else {
+                            if (!isChecked && areAllChipsUnchecked()) {
+                                chipView.isChecked = true
+                            } else {
+                                toggleDataSetVisibility(index, isChecked)
+                            }
                         }
                     }
                 }
@@ -137,6 +187,10 @@ class MultiChannelChartView @JvmOverloads constructor(
                 setDrawCircles(false)
                 setDrawValues(false)
             }
+        }
+
+        if (isSingleSelection) {
+            (chipGroupView.getChildAt(0) as Chip).isChecked = true
         }
     }
 
@@ -155,7 +209,7 @@ class MultiChannelChartView @JvmOverloads constructor(
             notifyDataSetChanged()
         }
 
-        lineChartView.isInvisible = true
+        //lineChartView.isInvisible = true
 //        noDataMessageView.isVisible = true
     }
 
@@ -170,14 +224,15 @@ class MultiChannelChartView @JvmOverloads constructor(
     fun addData(vararg channelData: Int) {
         if (dataSetList.isEmpty() || channelData.size != dataSetList.size) return
 
-        lineChartView.isVisible = true
+        //lineChartView.isVisible = true
 
         with(lineChartView.data) {
             if (dataSets.isEmpty()) {
                 for (index in 0..dataSetList.lastIndex) {
-                    val dataSet = dataSetList[index]
-                    addDataSet(dataSet)
-
+                    if ((chipGroupView.getChildAt(index) as Chip).isChecked) {
+                        val dataSet = dataSetList[index]
+                        addDataSet(dataSet)
+                    }
                 }
             }
         }
@@ -208,14 +263,15 @@ class MultiChannelChartView @JvmOverloads constructor(
     fun addData(vararg channelData: Float) {
         if (dataSetList.isEmpty() || channelData.size != dataSetList.size) return
 
-        lineChartView.isVisible = true
+        //lineChartView.isVisible = true
 
         with(lineChartView.data) {
             if (dataSets.isEmpty()) {
                 for (index in 0..dataSetList.lastIndex) {
-                    val dataSet = dataSetList[index]
-                    addDataSet(dataSet)
-
+                    if ((chipGroupView.getChildAt(index) as Chip).isChecked) {
+                        val dataSet = dataSetList[index]
+                        addDataSet(dataSet)
+                    }
                 }
             }
         }
@@ -248,9 +304,12 @@ class MultiChannelChartView @JvmOverloads constructor(
                 if (!dataSets.contains(dataSetList[index])) {
                     addDataSet(dataSetList[index])
                 }
-            } else if (dataSetCount != 1) {
+            } else {
                 removeDataSet(dataSetList[index])
             }
+            notifyDataChanged()
+            lineChartView.notifyDataSetChanged()
+            lineChartView.invalidate()
         }
     }
 
@@ -266,6 +325,15 @@ class MultiChannelChartView @JvmOverloads constructor(
         return false
     }
 
+    private fun uncheckedAllChipsExcept(chip: Chip) {
+        chipGroupView.children.filter { it is Chip && it.isChecked && it != chip }
+            .forEach { (it as Chip).isChecked = false }
+    }
+
+    private fun uncheckedAllChipsExceptTheFirst() {
+        chipGroupView.children.filter { it is Chip && it.isChecked }.drop(1)
+            .forEach { (it as Chip).isChecked = false }
+    }
 }
 
 class FloatValueFormatter(private val decimalFormat: DecimalFormat) : ValueFormatter() {

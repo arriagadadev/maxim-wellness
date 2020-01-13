@@ -291,7 +291,9 @@
             <com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
                 android:id="@+id/time_chart_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:mcv_single_selection="true"
+                app:mcv_show_settings="true" />
 
         </androidx.cardview.widget.CardView>
 
@@ -308,7 +310,9 @@
             <com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
                 android:id="@+id/frequency_chart_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:mcv_single_selection="true"
+                app:mcv_show_settings="true"/>
 
         </androidx.cardview.widget.CardView>
 

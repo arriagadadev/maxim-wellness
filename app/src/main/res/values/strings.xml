@@ -62,7 +62,7 @@
     <string name="vlf">vlf</string>
     <string name="lf">lf</string>
     <string name="hf">hf</string>
-    <string name="lfOverHf">lfOverHf</string>
+    <string name="lfOverHf">lf/hf</string>
     <string name="totPwr">totPwr</string>
 
     <string name="ibi">IBI</string>
@@ -102,6 +102,7 @@
     <string name="freq_metrics_unit">-- ms²</string>
     <string name="time_metrics_unit">-- ms</string>
     <string name="rr_unit">breath/min</string>
+    <string name="single_selection">Single Selection</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

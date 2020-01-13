@@ -225,14 +225,6 @@ class HrvFragment : Fragment(), IOnBackPressed {
         timeChartView.maximumEntryCount = 100
         frequencyChartView.maximumEntryCount = 100
         ibiChartView.maximumEntryCount = 100
-
-        val arr = IntArray(4) { i -> 0 }
-        val arr2 = IntArray(6) { i -> 0 }
-
-        for (i in 0..20) {
-            timeChartView.addData(*arr)
-            frequencyChartView.addData(*arr2)
-        }
     }
 
     private fun setupToolbar() {
@@ -324,7 +316,13 @@ class HrvFragment : Fragment(), IOnBackPressed {
     }
 
     private fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
     }
 
     private fun sendLogToFlashCommand() {

@@ -23,18 +23,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_settings"
+            app:layout_constraintTop_toTopOf="@id/titleView"
+            app:layout_constraintEnd_toEndOf="@id/titleView"
+            app:layout_constraintBottom_toBottomOf="@id/titleView"
+            android:id="@+id/settingsView"
+            android:background="?attr/selectableItemBackground"/>
+
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_group_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp"
-            app:chipSpacingHorizontal="@dimen/chip_spacing"
+            app:chipSpacing="@dimen/chip_spacing"
             app:layout_constraintBottom_toTopOf="@id/line_chart_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/titleView"
-            app:singleLine="true" />
+            app:singleLine="true"
+            app:selectionRequired="true"/>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/line_chart_view"

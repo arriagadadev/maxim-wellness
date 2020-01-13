@@ -22,4 +22,9 @@
     <declare-styleable name="OfflineDataView">
         <attr name="odv_title" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="MultiChannelChartView">
+        <attr name="mcv_single_selection" format="boolean" />
+        <attr name="mcv_show_settings" format="boolean" />
+    </declare-styleable>
 </resources>
