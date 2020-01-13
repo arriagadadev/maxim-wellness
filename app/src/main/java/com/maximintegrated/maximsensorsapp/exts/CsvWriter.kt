@@ -35,7 +35,7 @@ class CsvWriter private constructor(filePath: String) {
 
             file.printWriter().use { out ->
                 var count = 0
-
+                var flushed = false
                 while (true) {
                     val line = linesQueue.take()
                     if (line == POISON_PILL) {
@@ -46,11 +46,15 @@ class CsvWriter private constructor(filePath: String) {
                     out.println(line)
                     if (count > 10000) {
                         out.flush()
+                        flushed = true
                         count = 0
                     }
 
                 }
                 listener?.onCompleted()
+                if(count == 1 && !flushed){
+                    file.delete()
+                }
             }
         }
     }
