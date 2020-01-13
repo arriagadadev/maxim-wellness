@@ -90,6 +90,7 @@ open class BluetoothScannerActivity : AppCompatActivity(), OnBluetoothDeviceClic
         if (requestCode == REQUEST_LOCATION_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted
             scannerDelegate.hideLocationPermissionMessage()
+            startBluetoothDeviceDiscovery()
         }
         if (requestCode == REQUEST_STORAGE_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted

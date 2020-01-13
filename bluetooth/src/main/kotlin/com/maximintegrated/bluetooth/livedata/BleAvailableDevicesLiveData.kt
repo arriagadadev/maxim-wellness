@@ -1,5 +1,6 @@
 package com.maximintegrated.bluetooth.livedata
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -8,6 +9,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import androidx.lifecycle.MutableLiveData
 import com.maximintegrated.bluetooth.common.ExtendedBluetoothDevice
+import com.maximintegrated.bluetooth.extension.hasPermission
 import com.maximintegrated.bluetooth.util.isBluetoothEnabled
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat
 import no.nordicsemi.android.support.v18.scanner.ScanCallback
@@ -92,7 +94,7 @@ class BleAvailableDevicesLiveData(context: Context) :
 
     override fun onActive() {
         super.onActive()
-        if (isBluetoothEnabled) {
+        if (isBluetoothEnabled && context.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
             startBleScan()
             handler.postDelayed({
                 stopBleScan()

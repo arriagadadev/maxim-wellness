@@ -90,6 +90,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
         if (requestCode == REQUEST_LOCATION_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted
             scannerDelegate.hideLocationPermissionMessage()
+            BleAvailableDevicesLiveData.startScan(this)
         }
         if (requestCode == REQUEST_STORAGE_PERMISSION && verifyPermissions(grantResults)) {
             // permission was granted

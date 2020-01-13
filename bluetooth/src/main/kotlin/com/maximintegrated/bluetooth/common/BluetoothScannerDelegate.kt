@@ -57,10 +57,10 @@ class BluetoothScannerDelegate(
         get() = deviceListController.errorModel == storagePermissionErrorModel
 
     val isScanStartVisible
-        get() = !isShowingStoragePermissionMessage && isBluetoothOn && !isDiscovering
+        get() = !isShowingLocationPermissionMessage && !isShowingStoragePermissionMessage && isBluetoothOn && !isDiscovering
 
     val isScanStopVisible
-        get() = !isShowingStoragePermissionMessage && isBluetoothOn && isDiscovering
+        get() = !isShowingLocationPermissionMessage && !isShowingStoragePermissionMessage && isBluetoothOn && isDiscovering
 
     var deviceClickListener
         get() = deviceListController.deviceClickListener
