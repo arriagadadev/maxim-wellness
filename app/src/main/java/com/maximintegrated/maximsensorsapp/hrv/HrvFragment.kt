@@ -206,12 +206,12 @@ class HrvFragment : Fragment(), IOnBackPressed {
         )
 
         frequencyChartView.dataSetInfoList = listOf(
+            DataSetInfo(R.string.ulf, R.color.channel_ir),
             DataSetInfo(R.string.vlf, R.color.channel_red),
             DataSetInfo(R.string.lf, R.color.channel_green),
             DataSetInfo(R.string.hf, R.color.colorPrimaryDark),
             DataSetInfo(R.string.lfOverHf, R.color.colorPrimary),
-            DataSetInfo(R.string.totPwr, R.color.color_secondary),
-            DataSetInfo(R.string.ulf, R.color.channel_ir)
+            DataSetInfo(R.string.totPwr, R.color.color_secondary)
         )
 
         ibiChartView.dataSetInfoList = listOf(
