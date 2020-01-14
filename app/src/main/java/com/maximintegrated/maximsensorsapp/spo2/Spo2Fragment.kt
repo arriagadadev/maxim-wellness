@@ -33,29 +33,20 @@ import java.util.*
 import kotlin.math.roundToInt
 
 
-class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener {
+class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     companion object {
         fun newInstance() = Spo2Fragment()
         const val STATUS_TIMEOUT = 3
     }
 
-    private lateinit var hspViewModel: HspViewModel
     private lateinit var chartView: MultiChannelChartView
 
     private lateinit var viewReferenceDevice: ReferenceDeviceView
     private lateinit var polarViewModel: PolarViewModel
     private var bleScannerDialog: BleScannerDialog? = null
 
-    private lateinit var menuItemStartMonitoring: MenuItem
-    private lateinit var menuItemStopMonitoring: MenuItem
-    private lateinit var menuItemLogToFile: MenuItem
-    private lateinit var menuItemLogToFlash: MenuItem
-    private lateinit var menuItemSettings: MenuItem
-    private lateinit var menuItemEnabledScd: MenuItem
-
     private var measurementStartTimestamp: Long? = null
-    private var dataRecorder: DataRecorder? = null
     private var startTime: String? = null
 
     private var rResult: Float? = null
@@ -68,31 +59,8 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             }
         }
 
-    private var isMonitoring: Boolean = false
-        set(value) {
-            field = value
-            menuItemStopMonitoring.isVisible = value
-            menuItemStartMonitoring.isVisible = !value
-
-        }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
-
-        hspViewModel.connectionState
-            .observe(this) { (device, connectionState) ->
-                toolbar.connectionInfo = if (hspViewModel.bluetoothDevice != null) {
-                    BleConnectionInfo(connectionState, device.name, device.address)
-                } else {
-                    null
-                }
-            }
-
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                addStreamData(hspStreamData)
-            }
 
         viewReferenceDevice = referenceDeviceView
 
@@ -116,10 +84,10 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         initializeChronometer()
         setupChart()
-        setupToolbar()
+        setupToolbar(getString(R.string.spo2))
     }
 
-    private fun initializeChronometer() {
+    override fun initializeChronometer() {
 
         spo2Chronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
         spo2Chronometer.setOnChronometerTickListener { cArg ->
@@ -141,42 +109,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         chartView.maximumEntryCount = 100
     }
 
-    private fun setupToolbar() {
-
-        toolbar.apply {
-            inflateMenu(R.menu.toolbar_menu)
-            menu.apply {
-                menuItemStartMonitoring = findItem(R.id.monitoring_start)
-                menuItemStopMonitoring = findItem(R.id.monitoring_stop)
-                menuItemLogToFile = findItem(R.id.log_to_file)
-                menuItemLogToFlash = findItem(R.id.log_to_flash)
-                menuItemSettings = findItem(R.id.hrm_settings)
-                menuItemEnabledScd = findItem(R.id.enable_scd)
-
-                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-                menuItemEnabledScd.isEnabled = true
-            }
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> showStopMonitoringDialog()
-                    R.id.log_to_file -> dataLoggingToggled()
-                    R.id.log_to_flash -> flashLoggingToggled()
-                    R.id.enable_scd -> enableScdToggled()
-                    R.id.hrm_settings -> showSettingsDialog()
-                    R.id.info_menu_item -> showInfoDialog()
-                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
-                    else -> return@setOnMenuItemClickListener false
-                }
-                return@setOnMenuItemClickListener true
-            }
-            setTitle(R.string.spo2)
-        }
-
-        toolbar.pageTitle = requireContext().getString(R.string.spo2)
-    }
-
-    private fun startMonitoring() {
+    override fun startMonitoring() {
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -209,7 +142,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
             }
     }
 
-    private fun sendDefaultSettings() {
+    override fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
         hspViewModel.sendCommand(
             SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
@@ -224,17 +157,7 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         }
     }
 
-    private fun sendLogToFlashCommand() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "flash",
-                "log",
-                if (menuItemLogToFlash.isChecked) "1" else "0"
-            )
-        )
-    }
-
-    private fun stopMonitoring() {
+    override fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -251,21 +174,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
         hspViewModel.stopStreaming()
         polarViewModel.disconnect()
-    }
-
-    private fun showStopMonitoringDialog() {
-        val alertDialog = AlertDialog.Builder(requireContext())
-        alertDialog.setTitle("Stop Monitoring")
-        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
-            .setPositiveButton("OK") { dialog, which ->
-                stopMonitoring()
-                dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-
-        alertDialog.setCancelable(false)
-        alertDialog.show()
     }
 
     private fun setupReferenceDeviceView() {
@@ -318,37 +226,21 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         fragmentManager?.let { bleScannerDialog?.show(it, "BleScannerDialog") }
     }
 
-    private fun dataLoggingToggled() {
+    override fun dataLoggingToggled() {
 
     }
 
-    private fun flashLoggingToggled() {
-        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
-        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
-    }
-
-    private fun enableScdToggled() {
-        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
-        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-    }
-
-    private fun showSettingsDialog() {
+    override fun showSettingsDialog() {
         /*val settingsDialog = Spo2SettingsFragmentDialog.newInstance()
         fragmentManager?.let { settingsDialog.show(it, "") }*/
     }
 
-    private fun showInfoDialog() {
+    override fun showInfoDialog() {
         val helpDialog = HelpDialog.newInstance(getString(R.string.spo2_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 
-    private fun showArbitraryCommandDialog() {
-        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
-        arbitraryCommandDialog.setTargetFragment(this, 1337)
-        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
-    }
-
-    fun addStreamData(streamData: HspStreamData) {
+    override fun addStreamData(streamData: HspStreamData) {
 
         dataRecorder?.record(streamData)
 
@@ -426,10 +318,6 @@ class Spo2Fragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     override fun onBackPressed(): Boolean {
         return isMonitoring
-    }
-
-    override fun onStopMonitoring() {
-        stopMonitoring()
     }
 
     override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {

@@ -30,40 +30,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class StressFragment : Fragment(), IOnBackPressed {
+class StressFragment : MeasurementBaseFragment() {
     companion object {
         fun newInstance() = StressFragment()
     }
-
-    private lateinit var hspViewModel: HspViewModel
 
     private var measurementStartTimestamp: Long? = null
     private var minConfidenceLevel = 0
     private var hrExpireDuration = 30
     private var lastValidHrTimestamp: Long = 0L
 
-    private lateinit var menuItemStartMonitoring: MenuItem
-    private lateinit var menuItemStopMonitoring: MenuItem
-    private lateinit var menuItemLogToFile: MenuItem
-    private lateinit var menuItemLogToFlash: MenuItem
-    private lateinit var menuItemSettings: MenuItem
-    private lateinit var menuItemEnabledScd: MenuItem
-
     private var algorithmInitConfig: AlgorithmInitConfig? = null
     private val algorithmInput = AlgorithmInput()
     private val algorithmOutput = AlgorithmOutput()
 
-    private var dataRecorder: DataRecorder? = null
-
     private var startTime: String? = null
-
-    private var isMonitoring: Boolean = false
-        set(value) {
-            field = value
-            menuItemStopMonitoring.isVisible = value
-            menuItemStartMonitoring.isVisible = !value
-
-        }
 
     private var hr: Int? = null
         set(value) {
@@ -132,21 +113,6 @@ class StressFragment : Fragment(), IOnBackPressed {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
-
-        hspViewModel.connectionState
-            .observe(this) { (device, connectionState) ->
-                toolbar.connectionInfo = if (hspViewModel.bluetoothDevice != null) {
-                    BleConnectionInfo(connectionState, device.name, device.address)
-                } else {
-                    null
-                }
-            }
-
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                addStreamData(hspStreamData)
-            }
     }
 
     override fun onCreateView(
@@ -166,10 +132,10 @@ class StressFragment : Fragment(), IOnBackPressed {
             MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS
 
         initializeChronometer()
-        setupToolbar()
+        setupToolbar(getString(R.string.stress))
     }
 
-    private fun initializeChronometer() {
+    override fun initializeChronometer() {
 
         stressChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
         stressChronometer.setOnChronometerTickListener { cArg ->
@@ -182,43 +148,7 @@ class StressFragment : Fragment(), IOnBackPressed {
         }
     }
 
-    private fun setupToolbar() {
-
-        toolbar.apply {
-            inflateMenu(R.menu.toolbar_menu)
-            menu.apply {
-                menuItemStartMonitoring = findItem(R.id.monitoring_start)
-                menuItemStopMonitoring = findItem(R.id.monitoring_stop)
-                menuItemLogToFile = findItem(R.id.log_to_file)
-                menuItemLogToFlash = findItem(R.id.log_to_flash)
-                menuItemSettings = findItem(R.id.hrm_settings)
-                menuItemEnabledScd = findItem(R.id.enable_scd)
-
-                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-                menuItemEnabledScd.isEnabled = true
-            }
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> showStopMonitoringDialog()
-                    R.id.log_to_file -> dataLoggingToggled()
-                    R.id.log_to_flash -> flashLoggingToggled()
-                    R.id.enable_scd -> enableScdToggled()
-                    R.id.hrm_settings -> showSettingsDialog()
-                    R.id.info_menu_item -> showInfoDialog()
-                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
-                    else -> return@setOnMenuItemClickListener false
-                }
-                return@setOnMenuItemClickListener true
-            }
-            setTitle(R.string.stress)
-        }
-
-        toolbar.pageTitle = requireContext().getString(R.string.stress)
-
-    }
-
-    fun addStreamData(streamData: HspStreamData) {
+    override fun addStreamData(streamData: HspStreamData) {
         renderHrmModel(streamData)
         dataRecorder?.record(streamData)
 
@@ -272,21 +202,11 @@ class StressFragment : Fragment(), IOnBackPressed {
         )
     }
 
-    private fun sendDefaultSettings() {
+    override fun sendDefaultSettings() {
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
     }
 
-    private fun sendLogToFlashCommand() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "flash",
-                "log",
-                if (menuItemLogToFlash.isChecked) "1" else "0"
-            )
-        )
-    }
-
-    private fun startMonitoring() {
+    override fun startMonitoring() {
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -315,7 +235,7 @@ class StressFragment : Fragment(), IOnBackPressed {
             }
     }
 
-    private fun stopMonitoring() {
+    override fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -332,60 +252,21 @@ class StressFragment : Fragment(), IOnBackPressed {
         hspViewModel.stopStreaming()
     }
 
-    private fun showStopMonitoringDialog() {
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        alertDialog.setTitle("Stop Monitoring")
-        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
-            .setPositiveButton("OK") { dialog, which ->
-                stopMonitoring()
-                dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-
-        alertDialog.setCancelable(false)
-        alertDialog.show()
-    }
-
-    private fun dataLoggingToggled() {
+    override fun dataLoggingToggled() {
 
     }
 
-    private fun flashLoggingToggled() {
-        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
-        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
-    }
-
-    private fun enableScdToggled() {
-        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
-        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-    }
-
-    private fun showSettingsDialog() {
+    override fun showSettingsDialog() {
 
     }
 
-    private fun showInfoDialog() {
+    override fun showInfoDialog() {
         val helpDialog = HelpDialog.newInstance(getString(R.string.stress_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
-    }
-
-    private fun showArbitraryCommandDialog() {
-        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
-        arbitraryCommandDialog.setTargetFragment(this, 1338)
-        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     private fun clearCardViewValues() {
         hr = null
         stress = null
-    }
-
-    override fun onBackPressed(): Boolean {
-        return isMonitoring
-    }
-
-    override fun onStopMonitoring() {
-        stopMonitoring()
     }
 }

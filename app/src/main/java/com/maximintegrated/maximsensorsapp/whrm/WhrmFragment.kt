@@ -33,7 +33,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener {
+class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     companion object {
         fun newInstance() = WhrmFragment()
@@ -45,34 +45,18 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     private lateinit var viewReferenceDevice: ReferenceDeviceView
 
-    private lateinit var hspViewModel: HspViewModel
     private lateinit var polarViewModel: PolarViewModel
     private var bleScannerDialog: BleScannerDialog? = null
 
     private lateinit var chartView: MultiChannelChartView
-    private var dataRecorder: DataRecorder? = null
+    //private var dataRecorder: DataRecorder? = null
 
     private var measurementStartTimestamp: Long? = null
     private var minConfidenceLevel = 0
     private var hrExpireDuration = 30
     private var lastValidHrTimestamp: Long = 0L
 
-    private lateinit var menuItemStartMonitoring: MenuItem
-    private lateinit var menuItemStopMonitoring: MenuItem
-    private lateinit var menuItemLogToFile: MenuItem
-    private lateinit var menuItemLogToFlash: MenuItem
-    private lateinit var menuItemSettings: MenuItem
-    private lateinit var menuItemEnabledScd: MenuItem
-
     private var countDownTimer: CountDownTimer? = null
-
-    private var isMonitoring: Boolean = false
-        set(value) {
-            field = value
-            menuItemStopMonitoring.isVisible = value
-            menuItemStartMonitoring.isVisible = !value
-            hrResultView.isMeasuring = value
-        }
 
     private var startTime: String? = null
 
@@ -121,22 +105,6 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
-
-        hspViewModel.connectionState
-            .observe(this) { (device, connectionState) ->
-                toolbar.connectionInfo = if (hspViewModel.bluetoothDevice != null) {
-                    BleConnectionInfo(connectionState, device.name, device.address)
-                } else {
-                    null
-                }
-            }
-
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                addStreamData(hspStreamData)
-                //Timber.d(hspStreamData.toString())
-            }
 
         radioButtonSampledMode.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
@@ -162,12 +130,12 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         chartView = view.findViewById(R.id.chart_view)
 
         initializeChronometer()
-        setupToolbar()
+        setupToolbar(getString(R.string.whrm_toolbar))
         setupChart()
         hrResultView.measuringWarningMessageView.text = ""
     }
 
-    private fun initializeChronometer() {
+    override fun initializeChronometer() {
 
         whrmChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
         whrmChronometer.setOnChronometerTickListener { cArg ->
@@ -189,42 +157,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         chartView.maximumEntryCount = 100
     }
 
-    private fun setupToolbar() {
-
-        toolbar.apply {
-            inflateMenu(R.menu.toolbar_menu)
-            menu.apply {
-                menuItemStartMonitoring = findItem(R.id.monitoring_start)
-                menuItemStopMonitoring = findItem(R.id.monitoring_stop)
-                menuItemLogToFile = findItem(R.id.log_to_file)
-                menuItemLogToFlash = findItem(R.id.log_to_flash)
-                menuItemSettings = findItem(R.id.hrm_settings)
-                menuItemEnabledScd = findItem(R.id.enable_scd)
-
-                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-                menuItemEnabledScd.isEnabled = true
-            }
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> showStopMonitoringDialog()
-                    R.id.log_to_file -> dataLoggingToggled()
-                    R.id.log_to_flash -> flashLoggingToggled()
-                    R.id.enable_scd -> enableScdToggled()
-                    R.id.hrm_settings -> showSettingsDialog()
-                    R.id.info_menu_item -> showInfoDialog()
-                    R.id.send_arbitrary_command -> showArbitraryCommandDialog()
-                    else -> return@setOnMenuItemClickListener false
-                }
-                return@setOnMenuItemClickListener true
-            }
-            setTitle(R.string.whrm_toolbar)
-        }
-
-        toolbar.pageTitle = requireContext().getString(R.string.whrm_toolbar)
-    }
-
-    private fun sendDefaultSettings() {
+    override fun sendDefaultSettings() {
         hspViewModel.sendCommand(
             SetConfigurationCommand(
                 "wearablesuite",
@@ -243,17 +176,11 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         }
     }
 
-    private fun sendLogToFlashCommand() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "flash",
-                "log",
-                if (menuItemLogToFlash.isChecked) "1" else "0"
-            )
-        )
+    override fun isMonitoringChanged() {
+        hrResultView.isMeasuring = isMonitoring
     }
 
-    private fun startMonitoring() {
+    override fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
         menuItemEnabledScd.isEnabled = false
@@ -304,7 +231,7 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         }
     }
 
-    private fun stopMonitoring() {
+    override fun stopMonitoring() {
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -320,28 +247,13 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         polarViewModel.disconnect()
     }
 
-    private fun showStopMonitoringDialog() {
-        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        alertDialog.setTitle("Stop Monitoring")
-        alertDialog.setMessage("Are you sure you want to stop monitoring ?")
-            .setPositiveButton("OK") { dialog, which ->
-                stopMonitoring()
-                dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-
-        alertDialog.setCancelable(false)
-        alertDialog.show()
-    }
-
     private fun setAlgorithmModeRadioButtonsEnabled(isEnabled: Boolean) {
         for (radioButton in algorithmModeRadioGroup.children) {
             radioButton.isEnabled = isEnabled
         }
     }
 
-    fun addStreamData(streamData: HspStreamData) {
+    override fun addStreamData(streamData: HspStreamData) {
         renderHrmModel(streamData)
         dataRecorder?.record(streamData)
         stepCount = streamData.runSteps + streamData.walkSteps
@@ -405,35 +317,19 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         fragmentManager?.let { bleScannerDialog?.show(it, "BleScannerDialog") }
     }
 
-    private fun dataLoggingToggled() {
+    override fun dataLoggingToggled() {
 
     }
 
-    private fun flashLoggingToggled() {
-        menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
-        menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
-    }
-
-    private fun enableScdToggled() {
-        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
-        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
-    }
-
-    private fun showSettingsDialog() {
+    override fun showSettingsDialog() {
         val whrmSettingsDialog = WhrmSettingsFragmentDialog.newInstance()
         whrmSettingsDialog.setTargetFragment(this, 1560)
         fragmentManager?.let { whrmSettingsDialog.show(it, "whrmSettingsDialog") }
     }
 
-    private fun showInfoDialog() {
+    override fun showInfoDialog() {
         val helpDialog = HelpDialog.newInstance(getString(R.string.whrm_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
-    }
-
-    private fun showArbitraryCommandDialog() {
-        val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
-        arbitraryCommandDialog.setTargetFragment(this, 1338)
-        fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
     }
 
     private fun clearChart() {
@@ -510,14 +406,6 @@ class WhrmFragment : Fragment(), IOnBackPressed, OnBluetoothDeviceClickListener 
         return (System.currentTimeMillis() - lastValidHrTimestamp) > TimeUnit.SECONDS.toMillis(
             hrExpireDuration.toLong()
         )
-    }
-
-    override fun onBackPressed(): Boolean {
-        return isMonitoring
-    }
-
-    override fun onStopMonitoring() {
-        stopMonitoring()
     }
 
     override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {
