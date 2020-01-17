@@ -5,26 +5,23 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bluetooth.ble.BleScannerDialog
 import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.bpt.polar.HeartRateMeasurement
 import com.maximintegrated.bpt.polar.PolarViewModel
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
-import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import kotlinx.android.synthetic.main.view_measurement_result.view.*
 import timber.log.Timber
@@ -102,6 +99,12 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             cadenceView.emptyValue = value.toString()
         }
 
+    private val heartRateMeasurementObserver =
+        androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
+            dataRecorder?.record(heartRateMeasurement)
+            viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+            Timber.d("%s", heartRateMeasurement)
+        }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -183,6 +186,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     override fun startMonitoring() {
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
+        dataRecorder?.dataRecorderListener = this
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
 
@@ -281,11 +285,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             }
 
         polarViewModel.heartRateMeasurement
-            .observe(this) { heartRateMeasurement ->
-                dataRecorder?.record(heartRateMeasurement)
-                viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
-                Timber.d("%s", heartRateMeasurement)
-            }
+            .observeForever(heartRateMeasurementObserver)
 
         polarViewModel.isDeviceSupported
             .observe(this) {
@@ -328,7 +328,8 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun showInfoDialog() {
-        val helpDialog = HelpDialog.newInstance(getString(R.string.whrm_info), getString(R.string.info))
+        val helpDialog =
+            HelpDialog.newInstance(getString(R.string.whrm_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 
@@ -423,5 +424,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     override fun onDetach() {
         super.onDetach()
         countDownTimer?.cancel()
+        polarViewModel.heartRateMeasurement.removeObserver(heartRateMeasurementObserver)
     }
 }

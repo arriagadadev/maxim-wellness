@@ -3,14 +3,17 @@ package com.maximintegrated.maximsensorsapp
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.maximsensorsapp.exts.ioThread
 import kotlinx.android.synthetic.main.include_app_bar.*
 
-abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
+abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
+    DataRecorder.DataRecorderListener {
     var dataRecorder: DataRecorder? = null
 
     lateinit var hspViewModel: HspViewModel
@@ -71,7 +74,7 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
 
     abstract fun stopMonitoring()
 
-    open fun isMonitoringChanged(){
+    open fun isMonitoringChanged() {
 
     }
 
@@ -87,7 +90,7 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
         )
     }
 
-    open fun showStopMonitoringDialog(){
+    open fun showStopMonitoringDialog() {
         val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
         alertDialog.setTitle("Stop Monitoring")
         alertDialog.setMessage("Are you sure you want to stop monitoring ?")
@@ -104,12 +107,12 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
 
     abstract fun dataLoggingToggled()
 
-    open fun flashLoggingToggled(){
+    open fun flashLoggingToggled() {
         menuItemLogToFlash.isChecked = !menuItemLogToFlash.isChecked
         menuItemLogToFile.isChecked = !menuItemLogToFlash.isChecked
     }
 
-    open fun enableScdToggled(){
+    open fun enableScdToggled() {
         ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
         menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
     }
@@ -118,7 +121,7 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
 
     abstract fun showInfoDialog()
 
-    open fun showArbitraryCommandDialog(){
+    open fun showArbitraryCommandDialog() {
         val arbitraryCommandDialog = ArbitraryCommandFragmentDialog.newInstance()
         arbitraryCommandDialog.setTargetFragment(this, 1338)
         fragmentManager?.let { arbitraryCommandDialog.show(it, "arbitraryCommandDialog") }
@@ -134,6 +137,11 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
         stopMonitoring()
     }
 
+    private val dataStreamObserver = Observer<HspStreamData> { data ->
+        addStreamData(data)
+        //Timber.d("MELIK: $data")
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
@@ -147,10 +155,21 @@ abstract class MeasurementBaseFragment: Fragment(), IOnBackPressed{
                 }
             }
 
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                addStreamData(hspStreamData)
-                //Timber.d(hspStreamData.toString())
-            }
+        hspViewModel.streamData.observeForever(dataStreamObserver)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        hspViewModel.streamData.removeObserver(dataStreamObserver)
+    }
+
+    override fun onFilesAreReadyForAlignment(
+        alignedFilePath: String,
+        maxim1HzFilePath: String,
+        refFilePath: String
+    ) {
+        ioThread {
+            align(alignedFilePath, maxim1HzFilePath, refFilePath)
+        }
     }
 }

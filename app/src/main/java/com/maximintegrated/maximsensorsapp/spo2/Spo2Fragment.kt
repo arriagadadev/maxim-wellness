@@ -5,27 +5,23 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bluetooth.ble.BleScannerDialog
 import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.bpt.polar.HeartRateMeasurement
 import com.maximintegrated.bpt.polar.PolarViewModel
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
-import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -57,6 +53,13 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             } else {
                 rResultView.emptyValue = ResultCardView.EMPTY_VALUE
             }
+        }
+
+    private val heartRateMeasurementObserver =
+        androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
+            dataRecorder?.record(heartRateMeasurement)
+            viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+            Timber.d("%s", heartRateMeasurement)
         }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -115,6 +118,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         menuItemLogToFlash.isEnabled = false
 
         dataRecorder = DataRecorder("SpO2")
+        dataRecorder?.dataRecorderListener = this
 
         clearChart()
         clearCardViewValues()
@@ -143,7 +147,13 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
         hspViewModel.sendCommand(
             SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
         )
@@ -190,11 +200,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             }
 
         polarViewModel.heartRateMeasurement
-            .observe(this) { heartRateMeasurement ->
-                dataRecorder?.record(heartRateMeasurement)
-                viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
-                Timber.d("%s", heartRateMeasurement)
-            }
+            .observeForever(heartRateMeasurementObserver)
 
         polarViewModel.isDeviceSupported
             .observe(this) {
@@ -236,7 +242,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun showInfoDialog() {
-        val helpDialog = HelpDialog.newInstance(getString(R.string.spo2_info), getString(R.string.info))
+        val helpDialog =
+            HelpDialog.newInstance(getString(R.string.spo2_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 
@@ -330,5 +337,10 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         }
 
         bleScannerDialog?.dismiss()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        polarViewModel.heartRateMeasurement.removeObserver(heartRateMeasurementObserver)
     }
 }

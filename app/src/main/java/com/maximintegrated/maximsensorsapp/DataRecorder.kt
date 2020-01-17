@@ -9,7 +9,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DataRecorder(type: String) {
+class DataRecorder(var type: String) {
 
     companion object {
         val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp")
@@ -65,6 +65,11 @@ class DataRecorder(type: String) {
 
     private val timestamp = TIMESTAMP_FORMAT.format(Date())
 
+    private var oneHzFileIsFinished = false
+    private var referenceFileIsFinished = false
+
+    var dataRecorderListener: DataRecorderListener? = null
+
     init {
         csvWriter = CsvWriter.open(
             getCsvFilePath(type),
@@ -82,6 +87,38 @@ class DataRecorder(type: String) {
         )
     }
 
+    private var oneHzListener = object : CsvWriter.Companion.CsvWriterListener {
+        override fun onCompleted() {
+            Timber.d("oneHzListener onCompleted")
+            oneHzFileIsFinished = true
+            if (referenceFileIsFinished) {
+                dataRecorderListener?.onFilesAreReadyForAlignment(
+                    getCsvFilePathAligned(type),
+                    csvWriter1Hz.filePath,
+                    referenceDevice.filePath
+                )
+                oneHzFileIsFinished = false
+                referenceFileIsFinished = false
+            }
+        }
+    }
+
+    private var referenceListener = object : CsvWriter.Companion.CsvWriterListener {
+        override fun onCompleted() {
+            Timber.d("referenceListener onCompleted")
+            referenceFileIsFinished = true
+            if (oneHzFileIsFinished) {
+                dataRecorderListener?.onFilesAreReadyForAlignment(
+                    getCsvFilePathAligned(type),
+                    csvWriter1Hz.filePath,
+                    referenceDevice.filePath
+                )
+                oneHzFileIsFinished = false
+                referenceFileIsFinished = false
+            }
+        }
+    }
+
     private fun getCsvFilePath(type: String) =
         File(OUTPUT_DIRECTORY, "/RAW/MaximSensorsApp_${timestamp}_$type.csv").absolutePath
 
@@ -92,6 +129,12 @@ class DataRecorder(type: String) {
         File(
             OUTPUT_DIRECTORY,
             "/REFERENCE_DEVICE/MaximSensorsApp_${timestamp}_${type}_reference_device.csv"
+        ).absolutePath
+
+    private fun getCsvFilePathAligned(type: String) =
+        File(
+            OUTPUT_DIRECTORY,
+            "/ALIGNED/MaximSensorsApp_${timestamp}_${type}_aligned.csv"
         ).absolutePath
 
     fun record(data: HspStreamData) {
@@ -131,7 +174,7 @@ class DataRecorder(type: String) {
 
         if (count % 25 == 0) {
             csvWriter1Hz.write(
-                TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis)),
+                data.currentTimeMillis,
                 data.hr
             )
             count = 1
@@ -149,6 +192,8 @@ class DataRecorder(type: String) {
     }
 
     fun close() {
+        csvWriter1Hz.listener = oneHzListener
+        referenceDevice.listener = referenceListener
         try {
             csvWriter.close()
             csvWriter1Hz.close()
@@ -156,5 +201,13 @@ class DataRecorder(type: String) {
         } catch (e: Exception) {
             Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
         }
+    }
+
+    interface DataRecorderListener {
+        fun onFilesAreReadyForAlignment(
+            alignedFilePath: String,
+            maxim1HzFilePath: String,
+            refFilePath: String
+        )
     }
 }

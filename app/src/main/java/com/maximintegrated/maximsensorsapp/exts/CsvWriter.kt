@@ -3,7 +3,7 @@ package com.maximintegrated.maximsensorsapp.exts
 import java.io.File
 import java.util.concurrent.LinkedBlockingDeque
 
-class CsvWriter private constructor(filePath: String) {
+class CsvWriter private constructor(var filePath: String) {
 
     companion object {
         private val POISON_PILL = Any()
@@ -52,7 +52,7 @@ class CsvWriter private constructor(filePath: String) {
 
                 }
                 listener?.onCompleted()
-                if(count == 1 && !flushed){
+                if (count == 1 && !flushed) {
                     file.delete()
                 }
             }
