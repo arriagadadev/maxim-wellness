@@ -105,8 +105,8 @@ typedef struct _FreqDomainHrvMetrics {
     float vlf;    /**< Power in VLF band (ms^2) */
     float lf;    /**< Power in LF band (ms^2) */
     float hf;    /**< Power in HF band (ms^2) */
-    float totPwr;    /**< Total power (ms^2) */
     float lfOverHf;    /**< LF/HF ratio */
+    float totPwr;    /**< Total power (ms^2) */
 } FreqDomainHrvMetrics;
 
 /**
