@@ -5,6 +5,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:name=".MaximSensorsApp"
@@ -16,6 +17,11 @@
         android:theme="@style/Theme.MaximSensorsApp"
         tools:ignore="GoogleAppIndexingWarning"
         android:largeHeap="true">
+
+        <service
+            android:name=".service.ForegroundService"
+            android:enabled="true"/>
+
 
         <provider
             android:name="androidx.core.content.FileProvider"

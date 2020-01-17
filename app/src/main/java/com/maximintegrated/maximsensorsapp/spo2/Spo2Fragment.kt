@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.spo2
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
 import android.graphics.Color
 import android.os.Bundle
 import android.os.SystemClock
@@ -59,6 +60,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
             dataRecorder?.record(heartRateMeasurement)
             viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+            hrResults[REF_KEY] = heartRateMeasurement.heartRate
+            updateNotification()
             Timber.d("%s", heartRateMeasurement)
         }
 
@@ -113,6 +116,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun startMonitoring() {
+        super.startMonitoring()
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -168,6 +172,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun stopMonitoring() {
+        super.stopMonitoring()
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -191,6 +196,10 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
         polarViewModel.connectionState
             .observe(this) { (device, connectionState) ->
+                if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
+                    hrResults.remove(REF_KEY)
+                    updateNotification()
+                }
                 viewReferenceDevice.bleConnectionInfo =
                     if (polarViewModel.bluetoothDevice != null) {
                         BleConnectionInfo(connectionState, device.name, device.address)

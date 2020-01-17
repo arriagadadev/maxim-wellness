@@ -16,6 +16,7 @@ import com.maximintegrated.bpt.hsp.protocol.HspCommand
 import com.maximintegrated.bpt.hsp.protocol.Status
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
+import com.maximintegrated.maximsensorsapp.service.ForegroundService
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber.d
 
@@ -142,5 +143,11 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
     override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {
         val fragment = (getCurrentFragment() as? OnBluetoothDeviceClickListener)
         fragment?.onBluetoothDeviceClicked(bluetoothDevice)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val intent = Intent(this, ForegroundService::class.java)
+        stopService(intent)
     }
 }

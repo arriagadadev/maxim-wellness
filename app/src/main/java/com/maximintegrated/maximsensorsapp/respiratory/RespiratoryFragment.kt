@@ -3,11 +3,8 @@ package com.maximintegrated.maximsensorsapp.respiratory
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
@@ -15,14 +12,12 @@ import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.FloatValueFormatter
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
-import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import java.text.DecimalFormat
@@ -125,10 +120,17 @@ class RespiratoryFragment : MeasurementBaseFragment() {
     }
 
     override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
     }
 
     override fun startMonitoring() {
+        super.startMonitoring()
         isMonitoring = true
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -152,6 +154,7 @@ class RespiratoryFragment : MeasurementBaseFragment() {
     }
 
     override fun stopMonitoring() {
+        super.stopMonitoring()
         isMonitoring = false
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -176,7 +179,8 @@ class RespiratoryFragment : MeasurementBaseFragment() {
     }
 
     override fun showInfoDialog() {
-        val helpDialog = HelpDialog.newInstance(getString(R.string.resp_info), getString(R.string.info))
+        val helpDialog =
+            HelpDialog.newInstance(getString(R.string.resp_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 

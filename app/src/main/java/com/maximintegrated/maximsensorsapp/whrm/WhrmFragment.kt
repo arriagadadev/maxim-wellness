@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.whrm
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothProfile
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
@@ -103,6 +104,8 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
             dataRecorder?.record(heartRateMeasurement)
             viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
+            hrResults[REF_KEY] = heartRateMeasurement.heartRate
+            updateNotification()
             Timber.d("%s", heartRateMeasurement)
         }
 
@@ -184,6 +187,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun startMonitoring() {
+        super.startMonitoring()
         isMonitoring = true
         dataRecorder = DataRecorder("Whrm")
         dataRecorder?.dataRecorderListener = this
@@ -236,6 +240,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun stopMonitoring() {
+        super.stopMonitoring()
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -276,6 +281,10 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
         polarViewModel.connectionState
             .observe(this) { (device, connectionState) ->
+                if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
+                    hrResults.remove(REF_KEY)
+                    updateNotification()
+                }
                 viewReferenceDevice.bleConnectionInfo =
                     if (polarViewModel.bluetoothDevice != null) {
                         BleConnectionInfo(connectionState, device.name, device.address)

@@ -3,11 +3,8 @@ package com.maximintegrated.maximsensorsapp.hrv
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
@@ -17,13 +14,11 @@ import com.maximintegrated.algorithms.hrv.FreqDomainHrvMetrics
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.hrv.TimeDomainHrvMetrics
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
-import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_hrv_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import java.text.SimpleDateFormat
@@ -257,6 +252,7 @@ class HrvFragment : MeasurementBaseFragment() {
     }
 
     override fun startMonitoring() {
+        super.startMonitoring()
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -285,6 +281,7 @@ class HrvFragment : MeasurementBaseFragment() {
     }
 
     override fun stopMonitoring() {
+        super.stopMonitoring()
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -310,7 +307,8 @@ class HrvFragment : MeasurementBaseFragment() {
     }
 
     override fun showInfoDialog() {
-        val helpDialog = HelpDialog.newInstance(getString(R.string.hrv_info), getString(R.string.info))
+        val helpDialog =
+            HelpDialog.newInstance(getString(R.string.hrv_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 

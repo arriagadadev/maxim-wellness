@@ -203,10 +203,17 @@ class StressFragment : MeasurementBaseFragment() {
     }
 
     override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "scdenable", if (menuItemEnabledScd.isChecked) "1" else "0"))
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
     }
 
     override fun startMonitoring() {
+        super.startMonitoring()
         isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
@@ -236,6 +243,7 @@ class StressFragment : MeasurementBaseFragment() {
     }
 
     override fun stopMonitoring() {
+        super.stopMonitoring()
         isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
@@ -261,7 +269,8 @@ class StressFragment : MeasurementBaseFragment() {
     }
 
     override fun showInfoDialog() {
-        val helpDialog = HelpDialog.newInstance(getString(R.string.stress_info), getString(R.string.info))
+        val helpDialog =
+            HelpDialog.newInstance(getString(R.string.stress_info), getString(R.string.info))
         fragmentManager?.let { helpDialog.show(it, "helpDialog") }
     }
 

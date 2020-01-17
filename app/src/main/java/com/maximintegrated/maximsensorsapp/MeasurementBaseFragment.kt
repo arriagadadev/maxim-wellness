@@ -1,7 +1,9 @@
 package com.maximintegrated.maximsensorsapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -10,10 +12,17 @@ import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.exts.ioThread
+import com.maximintegrated.maximsensorsapp.service.ForegroundService
 import kotlinx.android.synthetic.main.include_app_bar.*
 
 abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     DataRecorder.DataRecorderListener {
+
+    companion object {
+        const val MXM_KEY = "MXM"
+        const val REF_KEY = "REF"
+    }
+
     var dataRecorder: DataRecorder? = null
 
     lateinit var hspViewModel: HspViewModel
@@ -24,6 +33,8 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     lateinit var menuItemLogToFlash: MenuItem
     lateinit var menuItemSettings: MenuItem
     lateinit var menuItemEnabledScd: MenuItem
+
+    var hrResults: HashMap<String, Int> = hashMapOf() // MXM, REF --> KEYS
 
     var isMonitoring: Boolean = false
         set(value) {
@@ -70,9 +81,13 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         toolbar.pageTitle = title
     }
 
-    abstract fun startMonitoring()
+    open fun startMonitoring() {
+        startService()
+    }
 
-    abstract fun stopMonitoring()
+    open fun stopMonitoring() {
+        stopService()
+    }
 
     open fun isMonitoringChanged() {
 
@@ -134,11 +149,14 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     override fun onStopMonitoring() {
+        hspViewModel.streamData.removeObserver(dataStreamObserver)
         stopMonitoring()
     }
 
     private val dataStreamObserver = Observer<HspStreamData> { data ->
         addStreamData(data)
+        hrResults[MXM_KEY] = data.hr
+        updateNotification()
         //Timber.d("MELIK: $data")
     }
 
@@ -161,6 +179,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     override fun onDetach() {
         super.onDetach()
         hspViewModel.streamData.removeObserver(dataStreamObserver)
+        stopService()
     }
 
     override fun onFilesAreReadyForAlignment(
@@ -170,6 +189,39 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     ) {
         ioThread {
             align(alignedFilePath, maxim1HzFilePath, refFilePath)
+        }
+    }
+
+    private var serviceActive = false
+
+    private fun startService() {
+        val intent = Intent(requireActivity(), ForegroundService::class.java)
+        ContextCompat.startForegroundService(requireContext(), intent)
+        serviceActive = true
+    }
+
+    private fun stopService() {
+        val intent = Intent(requireActivity(), ForegroundService::class.java)
+        activity?.stopService(intent)
+        serviceActive = false
+    }
+
+    private fun getNotificationText(): String {
+        var text = ""
+        if (hrResults[MXM_KEY] != null) {
+            text += "Maxim Watch: ${hrResults[MXM_KEY].toString()}"
+        }
+        if (hrResults[REF_KEY] != null) {
+            text += "  Reference: ${hrResults[REF_KEY].toString()}"
+        }
+        return text
+    }
+
+    fun updateNotification() {
+        if (serviceActive) {
+            val intent = Intent(requireActivity(), ForegroundService::class.java)
+            intent.putExtra(ForegroundService.NOTIFICATION_MESSAGE_KEY, getNotificationText())
+            ContextCompat.startForegroundService(requireContext(), intent)
         }
     }
 }
