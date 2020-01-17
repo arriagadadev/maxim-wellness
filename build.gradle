@@ -2,8 +2,8 @@
 
 buildscript {
     final majorVersion = 1
-    final minorVersion = 2
-    final patchVersion = 2
+    final minorVersion = 3
+    final patchVersion = 0
 
 
     final latestSdk = 28
