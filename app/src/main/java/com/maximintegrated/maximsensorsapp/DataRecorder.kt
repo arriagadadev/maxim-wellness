@@ -88,8 +88,9 @@ class DataRecorder(var type: String) {
     }
 
     private var oneHzListener = object : CsvWriter.Companion.CsvWriterListener {
-        override fun onCompleted() {
-            Timber.d("oneHzListener onCompleted")
+        override fun onCompleted(isSuccessful: Boolean) {
+            Timber.d("oneHzListener onCompleted $isSuccessful")
+            if(!isSuccessful) return
             oneHzFileIsFinished = true
             if (referenceFileIsFinished) {
                 dataRecorderListener?.onFilesAreReadyForAlignment(
@@ -104,8 +105,9 @@ class DataRecorder(var type: String) {
     }
 
     private var referenceListener = object : CsvWriter.Companion.CsvWriterListener {
-        override fun onCompleted() {
-            Timber.d("referenceListener onCompleted")
+        override fun onCompleted(isSuccessful: Boolean) {
+            Timber.d("referenceListener onCompleted $isSuccessful")
+            if(!isSuccessful) return
             referenceFileIsFinished = true
             if (oneHzFileIsFinished) {
                 dataRecorderListener?.onFilesAreReadyForAlignment(

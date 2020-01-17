@@ -17,7 +17,7 @@ class CsvWriter private constructor(var filePath: String) {
         }
 
         interface CsvWriterListener {
-            fun onCompleted()
+            fun onCompleted(isSuccessful: Boolean)
         }
     }
 
@@ -51,9 +51,11 @@ class CsvWriter private constructor(var filePath: String) {
                     }
 
                 }
-                listener?.onCompleted()
                 if (count == 1 && !flushed) {
+                    listener?.onCompleted(false)
                     file.delete()
+                }else{
+                    listener?.onCompleted(true)
                 }
             }
         }

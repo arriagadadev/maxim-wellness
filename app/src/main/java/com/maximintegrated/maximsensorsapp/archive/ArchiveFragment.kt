@@ -249,7 +249,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         alertDialog.show()
     }
 
-    override fun onCompleted() {
+    override fun onCompleted(isSuccessful: Boolean) {
         doAsync {
             uiThread {
                 progressBar.visibility = View.GONE
