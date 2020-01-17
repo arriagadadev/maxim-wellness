@@ -29,7 +29,7 @@ data class HspStreamData(
     val scdState: Int,
     val walkSteps: Int,
     val runSteps: Int,
-    val kCal: Int,
+    val kCal: Float,
     val cadence: Int,
     val currentTimeMillis: Long = System.currentTimeMillis()
 ) {
@@ -41,13 +41,14 @@ data class HspStreamData(
     var rrInt = (rr * 10f).toInt()
     var rInt = (r * 1000f).toInt()
     var spo2Int = (spo2 * 10f).toInt()
+    var kCalInt = (kCal * 10f).toInt()
 
     companion object {
 
         // get_format ppg 9 enc=bin cs=1 format={smpleCnt,8},{smpleTime,32},{grnCnt,20},{grn2Cnt,20},{irCnt,20},{redCnt,20},{accelX,14,3},
         //{accelY,14,3},{accelZ,14,3},{opMode,4},{hr,12},{hrconf,8},{rr,14,1},{rrconf,8},{activity,4},{r,12,3},{wspo2conf,8},{spo2,11,1},{wspo2percentcomplete,8},
         //{wspo2lowSNR,1},{wspo2motion,1},{wspo2lowpi,1},{wspo2unreliableR,1},{wspo2state,4},{scdstate,4},
-        //{wSteps,24},{rSteps,24},{kCal,24},{cadence,24}
+        //{wSteps,24},{rSteps,24},{kCal,24, 1},{cadence,24}
 
         fun fromPacket(packet: ByteArray): HspStreamData {
             return with(BitStreamReader(packet, 8)) {
@@ -79,7 +80,7 @@ data class HspStreamData(
                     scdState = nextInt(4),
                     walkSteps = nextInt(24),
                     runSteps = nextInt(24),
-                    kCal = nextInt(24),
+                    kCal = nextSignedFloat(24, 10),
                     cadence = nextInt(24)
                 )
             }

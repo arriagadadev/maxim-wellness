@@ -31,7 +31,7 @@ fun AlgorithmInput.set(data: HspStreamData) {
     scdState = data.scdState
     walkSteps = data.walkSteps
     runSteps = data.runSteps
-    kCal = data.kCal
+    kCal = data.kCalInt
     cadence = data.cadence
     timestamp = data.currentTimeMillis
 }
