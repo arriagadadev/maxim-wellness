@@ -136,6 +136,8 @@
         In literature, most of the wearable stress monitoring studies use galvanic skin response,
         muscle tension, blood pressure and skin temperature devices as well as HR monitoring devices.
         Maxim\'s stress estimation methods use accelerometer and PPG data (HR, HRV) solely.</string>
+    <string name="alignment_successful">Auto alignment is done successfully.</string>
+    <string name="alignment_fail">The alignment should be done manually.</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

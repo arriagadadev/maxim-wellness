@@ -3,6 +3,7 @@ package com.maximintegrated.maximsensorsapp.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -49,7 +50,13 @@ class OfflineDataView @JvmOverloads constructor(
         dataSet.lineWidth = 2f
         dataSet.label = data.title
         dataSet.values = data.dataSetValues
-        chartMap[key] = LineData(dataSet)
+        if(chartMap.containsKey(key)){
+            dataSet.color = ContextCompat.getColor(context, R.color.channel_red)
+            chartMap[key]?.addDataSet(dataSet)
+        }else{
+            dataSet.color = ContextCompat.getColor(context, R.color.colorPrimary)
+            chartMap[key] = LineData(dataSet)
+        }
     }
 
     fun display(key: Int) {
@@ -72,6 +79,7 @@ class OfflineDataView @JvmOverloads constructor(
         lineChart.setVisibleXRangeMaximum(1000f)
 
         val xAxis = lineChart.xAxis
+        xAxis.setDrawLabels(false)
         xAxis.setDrawGridLines(false)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 //        xAxis.valueFormatter = IAxisValueFormatter { value, axis -> convert(value) } as ValueFormatter?

@@ -19,8 +19,15 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import timber.log.Timber
 import java.io.File
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+
+enum class HrAlignment {
+    ALIGNMENT_FAIL,
+    ALIGNMENT_NO_REF_DEVICE,
+    ALIGNMENT_SUCCESSFUL
+}
 
 class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -31,15 +38,38 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private var logFile: File? = null
 
+    private var refHrFile: File? = null
+
+    private var oneHzFile: File? = null
+
+    private var alignFile: File? = null
+
     private var offlineDataList: ArrayList<AlgorithmInput> = arrayListOf()
 
     companion object {
         fun newInstance(logFile: File): OfflineDataFragment {
             val fragment = OfflineDataFragment()
             fragment.logFile = logFile
+            var refPath = File(
+                DataRecorder.OUTPUT_DIRECTORY,
+                "/REFERENCE_DEVICE/${logFile.nameWithoutExtension}_reference_device.csv"
+            ).absolutePath
+            var oneHzPath = File(
+                DataRecorder.OUTPUT_DIRECTORY,
+                "/1Hz/${logFile.nameWithoutExtension}_1Hz.csv"
+            ).absolutePath
+            var alignPath = File(
+                DataRecorder.OUTPUT_DIRECTORY,
+                "/ALIGNED/${logFile.nameWithoutExtension}_aligned.csv"
+            ).absolutePath
+            fragment.refHrFile = if (File(refPath).exists()) File(refPath) else null
+            fragment.oneHzFile = if (File(oneHzPath).exists()) File(oneHzPath) else null
+            fragment.alignFile = if (File(alignPath).exists()) File(alignPath) else null
             return fragment
         }
     }
+
+    private var hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
 
     //private val adapter: OfflineDataAdapter by lazy { OfflineDataAdapter() }
 
@@ -87,19 +117,94 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
             offlineDataList = readAlgorithmInputsFromFile(logFile)
 
+            val alignedDataList = readTimeStampAndHrFromAlignedFile(alignFile)
+
             val resultList = runHrvAlgo()
 
-            offlineChart.put(1, OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.hr.toFloat()) },
-                "HR (bpm)",
-                ""
-            ))
+            var hrTimestampStart = 0L
+
+            if (alignedDataList.isNotEmpty()) {
+                hrAlignment = HrAlignment.ALIGNMENT_SUCCESSFUL
+                hrTimestampStart = alignedDataList[0].first
+                offlineChart.put(
+                    1, OfflineChartData(
+                        alignedDataList.map {
+                            Entry(
+                                (it.first - hrTimestampStart).toFloat(),
+                                it.second.toFloat()
+                            )
+                        },
+                        "HR (bpm)",
+                        ""
+                    )
+                )
+                offlineChart.put(
+                    1, OfflineChartData(
+                        alignedDataList.map {
+                            Entry(
+                                (it.first - hrTimestampStart).toFloat(),
+                                it.third.toFloat()
+                            )
+                        },
+                        "HR (bpm)",
+                        ""
+                    )
+                )
+                alignedDataList.clear()
+            } else {
+                val oneHzDataList = readTimeStampAndHrFrom1HzFile(oneHzFile)
+
+                val refDataList = readTimeStampAndHrFromReferenceFile(refHrFile)
+
+                if (oneHzDataList.isNotEmpty()) {
+                    hrTimestampStart = oneHzDataList[0].first
+                }
+
+                if (refDataList.isNotEmpty()) {
+                    hrTimestampStart = min(hrTimestampStart, refDataList[0].first)
+                    hrAlignment = HrAlignment.ALIGNMENT_FAIL
+                } else {
+                    hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
+                }
+
+                offlineChart.put(
+                    1, OfflineChartData(
+                        oneHzDataList.map {
+                            Entry(
+                                (it.first - hrTimestampStart).toFloat(),
+                                it.second.toFloat()
+                            )
+                        },
+                        "HR (bpm)",
+                        ""
+                    )
+                )
+
+                if (refDataList.isNotEmpty()) {
+                    offlineChart.put(
+                        1, OfflineChartData(
+                            refDataList.map {
+                                Entry(
+                                    (it.first - hrTimestampStart).toFloat(),
+                                    it.second.toFloat()
+                                )
+                            },
+                            "HR (bpm)",
+                            ""
+                        )
+                    )
+                    refDataList.clear()
+                }
+
+                oneHzDataList.clear()
+            }
 
             offlineChart.put(2, OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
-                "SpO2 (%)",
-                ""
-            ))
+                    offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
+                    "SpO2 (%)",
+                    ""
+                )
+            )
 
             offlineChart.put(3, OfflineChartData(
                 offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rr / 10f) },
@@ -292,8 +397,35 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        if(position != 0){
+        if (position != 0) {
             offlineChart.display(position)
+            if (position != 1) { //HR
+                warningMessageView.visibility = View.GONE
+            } else {
+                when (hrAlignment) {
+                    HrAlignment.ALIGNMENT_SUCCESSFUL -> {
+                        warningMessageView.text = getString(R.string.alignment_successful)
+                        warningMessageView.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_check,
+                            0,
+                            0,
+                            0
+                        )
+                        warningMessageView.visibility = View.VISIBLE
+                    }
+                    HrAlignment.ALIGNMENT_FAIL -> {
+                        warningMessageView.text = getString(R.string.alignment_fail)
+                        warningMessageView.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_warning,
+                            0,
+                            0,
+                            0
+                        )
+                        warningMessageView.visibility = View.VISIBLE
+                    }
+                    else -> warningMessageView.visibility = View.GONE
+                }
+            }
         }
     }
 }
