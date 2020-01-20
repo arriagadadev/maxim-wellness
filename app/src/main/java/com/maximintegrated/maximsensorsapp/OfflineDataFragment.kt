@@ -135,7 +135,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                             )
                         },
                         "HR (bpm)",
-                        ""
+                        "Maxim"
                     )
                 )
                 offlineChart.put(
@@ -147,7 +147,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                             )
                         },
                         "HR (bpm)",
-                        ""
+                        "Ref"
                     )
                 )
                 alignedDataList.clear()
@@ -176,7 +176,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                             )
                         },
                         "HR (bpm)",
-                        ""
+                        "Maxim"
                     )
                 )
 
@@ -190,7 +190,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                                 )
                             },
                             "HR (bpm)",
-                            ""
+                            "Ref"
                         )
                     )
                     refDataList.clear()
@@ -202,14 +202,14 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
             offlineChart.put(2, OfflineChartData(
                     offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
                     "SpO2 (%)",
-                    ""
+                    "Maxim"
                 )
             )
 
             offlineChart.put(3, OfflineChartData(
                 offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rr / 10f) },
                 "IBI (ms)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(4,  OfflineChartData(
@@ -220,7 +220,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     )
                 },
                 "STEPS",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(5,  OfflineChartData(
@@ -233,79 +233,79 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     )
                 },
                 "MOTION (g)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(6,  OfflineChartData(
                 runRrAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it) },
                 "RESPIRATION RATE \n(breath/min)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(7,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rmssd) },
                 "RMSSD (ms)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(8,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.sdnn) },
                 "SDNN (ms)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(9,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.avnn) },
                 "AVNN (ms)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(10,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.pnn50) },
                 "PNN50 (ms)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(11,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.ulf) },
                 "ULF (ms²)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(12,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.vlf) },
                 "VLF (ms²)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(13,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lf) },
                 "LF (ms²)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(14,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.hf) },
                 "HF (ms²)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(15,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lfOverHf) },
                 "LF/HF",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(16,  OfflineChartData(
                 resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.totPwr) },
                 "TOTAL POWER (ms²)",
-                ""
+                "Maxim"
             ))
 
             offlineChart.put(17,  OfflineChartData(
                 runStressAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it.toFloat()) },
                 "STRESS SCORE",
-                ""
+                "Maxim"
             ))
 
             resultList.clear()

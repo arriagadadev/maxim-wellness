@@ -17,6 +17,7 @@ class OfflineDataView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     var chartMap: HashMap<Int, LineData> = hashMapOf()
+    var chartMapTitles: HashMap<Int, String> = hashMapOf()
 
     var title: CharSequence
         get() = chartTitle.text
@@ -44,12 +45,12 @@ class OfflineDataView @JvmOverloads constructor(
 
     fun put(key: Int, data: OfflineChartData) {
 
-        val dataSet = LineDataSet(emptyList(), "")
+        val dataSet = LineDataSet(emptyList(), data.label)
         dataSet.setDrawCircles(false)
         dataSet.setDrawFilled(false)
         dataSet.lineWidth = 2f
-        dataSet.label = data.title
         dataSet.values = data.dataSetValues
+        chartMapTitles[key] = data.title
         if(chartMap.containsKey(key)){
             dataSet.color = ContextCompat.getColor(context, R.color.channel_red)
             chartMap[key]?.addDataSet(dataSet)
@@ -62,7 +63,8 @@ class OfflineDataView @JvmOverloads constructor(
     fun display(key: Int) {
         if (chartMap.containsKey(key)) {
             lineChart.data = chartMap[key]
-            chartTitle.text = lineChart.data.dataSetLabels[0]
+            chartTitle.text = chartMapTitles[key]
+            lineChart.fitScreen()
             lineChart.invalidate()
         }
     }
@@ -71,7 +73,7 @@ class OfflineDataView @JvmOverloads constructor(
         lineChart.extraBottomOffset = 10f
         lineChart.description.isEnabled = false
         lineChart.setDrawGridBackground(false)
-        lineChart.legend.isEnabled = false
+        lineChart.legend.isEnabled = true
         lineChart.setScaleEnabled(true)
         lineChart.setPinchZoom(false)
         lineChart.axisRight.isEnabled = false

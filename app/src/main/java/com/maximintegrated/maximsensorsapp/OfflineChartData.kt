@@ -5,5 +5,5 @@ import com.github.mikephil.charting.data.Entry
 data class OfflineChartData(
     val dataSetValues: List<Entry>,
     val title: String,
-    val chartType: String
+    val label: String
 )
