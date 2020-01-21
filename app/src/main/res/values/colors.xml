@@ -18,4 +18,8 @@
     <color name="stress_orange">#ffbf00</color>
     <color name="stress_green">#238823</color>
 
+    <color name="progress_red">#d32f2f</color>
+    <color name="progress_orange">#ffbf00</color>
+    <color name="progress_green">#23DD23</color>
+
 </resources>

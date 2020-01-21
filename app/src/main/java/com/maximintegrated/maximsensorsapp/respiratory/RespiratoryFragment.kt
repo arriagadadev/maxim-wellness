@@ -20,6 +20,9 @@ import com.maximintegrated.maximsensorsapp.view.FloatValueFormatter
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
+import kotlinx.android.synthetic.main.view_multi_channel_chart.view.titleView
+import kotlinx.android.synthetic.main.view_result_card.view.*
+import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,6 +52,26 @@ class RespiratoryFragment : MeasurementBaseFragment() {
                 respirationResultView.emptyValue = ResultCardView.EMPTY_VALUE
             }
         }
+
+    private var scd: Int? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                respirationResultView.scdStateTextView.text = Scd.values()[value].displayName
+            } else {
+                respirationResultView.scdStateTextView.text = Scd.NO_DECISION.displayName
+            }
+        }
+
+    /*private var respirationConfidence: Int? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                respirationResultView.confidenceProgressBar.progress = value
+            } else {
+                respirationResultView.confidenceProgressBar.progress = 0
+            }
+        }*/
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -117,6 +140,8 @@ class RespiratoryFragment : MeasurementBaseFragment() {
             chartView.addData(algorithmOutput.respiratory.respirationRate)
             respiration = algorithmOutput.respiratory.respirationRate
         }
+
+        scd = streamData.scdState
     }
 
     override fun sendDefaultSettings() {
@@ -190,5 +215,6 @@ class RespiratoryFragment : MeasurementBaseFragment() {
 
     private fun clearCardViewValues() {
         respiration = null
+        scd = null
     }
 }

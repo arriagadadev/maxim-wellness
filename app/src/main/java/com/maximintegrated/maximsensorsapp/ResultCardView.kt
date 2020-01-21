@@ -3,6 +3,7 @@ package com.maximintegrated.maximsensorsapp
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.text.buildSpannedString
 import androidx.core.text.scale
 import androidx.core.view.isInvisible
@@ -69,6 +70,18 @@ class ResultCardView @JvmOverloads constructor(
             decimalFormatter.maximumFractionDigits = value
         }
 
+    private var enableProgress = false
+        set(value) {
+            field = value
+            confidenceGroup.visibility = if(value) View.VISIBLE else View.GONE
+        }
+
+    private var enableScdView = false
+        set(value) {
+            field = value
+            scdGroup.visibility = if(value) View.VISIBLE else View.GONE
+        }
+
     init {
         inflate(context, R.layout.view_result_card, this)
 
@@ -96,6 +109,10 @@ class ResultCardView @JvmOverloads constructor(
                 flashingText = getText(R.styleable.ResultCardView_rcv_flashing_text)
             }
 
+            enableProgress = getBoolean(R.styleable.ResultCardView_rcv_enable_progress, false)
+            enableScdView = getBoolean(R.styleable.ResultCardView_rcv_enable_scd_view, false)
+            confidenceProgressBar.progress = 0
+            scdStateTextView.text = Scd.NO_DECISION.displayName
             recycle()
         }
     }
