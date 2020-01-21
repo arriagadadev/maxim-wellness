@@ -51,6 +51,13 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/add_annotation"
+        android:checkable="false"
+        android:checked="false"
+        android:title="@string/add_annotation"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/send_arbitrary_command"
         android:checkable="false"
         android:checked="false"

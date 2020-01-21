@@ -3,6 +3,7 @@ package com.maximintegrated.maximsensorsapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -11,9 +12,13 @@ import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
+import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.ioThread
 import com.maximintegrated.maximsensorsapp.service.ForegroundService
 import kotlinx.android.synthetic.main.include_app_bar.*
+import timber.log.Timber
+import java.io.File
+import java.util.*
 
 abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     DataRecorder.DataRecorderListener {
@@ -71,6 +76,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                     R.id.hrm_settings -> showSettingsDialog()
                     R.id.info_menu_item -> showInfoDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
+                    R.id.add_annotation -> showAnnotationDialog()
                     else -> return@setOnMenuItemClickListener false
                 }
                 return@setOnMenuItemClickListener true
@@ -178,6 +184,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     override fun onDetach() {
         super.onDetach()
+        annotationWriter?.close()
         hspViewModel.streamData.removeObserver(dataStreamObserver)
         stopService()
     }
@@ -223,5 +230,48 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
             intent.putExtra(ForegroundService.NOTIFICATION_MESSAGE_KEY, getNotificationText())
             ContextCompat.startForegroundService(requireContext(), intent)
         }
+    }
+
+    private val timestamp = DataRecorder.TIMESTAMP_FORMAT.format(Date())
+    private var annotationWriter: CsvWriter? = null
+
+    private fun getCsvFilePathAnnotation(): String {
+        val name = this.javaClass.simpleName.replace("Fragment", "")
+        Timber.d("MELIK: name = $name")
+        return File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/ANNOTATIONS/MaximSensorsApp_${timestamp}_${name}_annotation.csv"
+        ).absolutePath
+    }
+
+    fun saveAnnotation(annotation: String) {
+        if (annotationWriter == null) {
+            annotationWriter = CsvWriter.open(
+                getCsvFilePathAnnotation(),
+                arrayOf("timestamp", "annotation")
+            )
+        }
+        annotationWriter?.write(
+            System.currentTimeMillis(),
+            annotation
+        )
+    }
+
+    fun showAnnotationDialog() {
+        Timber.d("MELIK: class = ${this.javaClass.name}")
+        val editText = EditText(context)
+        editText.hint = getString(R.string.enter_message)
+        val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        alertDialog.setTitle(getString(R.string.add_annotation))
+        alertDialog.setView(editText)
+            .setPositiveButton(getString(R.string.save)) { dialog, which ->
+                saveAnnotation(editText.text.toString())
+                dialog.dismiss()
+            }.setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                dialog.dismiss()
+            }
+
+        alertDialog.setCancelable(false)
+        alertDialog.show()
     }
 }
