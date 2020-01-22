@@ -201,6 +201,8 @@ class HrvFragment : MeasurementBaseFragment() {
         MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
         percentCompleted.measurementProgress = algorithmOutput.hrv.percentCompleted
+        notificationResults[MXM_KEY] = "HRV progress: ${algorithmOutput.hrv.percentCompleted}%"
+        updateNotification()
 
         if (algorithmOutput.hrv.isHrvCalculated) {
             updateTimeDomainHrvMetrics(algorithmOutput.hrv.timeDomainHrvMetrics)

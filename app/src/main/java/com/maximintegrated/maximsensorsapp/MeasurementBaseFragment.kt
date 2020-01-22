@@ -39,7 +39,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     lateinit var menuItemSettings: MenuItem
     lateinit var menuItemEnabledScd: MenuItem
 
-    var hrResults: HashMap<String, Int> = hashMapOf() // MXM, REF --> KEYS
+    var notificationResults: HashMap<String, String> = hashMapOf() // MXM, REF --> KEYS
 
     var isMonitoring: Boolean = false
         set(value) {
@@ -161,8 +161,6 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     private val dataStreamObserver = Observer<HspStreamData> { data ->
         addStreamData(data)
-        hrResults[MXM_KEY] = data.hr
-        updateNotification()
         //Timber.d("MELIK: $data")
     }
 
@@ -215,11 +213,11 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     private fun getNotificationText(): String {
         var text = ""
-        if (hrResults[MXM_KEY] != null) {
-            text += "Maxim Watch: ${hrResults[MXM_KEY].toString()}"
+        if (notificationResults[MXM_KEY] != null) {
+            text += notificationResults[MXM_KEY]
         }
-        if (hrResults[REF_KEY] != null) {
-            text += "  Reference: ${hrResults[REF_KEY].toString()}"
+        if (notificationResults[REF_KEY] != null) {
+            text += "  ${notificationResults[REF_KEY]}"
         }
         return text
     }

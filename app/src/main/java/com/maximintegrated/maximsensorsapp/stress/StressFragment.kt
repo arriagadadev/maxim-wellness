@@ -157,9 +157,12 @@ class StressFragment : MeasurementBaseFragment() {
         val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
         percentCompleted.measurementProgress = algorithmOutput.hrv.percentCompleted
-
+        notificationResults[MXM_KEY] = "Stress progress: ${algorithmOutput.hrv.percentCompleted}%"
+        updateNotification()
         if (success) {
             stress = algorithmOutput.stress.stressScore
+            notificationResults[MXM_KEY] = "Stress score: $stress"
+            updateNotification()
             stopMonitoring()
         }
     }

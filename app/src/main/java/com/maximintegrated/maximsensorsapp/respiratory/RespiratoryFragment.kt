@@ -139,6 +139,8 @@ class RespiratoryFragment : MeasurementBaseFragment() {
             }
             chartView.addData(algorithmOutput.respiratory.respirationRate)
             respiration = algorithmOutput.respiratory.respirationRate
+            notificationResults[MXM_KEY] = "Resp. rate: ${decimalFormat.format(respiration)} breath/min"
+            updateNotification()
         }
 
         scd = streamData.scdState

@@ -104,7 +104,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
             dataRecorder?.record(heartRateMeasurement)
             viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
-            hrResults[REF_KEY] = heartRateMeasurement.heartRate
+            notificationResults[REF_KEY] = "REF HR: ${heartRateMeasurement.heartRate}bpm"
             updateNotification()
             Timber.d("%s", heartRateMeasurement)
         }
@@ -263,6 +263,8 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun addStreamData(streamData: HspStreamData) {
+        notificationResults[MXM_KEY] = "Maxim HR: ${streamData.hr}bpm"
+        updateNotification()
         renderHrmModel(streamData)
         dataRecorder?.record(streamData)
         stepCount = streamData.runSteps + streamData.walkSteps
@@ -282,7 +284,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         polarViewModel.connectionState
             .observe(this) { (device, connectionState) ->
                 if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
-                    hrResults.remove(REF_KEY)
+                    notificationResults.remove(REF_KEY)
                     updateNotification()
                 }
                 viewReferenceDevice.bleConnectionInfo =

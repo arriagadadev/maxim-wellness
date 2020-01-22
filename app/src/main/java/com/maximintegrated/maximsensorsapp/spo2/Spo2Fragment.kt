@@ -60,7 +60,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         androidx.lifecycle.Observer<HeartRateMeasurement> { heartRateMeasurement ->
             dataRecorder?.record(heartRateMeasurement)
             viewReferenceDevice.heartRateMeasurement = heartRateMeasurement
-            hrResults[REF_KEY] = heartRateMeasurement.heartRate
+            notificationResults[REF_KEY] = "REF HR: ${heartRateMeasurement.heartRate}bpm"
             updateNotification()
             Timber.d("%s", heartRateMeasurement)
         }
@@ -197,7 +197,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         polarViewModel.connectionState
             .observe(this) { (device, connectionState) ->
                 if (connectionState == BluetoothProfile.STATE_DISCONNECTED) {
-                    hrResults.remove(REF_KEY)
+                    notificationResults.remove(REF_KEY)
                     updateNotification()
                 }
                 viewReferenceDevice.bleConnectionInfo =
@@ -257,7 +257,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun addStreamData(streamData: HspStreamData) {
-
+        notificationResults[MXM_KEY] = "Maxim SpO2: ${streamData.spo2}%"
+        updateNotification()
         dataRecorder?.record(streamData)
 
         renderSpo2Model(streamData)
