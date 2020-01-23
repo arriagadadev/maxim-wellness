@@ -48,6 +48,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
             menuItemStartMonitoring.isVisible = !value
             isMonitoringChanged()
         }
+    var expectingSampleCount: Int = 0
 
     abstract fun initializeChronometer()
 
@@ -88,10 +89,12 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     open fun startMonitoring() {
+        expectingSampleCount = 0
         startService()
     }
 
     open fun stopMonitoring() {
+        expectingSampleCount = 0
         stopService()
     }
 
@@ -160,7 +163,19 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     private val dataStreamObserver = Observer<HspStreamData> { data ->
+        if (!isMonitoring) return@Observer
         addStreamData(data)
+        if (expectingSampleCount != data.sampleCount) {
+            val error =
+                "expectingSampleCount = $expectingSampleCount  receivedSampleCount = ${data.sampleCount}"
+            Timber.d("Error: $error")
+            saveError(error)
+            expectingSampleCount = data.sampleCount
+        }
+        expectingSampleCount++
+        if (expectingSampleCount == 256) {
+            expectingSampleCount = 0
+        }
         //Timber.d("MELIK: $data")
     }
 
@@ -183,6 +198,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     override fun onDetach() {
         super.onDetach()
         annotationWriter?.close()
+        errorWriter?.close()
         hspViewModel.streamData.removeObserver(dataStreamObserver)
         stopService()
     }
@@ -232,6 +248,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     private val timestamp = DataRecorder.TIMESTAMP_FORMAT.format(Date())
     private var annotationWriter: CsvWriter? = null
+    private var errorWriter: CsvWriter? = null
 
     private fun getCsvFilePathAnnotation(): String {
         val name = this.javaClass.simpleName.replace("Fragment", "")
@@ -241,7 +258,15 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         ).absolutePath
     }
 
-    fun saveAnnotation(annotation: String) {
+    private fun getCsvFilePathError(): String {
+        val name = this.javaClass.simpleName.replace("Fragment", "")
+        return File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/ERROR/MaximSensorsApp_${timestamp}_${name}_error.csv"
+        ).absolutePath
+    }
+
+    private fun saveAnnotation(annotation: String) {
         if (annotationWriter == null) {
             annotationWriter = CsvWriter.open(
                 getCsvFilePathAnnotation(),
@@ -254,7 +279,20 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         )
     }
 
-    fun showAnnotationDialog() {
+    private fun saveError(error: String) {
+        if (errorWriter == null) {
+            errorWriter = CsvWriter.open(
+                getCsvFilePathError(),
+                arrayOf("timestamp", "error")
+            )
+        }
+        errorWriter?.write(
+            System.currentTimeMillis(),
+            error
+        )
+    }
+
+    private fun showAnnotationDialog() {
         val editText = EditText(context)
         editText.hint = getString(R.string.enter_message)
         val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
