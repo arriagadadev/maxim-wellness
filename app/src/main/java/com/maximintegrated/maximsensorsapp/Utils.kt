@@ -41,7 +41,7 @@ fun readAlgorithmInputsFromFile(file: File?): ArrayList<AlgorithmInput> {
         input.walkSteps = items[25].toInt()
         input.runSteps = items[26].toInt()
         input.kCal = (items[27].toFloat() * 10f).toInt()
-        input.cadence = items[28].toInt()
+        input.cadence = (items[28].toFloat() * 10f).toInt()
         input.timestamp = items[30].toLong()
         inputs.add(input)
     }
