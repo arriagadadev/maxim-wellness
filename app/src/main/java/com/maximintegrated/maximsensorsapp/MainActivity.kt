@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
@@ -64,8 +65,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                         getString(R.string.server_version, response.parameters[0].value)
                     hubVersion.text = getString(R.string.hub_version, response.parameters[1].value)
                     hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhparams"))
-                } else if (response.command.name == HspCommand.COMMAND_GET_CFG && response.parameters.isNotEmpty() && response.status == Status.SUCCESS) {
-
+                } else if (response.command.name == HspCommand.COMMAND_GET_CFG && response.parameters.isNotEmpty()) {
                     if (response.command.parameters[0].value == "sh_dhparams") {
                         val auth =
                             MaximAlgorithms.getAuthInitials(response.parameters[0].valueAsByteArray)
@@ -79,7 +79,9 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                             MaximAlgorithms.authenticate(param1, param2)
                         }
                     }
-
+                    if (response.status != Status.SUCCESS) {
+                        showAuthenticationFailMessage()
+                    }
                 } else if (response.command.name == HspCommand.COMMAND_SET_CFG) {
                     if (response.command.parameters[0].value == "sh_dhlpublic") {
                         hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhrpublic"))
@@ -99,6 +101,10 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                 firmwareAlgorithms.toTypedArray()
             )
         )
+    }
+
+    private fun showAuthenticationFailMessage() {
+        Toast.makeText(this, "Authentication failed!", Toast.LENGTH_SHORT).show()
     }
 
     override fun onBackPressed() {
