@@ -141,6 +141,7 @@
     <string name="confidence">Confidence</string>
     <string name="add_annotation">Add Annotation</string>
     <string name="enter_message">Enter your message</string>
+    <string name="monitoring_measurement">Monitoring the measurement...</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

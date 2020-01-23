@@ -235,7 +235,6 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     private fun getCsvFilePathAnnotation(): String {
         val name = this.javaClass.simpleName.replace("Fragment", "")
-        Timber.d("MELIK: name = $name")
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
             "/ANNOTATIONS/MaximSensorsApp_${timestamp}_${name}_annotation.csv"
@@ -256,7 +255,6 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     fun showAnnotationDialog() {
-        Timber.d("MELIK: class = ${this.javaClass.name}")
         val editText = EditText(context)
         editText.hint = getString(R.string.enter_message)
         val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())

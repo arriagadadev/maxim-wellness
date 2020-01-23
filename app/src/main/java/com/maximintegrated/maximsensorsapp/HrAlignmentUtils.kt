@@ -146,9 +146,7 @@ fun readTimeStampAndHrFrom1HzFile(file: File?): ArrayList<Pair<Long, Int>> {
         return pairs
     }
     val rows = file.readLines().drop(1)
-    Timber.d("path: ${file.absolutePath}   rows: ${rows.size}")
     for (row in rows) {
-        Timber.d("1Hz: $row")
         val items = row.split(",")
         if (items.size < 2) continue
         pairs.add(Pair(items[0].toLong(), items[1].toInt()))
@@ -162,9 +160,7 @@ fun readTimeStampAndHrFromReferenceFile(file: File?): ArrayList<Pair<Long, Int>>
         return pairs
     }
     val rows = file.readLines().drop(1)
-    Timber.d("path: ${file.absolutePath}   rows: ${rows.size}")
     for (row in rows) {
-        Timber.d("REF: $row")
         val items = row.split(",")
         if (items.size < 2) continue
         pairs.add(Pair(items[0].toLong(), items[1].toInt()))
@@ -178,9 +174,7 @@ fun readTimeStampAndHrFromAlignedFile(file: File?): ArrayList<Triple<Long, Int, 
         return triples
     }
     val rows = file.readLines().drop(1)
-    Timber.d("path: ${file.absolutePath}   rows: ${rows.size}")
     for (row in rows) {
-        Timber.d("ALIGNED: $row")
         val items = row.split(",")
         if (items.size < 3) continue
         triples.add(Triple(items[0].toLong(), items[1].toInt(), items[2].toInt()))

@@ -36,7 +36,7 @@ class ForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val text = intent?.getStringExtra(NOTIFICATION_MESSAGE_KEY) ?: "Maxim Watch: -- bpm"
+        val text = intent?.getStringExtra(NOTIFICATION_MESSAGE_KEY) ?: getString(R.string.monitoring_measurement)
         //val notificationIntent = Intent(this, MainActivity::class.java)
         //val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
