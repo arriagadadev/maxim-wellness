@@ -177,7 +177,7 @@ class DataRecorder(var type: String) {
                 data.currentTimeMillis,
                 data.hr
             )
-            count = 1
+            count = 0
         }
 
         count++
