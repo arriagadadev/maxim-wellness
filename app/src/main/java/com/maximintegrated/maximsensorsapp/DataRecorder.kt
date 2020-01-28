@@ -43,7 +43,7 @@ class DataRecorder(var type: String) {
             "walking_steps",
             "running_steps",
             "calorie",
-            "cadence",
+            "totalActEnergy",
             "timestamp",
             "timestamp_milis"
         )
@@ -63,7 +63,7 @@ class DataRecorder(var type: String) {
 
     private val referenceDevice: CsvWriter
 
-    private val timestamp = TIMESTAMP_FORMAT.format(Date())
+    val timestamp = TIMESTAMP_FORMAT.format(Date())
 
     private var oneHzFileIsFinished = false
     private var referenceFileIsFinished = false
@@ -167,7 +167,7 @@ class DataRecorder(var type: String) {
             data.walkSteps,
             data.runSteps,
             data.kCal,
-            data.cadence,
+            data.totalActEnergy,
             TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis)),
             data.currentTimeMillis
         )

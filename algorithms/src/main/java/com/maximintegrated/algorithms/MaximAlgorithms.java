@@ -35,7 +35,7 @@ public class MaximAlgorithms {
                 input.getSpo2(), input.getWspo2PercentageComplete(), input.getWspo2LowSnr(),
                 input.getWspo2Motion(), input.getWspo2LowPi(), input.getWspo2UnreliableR(),
                 input.getWspo2State(), input.getScdState(), input.getWalkSteps(),
-                input.getRunSteps(), input.getKCal(), input.getCadence(), input.getTimeStampUpper(),
+                input.getRunSteps(), input.getKCal(), input.getTotalActEnergy(), input.getTimeStampUpper(),
                 input.getTimeStampLower(), output);
     }
 
@@ -50,7 +50,7 @@ public class MaximAlgorithms {
                                      int spo2, int wspo2PercentageComplete, int wspo2LowSnr,
                                      int wspo2Motion, int wspo2LowPi, int wspo2UnreliableR,
                                      int wspo2State, int scdState, int walkSteps, int runSteps,
-                                     int kCal, int cadence, int timestampUpper, int timestampLower, AlgorithmOutput output);
+                                     int kCal, int totalActEnergy, int timestampUpper, int timestampLower, AlgorithmOutput output);
 
 
     public static native boolean end(int disableFlag);

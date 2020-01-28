@@ -165,7 +165,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@id/cadenceView"
+            app:layout_constraintBottom_toTopOf="@id/totalActEnergyView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
@@ -175,7 +175,7 @@
             app:rcv_title="SCD" />
 
         <com.maximintegrated.maximsensorsapp.ResultCardView
-            android:id="@+id/cadenceView"
+            android:id="@+id/totalActEnergyView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -188,7 +188,7 @@
             app:layout_constraintTop_toBottomOf="@id/scdView"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_sin"
-            app:rcv_title="Cadence" />
+            app:rcv_title="Total Active Energy" />
 
         <Chronometer
             android:id="@+id/whrmChronometer"
@@ -203,7 +203,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cadenceView" />
+            app:layout_constraintTop_toBottomOf="@id/totalActEnergyView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

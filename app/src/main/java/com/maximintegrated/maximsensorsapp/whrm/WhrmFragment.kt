@@ -94,10 +94,10 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             scdView.emptyValue = value ?: ResultCardView.EMPTY_VALUE
         }
 
-    private var cadence: String? = null
+    private var totalActEnergy: String? = null
         set(value) {
             field = value
-            cadenceView.emptyValue = value.toString()
+            totalActEnergyView.emptyValue = value.toString()
         }
 
     private val heartRateMeasurementObserver =
@@ -275,7 +275,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         energy = "${streamData.kCal} cal"
         activity = Activity.values()[streamData.activity].displayName
         scd = Scd.values()[streamData.scdState].displayName
-        cadence = "${streamData.cadence} steps/min"
+        totalActEnergy = "${streamData.totalActEnergy} kcal"
     }
 
     private fun setupReferenceDeviceView() {
@@ -355,7 +355,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         energy = null
         activity = null
         scd = null
-        cadence = null
+        totalActEnergy = null
     }
 
     private fun shouldShowMeasuringProgress(): Boolean {

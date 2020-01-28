@@ -106,7 +106,7 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
                                                         jint wspo2_low_pi, jint wspo2_unreliable_r,
                                                         jint wspo2_state, jint scd_state,
                                                         jint walk_steps, jint run_steps, jint k_cal,
-                                                        jint cadence, jint timestamp_upper,
+                                                        jint totalActEnergy, jint timestamp_upper,
                                                         jint timestamp_lower, jobject joutput) {
     mxm_algosuite_input_data input;
     input.inp_sample_count = (uint32_t) sample_count;
@@ -136,7 +136,7 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
     input.walk_steps = (uint32_t) walk_steps;
     input.run_steps = (uint32_t) run_steps;
     input.kcal = (uint32_t) k_cal;
-    input.cadence = (uint32_t) cadence;
+    input.cadence = (uint32_t) totalActEnergy;
     input.timestampUpper32bit = (uint32_t) timestamp_upper;
     input.timestampLower32bit = (uint32_t) timestamp_lower;
 
