@@ -161,6 +161,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         hspViewModel.sendCommand(
             SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
         )
+        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
     private fun sendAlgoMode() {

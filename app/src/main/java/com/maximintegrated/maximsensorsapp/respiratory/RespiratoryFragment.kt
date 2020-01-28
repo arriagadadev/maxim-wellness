@@ -154,6 +154,7 @@ class RespiratoryFragment : MeasurementBaseFragment() {
                 if (menuItemEnabledScd.isChecked) "1" else "0"
             )
         )
+        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
     override fun startMonitoring() {

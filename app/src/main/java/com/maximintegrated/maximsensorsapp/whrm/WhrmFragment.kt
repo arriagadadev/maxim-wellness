@@ -172,6 +172,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             )
         )
         hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
+        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
     private fun sendAlgoMode() {
