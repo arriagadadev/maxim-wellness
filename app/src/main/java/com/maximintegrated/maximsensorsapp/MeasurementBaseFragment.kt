@@ -3,12 +3,14 @@ package com.maximintegrated.maximsensorsapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.google.android.material.snackbar.Snackbar
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
@@ -90,12 +92,16 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     open fun startMonitoring() {
         expectingSampleCount = 0
+        dataCount = 0
+        errorCount = 0
         startService()
     }
 
     open fun stopMonitoring() {
         expectingSampleCount = 0
         stopService()
+        errorWriter?.close()
+        errorWriter = null
     }
 
     open fun isMonitoringChanged() {
@@ -162,21 +168,84 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         stopMonitoring()
     }
 
+    private var shouldShowDataLossError = false
+        set(value) {
+            field = value
+            if (value) {
+                if (view == null) {
+                    return
+                }
+                showSnackbar(
+                    view!!,
+                    "Restart the measurement in a less noisy environment.",
+                    Snackbar.LENGTH_INDEFINITE
+                )
+            }
+        }
+
+    private var previousData: HspStreamData? = null
+    private var dataCount = 0L
+    private var errorCount = 0L
+
     private val dataStreamObserver = Observer<HspStreamData> { data ->
         if (!isMonitoring) return@Observer
-        addStreamData(data)
+        dataCount++
         if (expectingSampleCount != data.sampleCount) {
-            val error =
-                "expectingSampleCount = $expectingSampleCount  receivedSampleCount = ${data.sampleCount}"
-            Timber.d("Error: $error")
-            saveError(error)
+            errorCount++
+            if ((data.sampleCount - expectingSampleCount > 1) || (errorCount * 100f / dataCount > 2f)) {
+                shouldShowDataLossError = true
+            }
+            if (previousData != null) {
+                val sampleCount = expectingSampleCount
+                val sampleTime = ((data.sampleTime + previousData!!.sampleTime) / 2).toInt()
+                val green = (data.green + previousData!!.green) / 2
+                val green2 = (data.green2 + previousData!!.green2) / 2
+                val ir = (data.ir + previousData!!.ir) / 2
+                val red = (data.red + previousData!!.red) / 2
+                val accX = (data.accelerationX + previousData!!.accelerationX) / 2
+                val accY = (data.accelerationY + previousData!!.accelerationY) / 2
+                val accZ = (data.accelerationZ + previousData!!.accelerationZ) / 2
+                val opMode = previousData!!.operationMode
+                val hr = (data.hr + previousData!!.hr) / 2
+                val hrConfidence = (data.hrConfidence + previousData!!.hrConfidence) / 2
+                val rr = previousData!!.rr
+                val rrConfidence = previousData!!.rrConfidence
+                val activity = previousData!!.activity
+                val r = (data.r + previousData!!.r) / 2
+                val spo2Confidence = (data.wspo2Confidence + previousData!!.wspo2Confidence) / 2
+                val spo2 = (data.spo2 + previousData!!.spo2) / 2
+                val spo2PercentageComplete =
+                    (data.wspo2PercentageComplete + previousData!!.wspo2PercentageComplete) / 2
+                val spo2LowSnr = previousData!!.wspo2LowSnr
+                val spo2Motion = previousData!!.wspo2Motion
+                val spo2LowPi = previousData!!.wspo2LowPi
+                val spo2UnreliableR = previousData!!.wspo2UnreliableR
+                val spo2State = previousData!!.wspo2State
+                val scdState = previousData!!.scdState
+                val walk = (data.walkSteps + previousData!!.walkSteps) / 2
+                val run = (data.runSteps + previousData!!.runSteps) / 2
+                val kcal = (data.kCal + previousData!!.kCal) / 2
+                val totalActEnergy = (data.totalActEnergy + previousData!!.totalActEnergy) / 2
+                val timestamp = (data.currentTimeMillis + previousData!!.currentTimeMillis) / 2
+
+                val backupData = HspStreamData(
+                    sampleCount, sampleTime.toFloat(), green, green2, ir,
+                    red, accX, accY, accZ, opMode, hr, hrConfidence, rr, rrConfidence, activity, r,
+                    spo2Confidence, spo2, spo2PercentageComplete, spo2LowSnr, spo2Motion, spo2LowPi,
+                    spo2UnreliableR, spo2State, scdState, walk, run, kcal, totalActEnergy, timestamp
+                )
+                dataRecorder?.record(backupData)
+            }
+            Timber.d("Error: expectingSampleCount = $expectingSampleCount  receivedSampleCount = ${data.sampleCount}")
+            saveError(expectingSampleCount.toString(), data.sampleCount.toString())
             expectingSampleCount = data.sampleCount
         }
+        addStreamData(data)
+        previousData = data
         expectingSampleCount++
         if (expectingSampleCount == 256) {
             expectingSampleCount = 0
         }
-        //Timber.d("MELIK: $data")
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -198,7 +267,6 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     override fun onDetach() {
         super.onDetach()
         annotationWriter?.close()
-        errorWriter?.close()
         hspViewModel.streamData.removeObserver(dataStreamObserver)
         stopService()
     }
@@ -259,10 +327,9 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     private fun getCsvFilePathError(): String {
-        val name = this.javaClass.simpleName.replace("Fragment", "")
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
-            "/ERROR/MaximSensorsApp_${timestamp}_${name}_error.csv"
+            "/ERROR/MaximSensorsApp_${dataRecorder?.timestamp}_${dataRecorder?.type}_error.csv"
         ).absolutePath
     }
 
@@ -279,17 +346,14 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         )
     }
 
-    private fun saveError(error: String) {
+    private fun saveError(expected: String, received: String) {
         if (errorWriter == null) {
             errorWriter = CsvWriter.open(
                 getCsvFilePathError(),
-                arrayOf("timestamp", "error")
+                arrayOf("timestamp", "expected", "received")
             )
         }
-        errorWriter?.write(
-            System.currentTimeMillis(),
-            error
-        )
+        errorWriter?.write(System.currentTimeMillis(), expected, received)
     }
 
     private fun showAnnotationDialog() {
@@ -308,4 +372,13 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         alertDialog.setCancelable(false)
         alertDialog.show()
     }
+
+    fun showSnackbar(view: View, message: String, duration: Int) {
+        val snackbar = Snackbar.make(view, message, duration)
+        snackbar.setAction(getString(R.string.ok)) {
+            snackbar.dismiss()
+        }
+        snackbar.show()
+    }
+
 }
