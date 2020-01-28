@@ -14,7 +14,6 @@ import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmInitConfig
 import com.maximintegrated.algorithms.sleep.SleepUserInfo
-import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.addFragment
@@ -26,8 +25,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.Comparator
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 
 class ArchiveFragment : RecyclerViewClickListener, Fragment(),
@@ -156,17 +153,36 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
     private fun runSleepAlgo(file: File): Boolean {
         val outputDirectory = OUTPUT_DIRECTORY
 
-        val inputs = readAlgorithmInputsFromFile(file)
-        //val outputs: ArrayList<AlgorithmOutput> = arrayListOf()
+        val oneHzFile = File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/1Hz/${file.nameWithoutExtension}_1Hz.csv"
+        )
 
-        if (inputs.isEmpty()) {
-            return false
+        var hrSum = 0
+        var hrCount = 0
+        var restingHr = 0f
+
+        var isHeaderObtained = false
+        oneHzFile.useLines { seq ->
+            seq.forEach {
+                if (!isHeaderObtained) {
+                    isHeaderObtained = true
+                    return@forEach
+                }
+                val items = it.split(",")
+                if (items.size < 2) return@forEach
+                val hr = items[1].toIntOrNull()
+                if (hr != null && hr != 0) {
+                    hrSum += hr
+                    hrCount++
+                }
+            }
         }
 
-        val restingHr = inputs.map { it.hr }.average().toFloat()
-
-        val userInfo =
-            SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr)
+        if (hrCount != 0) {
+            restingHr = hrSum * 1f / hrCount
+        }
+        val userInfo = SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr)
 
         algorithmInitConfig.sleepConfig = SleepAlgorithmInitConfig(
             SleepAlgorithmInitConfig.DetectableSleepDuration.MINIMUM_30_MIN,
@@ -191,33 +207,43 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         csvWriter.listener = this
         val output = AlgorithmOutput()
         var count = 0
-        for (input in inputs) {
-            val status = MaximAlgorithms.run(input, output)
-            //TODO: check the sample code for this
-            if (status) {
-                if (output.sleep.outputDataArrayLength > 0) {
-                    count++
-                    if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
-                        sleepFound = true
-                    } else {
-                        output.sleep.output.sleepWakeDetentionLatency = -1
+
+        isHeaderObtained = false
+        file.useLines { seq ->
+            seq.forEach {
+                if (!isHeaderObtained) {
+                    isHeaderObtained = true
+                    return@forEach
+                }
+                val input = csvRowToAlgorithmInput(it)
+                if (input != null) {
+                    val status = MaximAlgorithms.run(input, output)
+                    //TODO: check the sample code for this
+                    if (status) {
+                        if (output.sleep.outputDataArrayLength > 0) {
+                            count++
+                            if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
+                                sleepFound = true
+                            } else {
+                                output.sleep.output.sleepWakeDetentionLatency = -1
+                            }
+                            csvWriter.write(
+                                SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
+                                output.sleep.output.sleepWakeDecisionStatus,
+                                output.sleep.output.sleepWakeDetentionLatency,
+                                output.sleep.output.sleepWakeDecision,
+                                output.sleep.output.sleepPhaseOutputStatus,
+                                output.sleep.output.sleepPhaseOutput,
+                                output.sleep.output.hr,
+                                output.sleep.output.ibi,
+                                0,
+                                output.sleep.output.accMag
+                            )
+                        }
                     }
-                    csvWriter.write(
-                        SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
-                        output.sleep.output.sleepWakeDecisionStatus,
-                        output.sleep.output.sleepWakeDetentionLatency,
-                        output.sleep.output.sleepWakeDecision,
-                        output.sleep.output.sleepPhaseOutputStatus,
-                        output.sleep.output.sleepPhaseOutput,
-                        output.sleep.output.hr,
-                        output.sleep.output.ibi,
-                        0,
-                        output.sleep.output.accMag
-                    )
                 }
             }
         }
-        inputs.clear()
         MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
 
         csvWriter.close()

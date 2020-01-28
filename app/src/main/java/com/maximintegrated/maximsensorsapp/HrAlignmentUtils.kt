@@ -145,7 +145,7 @@ fun readTimeStampAndHrFrom1HzFile(file: File?): ArrayList<Pair<Long, Int>> {
     if (file == null) {
         return pairs
     }
-    val rows = file.readLines().drop(1)
+    val rows = file.bufferedReader().readLines().drop(1)
     for (row in rows) {
         val items = row.split(",")
         if (items.size < 2) continue
@@ -159,7 +159,7 @@ fun readTimeStampAndHrFromReferenceFile(file: File?): ArrayList<Pair<Long, Int>>
     if (file == null) {
         return pairs
     }
-    val rows = file.readLines().drop(1)
+    val rows = file.bufferedReader().readLines().drop(1)
     for (row in rows) {
         val items = row.split(",")
         if (items.size < 2) continue
@@ -173,7 +173,7 @@ fun readTimeStampAndHrFromAlignedFile(file: File?): ArrayList<Triple<Long, Int, 
     if (file == null) {
         return triples
     }
-    val rows = file.readLines().drop(1)
+    val rows = file.bufferedReader().readLines().drop(1)
     for (row in rows) {
         val items = row.split(",")
         if (items.size < 3) continue
