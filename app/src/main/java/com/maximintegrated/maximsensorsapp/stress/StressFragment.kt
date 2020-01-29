@@ -2,15 +2,11 @@ package com.maximintegrated.maximsensorsapp.stress
 
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
@@ -18,16 +14,14 @@ import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.HspViewModel
-import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
-import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.HelpDialog
+import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
+import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
-import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_stress_fragment_content.*
 import kotlinx.android.synthetic.main.view_result_card.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class StressFragment : MeasurementBaseFragment() {
@@ -43,8 +37,6 @@ class StressFragment : MeasurementBaseFragment() {
     private var algorithmInitConfig: AlgorithmInitConfig? = null
     private val algorithmInput = AlgorithmInput()
     private val algorithmOutput = AlgorithmOutput()
-
-    private var startTime: String? = null
 
     private var hr: Int? = null
         set(value) {
@@ -131,21 +123,7 @@ class StressFragment : MeasurementBaseFragment() {
         algorithmInitConfig?.enableAlgorithmsFlag =
             MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS
 
-        initializeChronometer()
         setupToolbar(getString(R.string.stress))
-    }
-
-    override fun initializeChronometer() {
-
-        stressChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-        stressChronometer.setOnChronometerTickListener { cArg ->
-            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
-            if (elapsedMillis > 3600000L) {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
-            } else {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-            }
-        }
     }
 
     override fun addStreamData(streamData: HspStreamData) {
@@ -205,31 +183,14 @@ class StressFragment : MeasurementBaseFragment() {
         )
     }
 
-    override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "wearablesuite",
-                "scdenable",
-                if (menuItemEnabledScd.isChecked) "1" else "0"
-            )
-        )
-        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
-    }
-
     override fun startMonitoring() {
         super.startMonitoring()
-        isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
-        dataRecorder = DataRecorder("Stress")
 
         clearCardViewValues()
 
         measurementStartTimestamp = null
-
-        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        stressChronometer.base = SystemClock.elapsedRealtime()
-        stressChronometer.start()
 
         MaximAlgorithms.init(algorithmInitConfig)
 
@@ -248,15 +209,8 @@ class StressFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
-
-        dataRecorder?.close()
-        dataRecorder = null
-
-        startTime = null
-        stressChronometer.stop()
 
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS)

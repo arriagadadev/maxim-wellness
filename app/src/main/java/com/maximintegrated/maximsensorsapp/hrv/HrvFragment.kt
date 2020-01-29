@@ -1,7 +1,6 @@
 package com.maximintegrated.maximsensorsapp.hrv
 
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,15 +13,15 @@ import com.maximintegrated.algorithms.hrv.FreqDomainHrvMetrics
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.hrv.TimeDomainHrvMetrics
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
-import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.HelpDialog
+import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
+import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_hrv_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class HrvFragment : MeasurementBaseFragment() {
     companion object {
@@ -36,8 +35,6 @@ class HrvFragment : MeasurementBaseFragment() {
     private lateinit var timeChartView: MultiChannelChartView
     private lateinit var frequencyChartView: MultiChannelChartView
     private lateinit var ibiChartView: MultiChannelChartView
-
-    private var startTime: String? = null
 
     private var avnn: String? = null
         set(value) {
@@ -139,24 +136,9 @@ class HrvFragment : MeasurementBaseFragment() {
         frequencyChartView = view.findViewById(R.id.frequency_chart_view)
         ibiChartView = view.findViewById(R.id.ibi_chart_view)
 
-        initializeChronometer()
         setupChart()
         setupToolbar(getString(R.string.hrv))
     }
-
-    override fun initializeChronometer() {
-
-        hrvChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-        hrvChronometer.setOnChronometerTickListener { cArg ->
-            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
-            if (elapsedMillis > 3600000L) {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
-            } else {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-            }
-        }
-    }
-
 
     private fun setupChart() {
         timeChartView.dataSetInfoList = listOf(
@@ -243,30 +225,13 @@ class HrvFragment : MeasurementBaseFragment() {
         )
     }
 
-    override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "wearablesuite",
-                "scdenable",
-                if (menuItemEnabledScd.isChecked) "1" else "0"
-            )
-        )
-        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
-    }
-
     override fun startMonitoring() {
         super.startMonitoring()
-        isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
-        dataRecorder = DataRecorder("Hrv")
 
         clearChart()
         clearCardViewValues()
-
-        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        hrvChronometer.base = SystemClock.elapsedRealtime()
-        hrvChronometer.start()
 
         MaximAlgorithms.init(algorithmInitConfig)
 
@@ -285,15 +250,8 @@ class HrvFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
-
-        dataRecorder?.close()
-        dataRecorder = null
-
-        startTime = null
-        hrvChronometer.stop()
 
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV)

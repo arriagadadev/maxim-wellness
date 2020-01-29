@@ -2,10 +2,14 @@ package com.maximintegrated.maximsensorsapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.SystemClock
 import android.view.MenuItem
 import android.view.View
+import android.widget.Chronometer
 import android.widget.EditText
 import androidx.core.content.ContextCompat
+import androidx.core.os.HandlerCompat.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -20,6 +24,7 @@ import com.maximintegrated.maximsensorsapp.service.ForegroundService
 import kotlinx.android.synthetic.main.include_app_bar.*
 import timber.log.Timber
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
@@ -40,6 +45,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     lateinit var menuItemLogToFlash: MenuItem
     lateinit var menuItemSettings: MenuItem
     lateinit var menuItemEnabledScd: MenuItem
+    lateinit var menuItemArbitraryCommand: MenuItem
 
     var notificationResults: HashMap<String, String> = hashMapOf() // MXM, REF --> KEYS
 
@@ -52,7 +58,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         }
     var expectingSampleCount: Int = 0
 
-    abstract fun initializeChronometer()
+    private var startTime: String? = null
+    private var startElapsedTime = 0L
+
+    private var handler = Handler()
 
     fun setupToolbar(title: String) {
 
@@ -65,6 +74,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 menuItemLogToFlash = findItem(R.id.log_to_flash)
                 menuItemSettings = findItem(R.id.hrm_settings)
                 menuItemEnabledScd = findItem(R.id.enable_scd)
+                menuItemArbitraryCommand = findItem(R.id.send_arbitrary_command)
 
                 menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
                 menuItemEnabledScd.isEnabled = true
@@ -91,14 +101,28 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     open fun startMonitoring() {
+        dataRecorder = DataRecorder(getMeasurementType())
+        dataRecorder?.dataRecorderListener = this
+        isMonitoring = true
         expectingSampleCount = 0
         dataCount = 0
         errorCount = 0
+
+        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
+        startElapsedTime = SystemClock.elapsedRealtime()
+        updateChronometer()
+        handler.postDelayed(tickRunnable, 1000)
+
         startService()
     }
 
     open fun stopMonitoring() {
+        isMonitoring = false
         expectingSampleCount = 0
+        startTime = null
+        handler.removeCallbacks(tickRunnable)
+        dataRecorder?.close()
+        dataRecorder = null
         stopService()
         errorWriter?.close()
         errorWriter = null
@@ -108,7 +132,16 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
     }
 
-    abstract fun sendDefaultSettings()
+    open fun sendDefaultSettings() {
+        hspViewModel.sendCommand(
+            SetConfigurationCommand(
+                "wearablesuite",
+                "scdenable",
+                if (menuItemEnabledScd.isChecked) "1" else "0"
+            )
+        )
+        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
+    }
 
     open fun sendLogToFlashCommand() {
         hspViewModel.sendCommand(
@@ -188,6 +221,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     private var errorCount = 0L
 
     private val dataStreamObserver = Observer<HspStreamData> { data ->
+        Timber.d("MELIK: $data")
         if (!isMonitoring) return@Observer
         dataCount++
         if (expectingSampleCount != data.sampleCount) {
@@ -319,11 +353,15 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     private var errorWriter: CsvWriter? = null
 
     private fun getCsvFilePathAnnotation(): String {
-        val name = this.javaClass.simpleName.replace("Fragment", "")
+        val name = getMeasurementType()
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
             "/ANNOTATIONS/MaximSensorsApp_${timestamp}_${name}_annotation.csv"
         ).absolutePath
+    }
+
+    open fun getMeasurementType(): String {
+        return this.javaClass.simpleName.replace("Fragment", "")
     }
 
     private fun getCsvFilePathError(): String {
@@ -381,4 +419,19 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         snackbar.show()
     }
 
+    private val tickRunnable = object : Runnable {
+        override fun run() {
+            if (isMonitoring) {
+                updateChronometer()
+                handler.postDelayed(this, 1000)
+            }else{
+                handler.removeCallbacks(this)
+            }
+        }
+    }
+
+    private fun updateChronometer(){
+        val elapsedMillis = SystemClock.elapsedRealtime() - startElapsedTime
+        toolbar.subtitle = "Start Time: ${startTime ?: ResultCardView.EMPTY_VALUE} - ${getFormattedTime(elapsedMillis)}"
+    }
 }

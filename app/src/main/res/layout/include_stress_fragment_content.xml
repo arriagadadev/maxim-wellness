@@ -14,8 +14,7 @@
             android:id="@+id/percentCompleted"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            app:layout_constraintBottom_toTopOf="@id/stressView"
+            android:layout_marginTop="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -27,8 +26,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@id/hrView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,31 +39,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@id/stressChronometer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/stressView"
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_heart_rate"
-            app:rcv_title="HR (bpm)" />
-
-
-        <Chronometer
-            android:id="@+id/stressChronometer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#9EC3DE"
-            android:gravity="center"
-            android:padding="10dp"
-            android:textColor="#00B2A9"
-            android:textSize="30sp"
-            android:textStyle="bold|italic"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:rcv_title="HR (bpm)"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/hrView" />
-
+            app:layout_constraintTop_toBottomOf="@+id/hrView"
+            android:layout_marginTop="4dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

@@ -2,6 +2,7 @@ package com.maximintegrated.maximsensorsapp
 
 import com.maximintegrated.algorithms.AlgorithmInput
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
@@ -59,4 +60,11 @@ fun csvRowToAlgorithmInput(row: String): AlgorithmInput? {
     input.totalActEnergy = (items[28].toFloat() * 10f).toInt()
     input.timestamp = items[30].toLong()
     return input
+}
+
+fun getFormattedTime(elapsedTime: Long): String {
+    val hour = TimeUnit.MILLISECONDS.toHours(elapsedTime)
+    val min = TimeUnit.MILLISECONDS.toMinutes(elapsedTime) % 60
+    val sec = TimeUnit.MILLISECONDS.toSeconds(elapsedTime) % 60
+    return String.format("%02d:%02d:%02d", hour, min, sec)
 }

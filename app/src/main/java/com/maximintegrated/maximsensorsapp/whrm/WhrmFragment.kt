@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,8 +25,6 @@ import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import kotlinx.android.synthetic.main.view_measurement_result.view.*
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
@@ -55,8 +52,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     private var lastValidHrTimestamp: Long = 0L
 
     private var countDownTimer: CountDownTimer? = null
-
-    private var startTime: String? = null
 
     private var hrConfidence: Int? = null
         set(value) {
@@ -135,23 +130,9 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         super.onViewCreated(view, savedInstanceState)
         chartView = view.findViewById(R.id.chart_view)
 
-        initializeChronometer()
         setupToolbar(getString(R.string.whrm_toolbar))
         setupChart()
         hrResultView.measuringWarningMessageView.text = ""
-    }
-
-    override fun initializeChronometer() {
-
-        whrmChronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-        whrmChronometer.setOnChronometerTickListener { cArg ->
-            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
-            if (elapsedMillis > 3600000L) {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
-            } else {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-            }
-        }
     }
 
     private fun setupChart() {
@@ -161,18 +142,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         )
 
         chartView.maximumEntryCount = 100
-    }
-
-    override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "wearablesuite",
-                "scdenable",
-                if (menuItemEnabledScd.isChecked) "1" else "0"
-            )
-        )
-        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode ", "2"))
-        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
     private fun sendAlgoMode() {
@@ -189,9 +158,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        isMonitoring = true
-        dataRecorder = DataRecorder("Whrm")
-        dataRecorder?.dataRecorderListener = this
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
 
@@ -209,10 +175,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         hrResultView.result = null
 
         setAlgorithmModeRadioButtonsEnabled(false)
-
-        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        whrmChronometer.base = SystemClock.elapsedRealtime()
-        whrmChronometer.start()
 
         hspViewModel.isDeviceSupported
             .observe(this) {
@@ -242,16 +204,10 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
 
-        startTime = null
-        whrmChronometer.stop()
-
         setAlgorithmModeRadioButtonsEnabled(true)
-        dataRecorder?.close()
-        dataRecorder = null
 
         hspViewModel.stopStreaming()
         polarViewModel.disconnect()

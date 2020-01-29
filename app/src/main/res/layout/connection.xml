@@ -29,4 +29,18 @@
         app:layout_constraintTop_toTopOf="@id/bluetooth_state_view"
         tools:text="TITLE" />
 
+    <TextView
+        android:id="@+id/toolbarSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        tools:text="00:00:00"
+        android:textColor="#808080"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/toolbarTitle"
+        app:layout_constraintStart_toStartOf="@id/toolbarTitle"
+        app:layout_constraintEnd_toEndOf="@id/toolbarTitle"
+        android:visibility="gone"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

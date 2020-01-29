@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
 import android.graphics.Color
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,8 +24,6 @@ import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -44,7 +41,6 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     private var bleScannerDialog: BleScannerDialog? = null
 
     private var measurementStartTimestamp: Long? = null
-    private var startTime: String? = null
 
     private var rResult: Float? = null
         set(value) {
@@ -88,22 +84,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
         algorithmModeOneShotRadioButton.isChecked = true
 
-        initializeChronometer()
         setupChart()
         setupToolbar(getString(R.string.spo2))
-    }
-
-    override fun initializeChronometer() {
-
-        spo2Chronometer.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-        spo2Chronometer.setOnChronometerTickListener { cArg ->
-            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
-            if (elapsedMillis > 3600000L) {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
-            } else {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-            }
-        }
     }
 
     private fun setupChart() {
@@ -115,21 +97,17 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         chartView.maximumEntryCount = 100
     }
 
+    override fun getMeasurementType(): String {
+        return "SpO2"
+    }
+
     override fun startMonitoring() {
         super.startMonitoring()
-        isMonitoring = true
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
 
-        dataRecorder = DataRecorder("SpO2")
-        dataRecorder?.dataRecorderListener = this
-
         clearChart()
         clearCardViewValues()
-
-        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        spo2Chronometer.base = SystemClock.elapsedRealtime()
-        spo2Chronometer.start()
 
         measurementStartTimestamp = null
         hrResultView.measurementProgress = 0
@@ -151,17 +129,10 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     }
 
     override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "wearablesuite",
-                "scdenable",
-                if (menuItemEnabledScd.isChecked) "1" else "0"
-            )
-        )
+        super.sendDefaultSettings()
         hspViewModel.sendCommand(
             SetConfigurationCommand("wearablesuite", "spo2ledpdconfig", "1020")
         )
-        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
     private fun sendAlgoMode() {
@@ -174,15 +145,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        isMonitoring = false
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
-
-        dataRecorder?.close()
-        dataRecorder = null
-
-        startTime = null
-        spo2Chronometer.stop()
 
         spo2ResultView.isMeasuring = false
 
@@ -332,10 +296,6 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         for (radioButton in algorithmModeRadioGroup.children) {
             radioButton.isEnabled = isEnabled
         }
-    }
-
-    override fun onBackPressed(): Boolean {
-        return isMonitoring
     }
 
     override fun onBluetoothDeviceClicked(bluetoothDevice: BluetoothDevice) {

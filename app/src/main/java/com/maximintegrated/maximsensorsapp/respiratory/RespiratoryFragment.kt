@@ -1,7 +1,6 @@
 package com.maximintegrated.maximsensorsapp.respiratory
 
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,28 +11,21 @@ import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.FloatValueFormatter
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import kotlinx.android.synthetic.main.include_respiratory_fragment_content.*
-import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.titleView
 import kotlinx.android.synthetic.main.view_result_card.view.*
-import timber.log.Timber
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
 class RespiratoryFragment : MeasurementBaseFragment() {
 
     companion object {
         fun newInstance() = RespiratoryFragment()
     }
-
-    private var startTime: String? = null
 
     private lateinit var chartView: MultiChannelChartView
 
@@ -98,23 +90,8 @@ class RespiratoryFragment : MeasurementBaseFragment() {
         )
         algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_RESP
 
-        initializeChronometer()
         setupChart()
         setupToolbar(getString(R.string.respiratory))
-    }
-
-    override fun initializeChronometer() {
-
-        respirationChronometer.format =
-            "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-        respirationChronometer.setOnChronometerTickListener { cArg ->
-            val elapsedMillis = SystemClock.elapsedRealtime() - cArg.base
-            if (elapsedMillis > 3600000L) {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 0%s"
-            } else {
-                cArg.format = "Start Time ${startTime ?: ResultCardView.EMPTY_VALUE} 00:%s"
-            }
-        }
     }
 
     private fun setupChart() {
@@ -139,37 +116,25 @@ class RespiratoryFragment : MeasurementBaseFragment() {
             }
             chartView.addData(algorithmOutput.respiratory.respirationRate)
             respiration = algorithmOutput.respiratory.respirationRate
-            notificationResults[MXM_KEY] = "Resp. rate: ${decimalFormat.format(respiration)} breath/min"
+            notificationResults[MXM_KEY] =
+                "Resp. rate: ${decimalFormat.format(respiration)} breath/min"
             updateNotification()
         }
 
         scd = streamData.scdState
     }
 
-    override fun sendDefaultSettings() {
-        hspViewModel.sendCommand(
-            SetConfigurationCommand(
-                "wearablesuite",
-                "scdenable",
-                if (menuItemEnabledScd.isChecked) "1" else "0"
-            )
-        )
-        hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
+    override fun getMeasurementType(): String {
+        return "Respiration_Rate"
     }
 
     override fun startMonitoring() {
         super.startMonitoring()
-        isMonitoring = true
         menuItemEnabledScd.isEnabled = true
         menuItemLogToFlash.isEnabled = true
-        dataRecorder = DataRecorder("Respiration_Rate")
 
         clearChart()
         clearCardViewValues()
-
-        startTime = SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())
-        respirationChronometer.base = SystemClock.elapsedRealtime()
-        respirationChronometer.start()
 
         MaximAlgorithms.init(algorithmInitConfig)
 
@@ -183,15 +148,8 @@ class RespiratoryFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        isMonitoring = false
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
-
-        dataRecorder?.close()
-        dataRecorder = null
-
-        startTime = null
-        respirationChronometer.stop()
 
         MaximAlgorithms.end(MaximAlgorithms.FLAG_RESP)
 

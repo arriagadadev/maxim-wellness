@@ -14,8 +14,7 @@
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="@dimen/signal_chart_height"
-            android:layout_marginTop="20dp"
-            app:layout_constraintBottom_toTopOf="@id/algorithmModeTitle"
+            android:layout_marginTop="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -30,12 +29,11 @@
         <TextView
             android:id="@+id/algorithmModeTitle"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/algorithm_mode_title_top_margin"
             android:text="@string/spo2_algorithm_mode"
             android:textAppearance="@style/TextAppearance.Maxim.ResultCard.Title"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/algorithmModeRadioGroup"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardView" />
@@ -45,7 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spo2_radio_group_top_margin"
-            android:layout_marginBottom="@dimen/spo2_radio_group_bottom_margin"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -73,10 +70,10 @@
             android:id="@+id/spo2ResultView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/lowSnr"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/algorithmModeRadioGroup"
+            android:layout_marginTop="4dp"
             app:mrv_title="SpO2"
             app:mrv_unit="%"
             app:mrv_enable_flash="true"/>
@@ -89,7 +86,6 @@
             android:background="@drawable/rectangle"
             android:gravity="center"
             android:text="@string/snr"
-            app:layout_constraintBottom_toTopOf="@id/hrResultView"
             app:layout_constraintEnd_toStartOf="@id/motion"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/spo2ResultView" />
@@ -137,8 +133,7 @@
             android:id="@+id/hrResultView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            app:layout_constraintBottom_toTopOf="@id/referenceDeviceView"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/unreliableR"
@@ -152,7 +147,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             app:cardElevation="8dp"
-            app:layout_constraintBottom_toTopOf="@id/rResultView"
             app:layout_constraintTop_toBottomOf="@id/hrResultView" />
 
         <com.maximintegrated.maximsensorsapp.ResultCardView
@@ -160,9 +154,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@id/spo2Chronometer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
@@ -170,21 +161,12 @@
             app:layout_constraintWidth_max="300dp"
             app:miv_icon="@drawable/ic_sin"
             app:rcv_title="R" />
-
-        <Chronometer
-            android:id="@+id/spo2Chronometer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#9EC3DE"
-            android:gravity="center"
-            android:padding="10dp"
-            android:textColor="#00B2A9"
-            android:textSize="30sp"
-            android:textStyle="bold|italic"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/rResultView" />
-
+            app:layout_constraintTop_toBottomOf="@+id/rResultView"
+            android:layout_marginTop="4dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </merge>

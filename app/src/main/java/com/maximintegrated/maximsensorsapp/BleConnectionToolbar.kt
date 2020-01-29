@@ -3,12 +3,14 @@ package com.maximintegrated.maximsensorsapp
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import eo.view.bluetoothstate.BluetoothState
 import eo.view.bluetoothstate.BluetoothStateView
+import kotlinx.android.synthetic.main.connection.view.*
 
 data class BleConnectionInfo(
     val connectionStateCode: Int,
@@ -45,6 +47,17 @@ class BleConnectionToolbar @JvmOverloads constructor(
         set(value) {
             field = value
             toolbarTitle.text = value
+        }
+
+    var subtitle: String = ""
+        set(value) {
+            field = value
+            toolbarSubtitle.text = value
+            if (value == "") {
+                toolbarSubtitle.visibility = View.GONE
+            } else if (toolbarSubtitle.visibility != View.VISIBLE) {
+                toolbarSubtitle.visibility = View.VISIBLE
+            }
         }
 
     private val bluetoothStateView: BluetoothStateView
