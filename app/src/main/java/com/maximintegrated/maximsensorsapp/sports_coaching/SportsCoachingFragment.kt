@@ -1,41 +1,39 @@
 package com.maximintegrated.maximsensorsapp.sports_coaching
 
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.exts.addFragment
+import kotlinx.android.synthetic.main.fragment_sports_coaching.*
 import kotlinx.android.synthetic.main.include_app_bar.*
-import timber.log.Timber
+import kotlinx.android.synthetic.main.login_layout.*
+import kotlinx.android.synthetic.main.profile_layout.*
+
 
 class SportsCoachingFragment : Fragment() {
 
     companion object {
-        fun newInstance() =
-            SportsCoachingFragment()
+        fun newInstance() = SportsCoachingFragment()
     }
 
     private lateinit var hspViewModel: HspViewModel
 
-    private lateinit var menuItemStartMonitoring: MenuItem
-    private lateinit var menuItemStopMonitoring: MenuItem
-    private lateinit var menuItemLogToFile: MenuItem
-    private lateinit var menuItemLogToFlash: MenuItem
-    private lateinit var menuItemSettings: MenuItem
+    private val gson = Gson()
 
-    private var isMonitoring: Boolean = false
-        set(value) {
-            field = value
-            menuItemStopMonitoring.isVisible = value
-            menuItemStartMonitoring.isVisible = !value
-
-        }
+    private var users: ArrayList<SportsCoachingUser> = arrayListOf()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -49,23 +47,6 @@ class SportsCoachingFragment : Fragment() {
                     null
                 }
             }
-
-        hspViewModel.commandResponse
-            .observe(this) { hspResponse ->
-                Timber.d(hspResponse.toString())
-            }
-
-        hspViewModel.connectionState
-            .observe(this) { (device, connectionState) ->
-                if (hspViewModel.bluetoothDevice != null) {
-                    Timber.d(device.name)
-                }
-            }
-
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                Timber.d(hspStreamData.toString())
-            }
     }
 
     override fun onCreateView(
@@ -78,73 +59,98 @@ class SportsCoachingFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (activity as AppCompatActivity).supportActionBar!!.hide()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar()
-    }
+        toolbar.pageTitle = getString(R.string.sports_coaching)
+        haveAccountTextView.paintFlags = haveAccountTextView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        noAccountTextView.paintFlags = noAccountTextView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-    private fun setupToolbar() {
+        val usernameList: ArrayList<String> = arrayListOf(getString(R.string.select_user))
 
-        toolbar.apply {
-            inflateMenu(R.menu.toolbar_menu)
-            menu.apply {
-                menuItemStartMonitoring = findItem(R.id.monitoring_start)
-                menuItemStopMonitoring = findItem(R.id.monitoring_stop)
-                menuItemLogToFile = findItem(R.id.log_to_file)
-                menuItemLogToFlash = findItem(R.id.log_to_flash)
-                menuItemSettings = findItem(R.id.hrm_settings)
-            }
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> stopMonitoring()
-                    R.id.log_to_file -> dataLoggingToggled()
-                    R.id.log_to_flash -> flashLoggingToggled()
-                    R.id.hrm_settings -> showSettingsDialog()
-                    else -> return@setOnMenuItemClickListener false
-                }
-                return@setOnMenuItemClickListener true
-            }
-            setNavigationOnClickListener {
-                onBackPressed()
-            }
-            setTitle(R.string.sports_coaching)
+        if (SportsCoachingSettings.userListJson != "") {
+            val listType = object : TypeToken<ArrayList<SportsCoachingUser>>() {}.type
+            users = gson.fromJson<ArrayList<SportsCoachingUser>>(
+                SportsCoachingSettings.userListJson,
+                listType
+            ) ?: arrayListOf()
         }
 
-        toolbar.pageTitle = requireContext().getString(R.string.sports_coaching)
+        usernameList.addAll(users.map { it.userName })
+        ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            usernameList
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            userSpinner.adapter = adapter
+        }
 
-    }
+        if(usernameList.size > 1){
+            userSpinner.setSelection(1)
+        }
 
-    private fun startMonitoring() {
-        isMonitoring = true
+        haveAccountTextView.setOnClickListener {
+            loginLayout.visibility = View.VISIBLE
+            profileLayout.visibility = View.GONE
+        }
 
-        hspViewModel.isDeviceSupported
-            .observe(this) {
-                hspViewModel.startStreaming()
+        noAccountTextView.setOnClickListener {
+            loginLayout.visibility = View.GONE
+            profileLayout.visibility = View.VISIBLE
+        }
+
+        unitChipGroup.setOnCheckedChangeListener { group, checkedId ->
+            run {
+                if (checkedId == R.id.metricsChip) {
+                    weightLayout.hint = getString(R.string.weight_in_kg)
+                    heightLayout.hint = getString(R.string.height_in_cm)
+                } else {
+                    weightLayout.hint = getString(R.string.weight_in_lbs)
+                    heightLayout.hint = getString(R.string.height_in_inch)
+                }
             }
+        }
+
+        loginButton.setOnClickListener {
+            var index = userSpinner.selectedItemPosition
+            if (index > 0) {
+                index--
+            } else {
+                if(usernameList.size == 1){
+                    showWarningMessage(getString(R.string.should_create_profile))
+                }else{
+                    showWarningMessage(getString(R.string.should_select_user))
+                }
+                return@setOnClickListener
+            }
+            val user = users[index]
+            SportsCoachingSettings.currentUserJson = gson.toJson(user)
+            requireActivity().addFragment(SportsCoachingLandingFragment.newInstance())
+        }
+
+        signupButton.setOnClickListener {
+            val name = usernameEditText.text.toString()
+            val birthYear = birthYearEditText.text.toString().toIntOrNull()
+            val gender = if (maleChip.isChecked) Gender.MALE else Gender.FEMALE
+            val isUnitInMetric = metricsChip.isChecked
+            val weight = weightEditText.text.toString().toIntOrNull()
+            val height = heightEditText.text.toString().toIntOrNull()
+            if (name == "" || birthYear == null || weight == null || height == null) {
+                showWarningMessage(getString(R.string.all_fields_required))
+                return@setOnClickListener
+            }
+            val user = SportsCoachingUser(name, birthYear, gender, weight, height, isUnitInMetric)
+            users.add(user)
+            SportsCoachingSettings.currentUserJson = gson.toJson(user)
+            SportsCoachingSettings.userListJson = gson.toJson(users)
+            requireActivity().addFragment(SportsCoachingLandingFragment.newInstance())
+        }
     }
 
-    private fun stopMonitoring() {
-        isMonitoring = false
-
-        hspViewModel.stopStreaming()
-    }
-
-    private fun dataLoggingToggled() {
-
-    }
-
-    private fun flashLoggingToggled() {
-
-    }
-
-    private fun showSettingsDialog() {
-
-    }
-
-    private fun onBackPressed() {
-
+    private fun showWarningMessage(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

@@ -62,6 +62,7 @@ dependencies {
     implementation deps.kotpref
     implementation 'com.chibatching.kotpref:initializer:2.2.0'
     implementation "org.jetbrains.anko:anko-commons:0.10.8"
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     implementation deps.bleLibrary
     implementation deps.bleCommon

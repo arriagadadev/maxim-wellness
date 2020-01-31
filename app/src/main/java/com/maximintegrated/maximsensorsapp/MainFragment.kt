@@ -18,6 +18,7 @@ import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
+import com.maximintegrated.maximsensorsapp.sports_coaching.SportsCoachingFragment
 import com.maximintegrated.maximsensorsapp.stress.StressFragment
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -73,8 +74,8 @@ class MainFragment : Fragment() {
         stressMenuItemView.isEnabled = true
         stressMenuItemView.isVisible = true
 
-        sportsCoachingMenuItemView.isEnabled = false
-        sportsCoachingMenuItemView.isVisible = false
+        sportsCoachingMenuItemView.isEnabled = true
+        sportsCoachingMenuItemView.isVisible = true
 
         archiveMenuItemView.isEnabled = true
         archiveMenuItemView.isVisible = true
@@ -132,7 +133,8 @@ class MainFragment : Fragment() {
         }
 
         sportsCoachingMenuItemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SEND)
+            requireActivity().addFragment(SportsCoachingFragment.newInstance())
+            /*val intent = Intent(Intent.ACTION_SEND)
             intent.component = ComponentName(
                 "com.maximintegrated.sportscoaching",
                 "com.maximintegrated.sportscoaching.view.MainActivity"
@@ -147,7 +149,7 @@ class MainFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }
+            }*/
         }
 
         archiveMenuItemView.setOnClickListener {

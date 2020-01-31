@@ -40,7 +40,7 @@ inline fun FragmentActivity.addFragment(fragment: Fragment, @IdRes containerId: 
             R.anim.bottom_sheet_slide_in,
             R.anim.bottom_sheet_slide_out
         )
-        .add(containerId, fragment)
+        .replace(containerId, fragment)
         .addToBackStack(null)
         .commit()
 }
