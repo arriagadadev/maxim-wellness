@@ -114,8 +114,7 @@
             android:layout_marginBottom="10dp"
             android:id="@+id/confidenceProgressBar"
             style="?android:attr/progressBarStyleHorizontal"
-            android:progressDrawable="@drawable/gradient_pb"
-            android:progress="100" />
+            android:progress="0" />
 
         <androidx.constraintlayout.widget.Group
             android:layout_width="wrap_content"

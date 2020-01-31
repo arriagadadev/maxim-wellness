@@ -29,7 +29,7 @@
     <string name="log_file_saved_to">Log file saved to %1$s</string>
 
     <string name="settings">Settings</string>
-    <string name="spo2_settings">Spo2 Settings</string>
+    <string name="spo2_settings">SpO2 Settings</string>
     <string name="whrm_settings">WHRM Settings</string>
 
     <string name="save">Save</string>
@@ -136,12 +136,57 @@
         In literature, most of the wearable stress monitoring studies use galvanic skin response,
         muscle tension, blood pressure and skin temperature devices as well as HR monitoring devices.
         Maxim\'s stress estimation methods use accelerometer and PPG data (HR, HRV) solely.</string>
+    <string name="readiness_info">  Readiness score determines how much you are ready for the day.
+        \n\n  It is scaled between 1–100.\n\n  Taken early first thing in the morning.\n\n  Sit comfortably
+        and relax a few minutes before starting.</string>
+    <string name="vo2max_info">  VO2Max is a single best indicator of fitness and cardiovascular health.
+        \n\n  VO2Max score ranges between 1-100.\n\n  Sit comfortably and relax a few minutes before
+        starting.</string>
+    <string name="epoc_recovery_info">  EPOC is the excess oxygen consumed following exercise.</string>
+    <string name="recovery_time_info">  Recovery time after exercise is calculated and reported.
+        \n\n The fitter you are, the faster you recover.\n\n  Sit comfortably and start measurement.
+        It will take about 3 minutes.</string>
+    <string name="fitness_age_info">  The fitness age calculation is based on how fit you are, rather
+        than your actual age.\n\n  It uses VO2Max values measured and stored in history.</string>
+
     <string name="alignment_successful">Auto alignment is done successfully.</string>
     <string name="alignment_fail">ECG vs PPG auto alignment cannot be completed. The alignment should be done manually. Please refer to alignment section in the MAXREFDES103 user guide.</string>
     <string name="confidence">Confidence</string>
     <string name="add_annotation">Add Annotation</string>
     <string name="enter_message">Enter your message</string>
     <string name="monitoring_measurement">Monitoring the measurement...</string>
+    <string name="login">Login</string>
+    <string name="dont_have_account">Don\'t have account?</string>
+    <string name="username">Username</string>
+    <string name="birth_year">Birth Year</string>
+    <string name="weight_in_kg">Weight(kg)</string>
+    <string name="height_in_cm">Height(cm)</string>
+    <string name="weight_in_lbs">Weight(lbs)</string>
+    <string name="height_in_inch">Height(inch)</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="metric">Metric</string>
+    <string name="us">U.S.</string>
+    <string name="i_have_an_account">I have an account</string>
+    <string name="select_user">Select a user</string>
+    <string name="signup">Sign up</string>
+    <string name="all_fields_required">All the fields are required.</string>
+    <string name="training">Training</string>
+    <string name="history">history</string>
+    <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
+    <string name="readiness">Readiness</string>
+    <string name="resting_vo2max">Resting VO2Max</string>
+    <string name="vo2max">VO2Max</string>
+    <string name="epoc_recovery">EPOC Recovery</string>
+    <string name="recovery_time">Recovery Time</string>
+    <string name="fitness_age">Fitness Age</string>
+    <string name="statistics">Statistics</string>
+    <string name="readiness_score">Readiness Score</string>
+    <string name="vo2max_score">VO2Max Score</string>
+    <string name="epoc_recovery_score">EPOC Recovery Score</string>
+    <string name="should_create_profile">You should create a profile.</string>
+    <string name="should_select_user">You should select a user.</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

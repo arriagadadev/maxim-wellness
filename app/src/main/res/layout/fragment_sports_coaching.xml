@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
@@ -7,6 +8,19 @@
     android:focusable="true"
     android:orientation="vertical">
 
-    <include layout="@layout/include_app_bar" />
+    <include layout="@layout/include_app_bar"
+        android:id="@+id/app_bar"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <include
+            layout="@layout/login_layout"
+            android:id="@+id/loginLayout"/>
+
+        <include
+            layout="@layout/profile_layout"
+            android:id="@+id/profileLayout"
+            android:visibility="gone"/>
+    </FrameLayout>
+</LinearLayout>

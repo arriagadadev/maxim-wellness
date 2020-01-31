@@ -22,4 +22,7 @@
     <color name="progress_orange">#ffbf00</color>
     <color name="progress_green">#23DD23</color>
 
+    <color name="chipChecked">#00B2A9</color>
+    <color name="chipUnchecked">#E0E0E0</color>
+
 </resources>
