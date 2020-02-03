@@ -6,14 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineDataSet
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
 import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig
+import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import kotlinx.android.synthetic.main.fragment_offline_data.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -29,7 +32,8 @@ enum class HrAlignment {
     ALIGNMENT_SUCCESSFUL
 }
 
-class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
+class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener,
+    CsvWriter.Companion.CsvWriterListener {
 
     private var algorithmInitConfig: AlgorithmInitConfig? = null
     private val algorithmOutput = AlgorithmOutput()
@@ -46,7 +50,26 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private var offlineDataList: ArrayList<AlgorithmInput> = arrayListOf()
 
+    private var respResults: List<Pair<Long, Float>> = arrayListOf()
+
+    private var hrvResults: List<Pair<Long, HrvOfflineChartData>> = arrayListOf()
+
+    private var stressResults: List<Pair<Long, Int>> = arrayListOf()
+
     companion object {
+        const val RESP_INDEX = 6
+        const val RMSSD_INDEX = 7
+        const val SDNN_INDEX = 8
+        const val AVNN_INDEX = 9
+        const val PNN50_INDEX = 10
+        const val ULF_INDEX = 11
+        const val VLF_INDEX = 12
+        const val LF_INDEX = 13
+        const val HF_INDEX = 14
+        const val LF_HF_INDEX = 15
+        const val TOTPWR_INDEX = 16
+        const val STRESS_INDEX = 17
+
         fun newInstance(logFile: File): OfflineDataFragment {
             val fragment = OfflineDataFragment()
             fragment.logFile = logFile
@@ -71,6 +94,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private var hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
 
+    private var csvWriter: CsvWriter? = null
     //private val adapter: OfflineDataAdapter by lazy { OfflineDataAdapter() }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -112,6 +136,97 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
         chartSpinner.onItemSelectedListener = this
 
+        csvExportButton.setOnClickListener {
+            val index = chartSpinner.selectedItemPosition
+            var file: File?
+            when (index) {
+                RESP_INDEX -> {
+                    file = getOutputFile("resp_out")
+                    when {
+                        file.exists() -> {
+                            Toast.makeText(requireContext(), getString(R.string.file_already_exists), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        respResults.isEmpty() -> {
+                            Toast.makeText(requireContext(), getString(R.string.no_data_found), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        else -> {
+                            csvWriter = CsvWriter.open(file.absolutePath)
+                            csvWriter?.listener = this@OfflineDataFragment
+                        }
+                    }
+                }
+                in RMSSD_INDEX..TOTPWR_INDEX -> {
+                    file = getOutputFile("hrv_out")
+                    when {
+                        file.exists() -> {
+                            Toast.makeText(requireContext(), getString(R.string.file_already_exists), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        hrvResults.isEmpty() -> {
+                            Toast.makeText(requireContext(), getString(R.string.no_data_found), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        else -> {
+                            csvWriter = CsvWriter.open(file.absolutePath)
+                            csvWriter?.listener = this@OfflineDataFragment
+                        }
+                    }
+                }
+                STRESS_INDEX -> {
+                    file = getOutputFile("stress_out")
+                    when {
+                        file.exists() -> {
+                            Toast.makeText(requireContext(), getString(R.string.file_already_exists), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        stressResults.isEmpty() -> {
+                            Toast.makeText(requireContext(), getString(R.string.no_data_found), Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        else -> {
+                            csvWriter = CsvWriter.open(file.absolutePath)
+                            csvWriter?.listener = this@OfflineDataFragment
+                        }
+                    }
+
+                }
+            }
+            progressBar.visibility = View.VISIBLE
+            doAsync {
+                when (index) {
+                    RESP_INDEX -> {
+                        csvWriter?.write("timestamp", "Respiration Rate")
+                        respResults.forEach {
+                            csvWriter?.write(it.first, "%.2f".format(it.second))
+                        }
+                        csvWriter?.close()
+                    }
+                    in RMSSD_INDEX..TOTPWR_INDEX -> {
+                        csvWriter?.write("timestamp", "AVNN", "SDNN", "RMSSD", "PNN50",
+                            "ULF", "VLF", "LF", "HF", "LF/HF", "TOT_PWR")
+                        hrvResults.forEach {
+                            csvWriter?.write(it.first, it.second.avnn, it.second.sdnn,
+                                it.second.rmssd, it.second.pnn50, it.second.ulf, it.second.vlf,
+                                it.second.lf, it.second.hf, it.second.lfOverHf, it.second.totPwr)
+                        }
+                        csvWriter?.close()
+                    }
+                    STRESS_INDEX -> {
+                        csvWriter?.write("timestamp", "Stress Score")
+                        stressResults.forEach {
+                            csvWriter?.write(it.first, it.second)
+                        }
+                        csvWriter?.close()
+                    }
+                }
+                uiThread {
+                    progressBar.visibility = View.GONE
+                }
+            }
+        }
+
         progressBar.visibility = View.VISIBLE
         doAsync {
 
@@ -119,18 +234,22 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
             val alignedDataList = readTimeStampAndHrFromAlignedFile(alignFile)
 
-            val resultList = runHrvAlgo()
+            hrvResults = runHrvAlgo()
 
-            var hrTimestampStart = 0L
+            respResults = runRrAlgo()
+
+            stressResults = runStressAlgo()
+
+            //var hrTimestampStart = 0L
 
             if (alignedDataList.isNotEmpty()) {
                 hrAlignment = HrAlignment.ALIGNMENT_SUCCESSFUL
-                hrTimestampStart = alignedDataList[0].first
+                //hrTimestampStart = alignedDataList[0].first
                 offlineChart.put(
                     1, OfflineChartData(
-                        alignedDataList.map {
+                        alignedDataList.mapIndexed { idx, it ->
                             Entry(
-                                (it.first - hrTimestampStart).toFloat(),
+                                idx.toFloat(),
                                 it.second.toFloat()
                             )
                         },
@@ -140,9 +259,9 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 )
                 offlineChart.put(
                     1, OfflineChartData(
-                        alignedDataList.map {
+                        alignedDataList.mapIndexed { idx, it ->
                             Entry(
-                                (it.first - hrTimestampStart).toFloat(),
+                                idx.toFloat(),
                                 it.third.toFloat()
                             )
                         },
@@ -156,12 +275,12 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
                 val refDataList = readTimeStampAndHrFromReferenceFile(refHrFile)
 
-                if (oneHzDataList.isNotEmpty()) {
+                /*if (oneHzDataList.isNotEmpty()) {
                     hrTimestampStart = oneHzDataList[0].first
-                }
+                }*/
 
                 if (refDataList.isNotEmpty()) {
-                    hrTimestampStart = min(hrTimestampStart, refDataList[0].first)
+                    //hrTimestampStart = min(hrTimestampStart, refDataList[0].first)
                     hrAlignment = HrAlignment.ALIGNMENT_FAIL
                 } else {
                     hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
@@ -169,9 +288,9 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
                 offlineChart.put(
                     1, OfflineChartData(
-                        oneHzDataList.map {
+                        oneHzDataList.mapIndexed { idx, it ->
                             Entry(
-                                (it.first - hrTimestampStart).toFloat(),
+                                idx.toFloat(),
                                 it.second.toFloat()
                             )
                         },
@@ -183,9 +302,9 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 if (refDataList.isNotEmpty()) {
                     offlineChart.put(
                         1, OfflineChartData(
-                            refDataList.map {
+                            refDataList.mapIndexed { idx, it ->
                                 Entry(
-                                    (it.first - hrTimestampStart).toFloat(),
+                                    idx.toFloat(),
                                     it.second.toFloat()
                                 )
                             },
@@ -199,116 +318,158 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 oneHzDataList.clear()
             }
 
-            offlineChart.put(2, OfflineChartData(
-                    offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
+            offlineChart.put(
+                2, OfflineChartData(
+                    offlineDataList.filterIndexed { index, it ->  index % 25 == 0}
+                        .mapIndexed { idx, it -> Entry(idx.toFloat(), it.spo2 / 10f) },
                     "SpO2 (%)",
                     "Maxim"
                 )
             )
 
-            offlineChart.put(3, OfflineChartData(
-                offlineDataList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rr / 10f) },
-                "IBI (ms)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                3, OfflineChartData(
+                    offlineDataList.filterIndexed { index, it ->  it.rr != 0}
+                        .mapIndexed { idx, it -> Entry(idx.toFloat(), it.rr / 10f) },
+                    "IBI (ms)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(4,  OfflineChartData(
-                offlineDataList.mapIndexed { idx, it ->
-                    Entry(
-                        idx.toFloat(),
-                        (it.walkSteps + it.runSteps).toFloat()
-                    )
-                },
-                "STEPS",
-                "Maxim"
-            ))
-
-            offlineChart.put(5,  OfflineChartData(
-                offlineDataList.mapIndexed { idx, it ->
-                    Entry(
-                        idx.toFloat(), sqrt(
-                            (it.accelerationX / 1000f).pow(2) + (it.accelerationY / 1000f).pow(2) +
-                                    (it.accelerationZ / 1000f).pow(2)
+            offlineChart.put(
+                4, OfflineChartData(
+                    offlineDataList.filterIndexed { index, it ->  index % 25 == 0}
+                        .mapIndexed { idx, it ->
+                        Entry(
+                            idx.toFloat(),
+                            (it.walkSteps + it.runSteps).toFloat()
                         )
-                    )
-                },
-                "MOTION (g)",
-                "Maxim"
-            ))
+                    },
+                    "STEPS",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(6,  OfflineChartData(
-                runRrAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it) },
-                "RESPIRATION RATE \n(breath/min)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                5, OfflineChartData(
+                    offlineDataList.filterIndexed { index, it ->  index % 25 == 0}
+                        .mapIndexed { idx, it ->
+                        Entry(
+                            idx.toFloat(), sqrt(
+                                (it.accelerationX / 1000f).pow(2) + (it.accelerationY / 1000f).pow(2) +
+                                        (it.accelerationZ / 1000f).pow(2)
+                            )
+                        )
+                    },
+                    "MOTION (g)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(7,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.rmssd) },
-                "RMSSD (ms)",
-                "Maxim"
-            ))
+            offlineDataList.clear()
 
-            offlineChart.put(8,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.sdnn) },
-                "SDNN (ms)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                RESP_INDEX, OfflineChartData(
+                    respResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second) },
+                    "RESPIRATION RATE \n(breath/min)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(9,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.avnn) },
-                "AVNN (ms)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                RMSSD_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.rmssd) },
+                    "RMSSD (ms)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(10,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.pnn50) },
-                "PNN50 (ms)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                SDNN_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.sdnn) },
+                    "SDNN (ms)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(11,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.ulf) },
-                "ULF (ms²)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                AVNN_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.avnn) },
+                    "AVNN (ms)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(12,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.vlf) },
-                "VLF (ms²)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                PNN50_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.pnn50) },
+                    "PNN50 (ms)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(13,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lf) },
-                "LF (ms²)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                ULF_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.ulf) },
+                    "ULF (ms²)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(14,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.hf) },
-                "HF (ms²)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                VLF_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.vlf) },
+                    "VLF (ms²)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(15,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.lfOverHf) },
-                "LF/HF",
-                "Maxim"
-            ))
+            offlineChart.put(
+                LF_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.lf) },
+                    "LF (ms²)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(16,  OfflineChartData(
-                resultList.mapIndexed { idx, it -> Entry(idx.toFloat(), it.totPwr) },
-                "TOTAL POWER (ms²)",
-                "Maxim"
-            ))
+            offlineChart.put(
+                HF_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.hf) },
+                    "HF (ms²)",
+                    "Maxim"
+                )
+            )
 
-            offlineChart.put(17,  OfflineChartData(
-                runStressAlgo().mapIndexed { idx, it -> Entry(idx.toFloat(), it.toFloat()) },
-                "STRESS SCORE",
-                "Maxim"
-            ))
+            offlineChart.put(
+                LF_HF_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.lfOverHf) },
+                    "LF/HF",
+                    "Maxim"
+                )
+            )
 
-            resultList.clear()
+            offlineChart.put(
+                TOTPWR_INDEX, OfflineChartData(
+                    hrvResults.mapIndexed { idx, it -> Entry(idx.toFloat(), it.second.totPwr) },
+                    "TOTAL POWER (ms²)",
+                    "Maxim"
+                )
+            )
+
+            offlineChart.put(
+                STRESS_INDEX, OfflineChartData(
+                    stressResults.mapIndexed { idx, it ->
+                        Entry(
+                            idx.toFloat(),
+                            it.second.toFloat()
+                        )
+                    },
+                    "STRESS SCORE",
+                    "Maxim"
+                )
+            )
+
+            //resultList.clear()
 
             uiThread {
                 progressBar.visibility = View.GONE
@@ -317,29 +478,32 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
     }
 
-    private fun runHrvAlgo(): ArrayList<HrvOfflineChartData> {
+    private fun runHrvAlgo(): ArrayList<Pair<Long, HrvOfflineChartData>> {
         algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 60, 15)
         algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_HRV
         MaximAlgorithms.init(algorithmInitConfig)
 
-        val resultList: ArrayList<HrvOfflineChartData> = arrayListOf()
+        val resultList: ArrayList<Pair<Long, HrvOfflineChartData>> = arrayListOf()
 
         for (algorithmInput in offlineDataList) {
             MaximAlgorithms.run(algorithmInput, algorithmOutput)
 
             if (algorithmOutput.hrv.isHrvCalculated) {
                 resultList.add(
-                    HrvOfflineChartData(
-                        avnn = algorithmOutput.hrv.timeDomainHrvMetrics.avnn,
-                        sdnn = algorithmOutput.hrv.timeDomainHrvMetrics.sdnn,
-                        rmssd = algorithmOutput.hrv.timeDomainHrvMetrics.rmssd,
-                        pnn50 = algorithmOutput.hrv.timeDomainHrvMetrics.pnn50,
-                        ulf = algorithmOutput.hrv.freqDomainHrvMetrics.ulf,
-                        vlf = algorithmOutput.hrv.freqDomainHrvMetrics.vlf,
-                        lf = algorithmOutput.hrv.freqDomainHrvMetrics.lf,
-                        hf = algorithmOutput.hrv.freqDomainHrvMetrics.hf,
-                        lfOverHf = algorithmOutput.hrv.freqDomainHrvMetrics.lfOverHf,
-                        totPwr = algorithmOutput.hrv.freqDomainHrvMetrics.totPwr
+                    Pair(
+                        algorithmInput.timestamp,
+                        HrvOfflineChartData(
+                            avnn = algorithmOutput.hrv.timeDomainHrvMetrics.avnn,
+                            sdnn = algorithmOutput.hrv.timeDomainHrvMetrics.sdnn,
+                            rmssd = algorithmOutput.hrv.timeDomainHrvMetrics.rmssd,
+                            pnn50 = algorithmOutput.hrv.timeDomainHrvMetrics.pnn50,
+                            ulf = algorithmOutput.hrv.freqDomainHrvMetrics.ulf,
+                            vlf = algorithmOutput.hrv.freqDomainHrvMetrics.vlf,
+                            lf = algorithmOutput.hrv.freqDomainHrvMetrics.lf,
+                            hf = algorithmOutput.hrv.freqDomainHrvMetrics.hf,
+                            lfOverHf = algorithmOutput.hrv.freqDomainHrvMetrics.lfOverHf,
+                            totPwr = algorithmOutput.hrv.freqDomainHrvMetrics.totPwr
+                        )
                     )
                 )
             }
@@ -351,18 +515,18 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
         return resultList
     }
 
-    private fun runStressAlgo(): List<Int> {
+    private fun runStressAlgo(): List<Pair<Long, Int>> {
         algorithmInitConfig?.hrvConfig = HrvAlgorithmInitConfig(40f, 90, 30)
         algorithmInitConfig?.enableAlgorithmsFlag =
             MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS
         MaximAlgorithms.init(algorithmInitConfig)
 
-        val resultList: ArrayList<Int> = arrayListOf()
+        val resultList: ArrayList<Pair<Long, Int>> = arrayListOf()
 
         for (algorithmInput in offlineDataList) {
             if (MaximAlgorithms.run(algorithmInput, algorithmOutput)) {
                 Timber.d("Stress score = ${algorithmOutput.stress.stressScore}")
-                resultList.add(algorithmOutput.stress.stressScore)
+                resultList.add(Pair(algorithmInput.timestamp, algorithmOutput.stress.stressScore))
             }
         }
 
@@ -372,19 +536,25 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
 
-    private fun runRrAlgo(): List<Float> {
+    private fun runRrAlgo(): List<Pair<Long, Float>> {
         algorithmInitConfig?.enableAlgorithmsFlag = MaximAlgorithms.FLAG_RESP
         MaximAlgorithms.init(algorithmInitConfig)
 
-        val resultList: ArrayList<Float> = arrayListOf()
+        val resultList: ArrayList<Pair<Long, Float>> = arrayListOf()
 
-        for (algorithmInput in offlineDataList) {
+        for ((index, algorithmInput) in offlineDataList.withIndex()) {
             MaximAlgorithms.run(
                 algorithmInput,
                 algorithmOutput
             )
-
-            resultList.add(algorithmOutput.respiratory.respirationRate)
+            if(index % 25 == 0){
+                resultList.add(
+                    Pair(
+                        algorithmInput.timestamp,
+                        algorithmOutput.respiratory.respirationRate
+                    )
+                )
+            }
         }
 
         MaximAlgorithms.end(MaximAlgorithms.FLAG_RESP)
@@ -425,6 +595,34 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     }
                     else -> warningMessageView.visibility = View.GONE
                 }
+            }
+
+            if (position in RESP_INDEX..STRESS_INDEX) {
+                csvExportButton.visibility = View.VISIBLE
+            } else {
+                csvExportButton.visibility = View.GONE
+            }
+        } else {
+            csvExportButton.visibility = View.GONE
+        }
+    }
+
+    private fun getOutputFile(suffix: String): File {
+        return File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/OUTPUT/${logFile?.nameWithoutExtension}_$suffix.csv"
+        )
+    }
+
+    override fun onCompleted(isSuccessful: Boolean) {
+        doAsync {
+            uiThread {
+                Toast.makeText(
+                    requireContext(),
+                    "Saved to ${csvWriter?.filePath}",
+                    Toast.LENGTH_LONG
+                ).show()
+                csvWriter = null
             }
         }
     }

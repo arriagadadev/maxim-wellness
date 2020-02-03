@@ -15,7 +15,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@android:drawable/editbox_background"
         />
 
@@ -64,6 +66,21 @@
         android:drawableStart="@drawable/ic_check"
         android:drawablePadding="10dp"
         android:gravity="center"
+        android:visibility="gone"
+        />
+
+    <Button
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/color_secondary"
+        android:text="@string/export_csv"
+        android:textColor="@color/color_on_secondary"
+        android:id="@+id/csvExportButton"
+        android:textSize="16sp"
+        android:layout_margin="10dp"
         android:visibility="gone"
         />
 

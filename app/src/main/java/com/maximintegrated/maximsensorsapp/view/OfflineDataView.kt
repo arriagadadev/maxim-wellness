@@ -17,7 +17,7 @@ class OfflineDataView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     var chartMap: HashMap<Int, LineData> = hashMapOf()
-    var chartMapTitles: HashMap<Int, String> = hashMapOf()
+    var chartTitlesMap: HashMap<Int, String> = hashMapOf()
 
     var title: CharSequence
         get() = chartTitle.text
@@ -50,11 +50,11 @@ class OfflineDataView @JvmOverloads constructor(
         dataSet.setDrawFilled(false)
         dataSet.lineWidth = 2f
         dataSet.values = data.dataSetValues
-        chartMapTitles[key] = data.title
-        if(chartMap.containsKey(key)){
+        chartTitlesMap[key] = data.title
+        if (chartMap.containsKey(key)) {
             dataSet.color = ContextCompat.getColor(context, R.color.channel_red)
             chartMap[key]?.addDataSet(dataSet)
-        }else{
+        } else {
             dataSet.color = ContextCompat.getColor(context, R.color.colorPrimary)
             chartMap[key] = LineData(dataSet)
         }
@@ -63,7 +63,7 @@ class OfflineDataView @JvmOverloads constructor(
     fun display(key: Int) {
         if (chartMap.containsKey(key)) {
             lineChart.data = chartMap[key]
-            chartTitle.text = chartMapTitles[key]
+            chartTitle.text = chartTitlesMap[key]
             lineChart.fitScreen()
             lineChart.invalidate()
         }

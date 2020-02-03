@@ -187,6 +187,9 @@
     <string name="epoc_recovery_score">EPOC Recovery Score</string>
     <string name="should_create_profile">You should create a profile.</string>
     <string name="should_select_user">You should select a user.</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="file_already_exists">File already exists</string>
+    <string name="no_data_found">No data found</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>
