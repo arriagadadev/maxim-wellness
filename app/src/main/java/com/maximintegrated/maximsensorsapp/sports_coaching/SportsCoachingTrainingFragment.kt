@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
+import com.maximintegrated.algorithms.sports.SportsCoachingSession
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -60,7 +61,7 @@ class SportsCoachingTrainingFragment : Fragment() {
             requireActivity().addFragment(SportsCoachingReadinessFragment.newInstance())
         }
         vo2MaxMenuItemView.setOnClickListener {
-            SportsCoachingManager.currentSession = SportsCoachingSession.VO2_MAX
+            SportsCoachingManager.currentSession = SportsCoachingSession.VO2MAX_RELAX
             requireActivity().addFragment(SportsCoachingVO2MaxFragment.newInstance())
         }
         epocRecoveryMenuItemView.setOnClickListener {
@@ -72,7 +73,7 @@ class SportsCoachingTrainingFragment : Fragment() {
             requireActivity().addFragment(SportsCoachingRecoveryTimeFragment.newInstance())
         }
         fitnessAgeMenuItemView.setOnClickListener {
-            SportsCoachingManager.currentSession = SportsCoachingSession.FITNESS_AGE
+            SportsCoachingManager.currentSession = SportsCoachingSession.VO2MAX_FROM_HISTORY
             requireActivity().addFragment(SportsCoachingFitnessAgeFragment.newInstance())
         }
     }

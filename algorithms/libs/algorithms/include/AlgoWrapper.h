@@ -16,6 +16,7 @@ extern "C" {
 
 /* Macros for library import/export */
 #if defined(WIN32) || defined(_WIN32)
+#define COMPILER_INLINED
 #ifdef MXM_ALGOSUITE_EXPORTS
 #define MXM_ALGOSUITE_API __declspec(dllexport)
 #elif defined MXM_RRM_IMPORTS
@@ -38,6 +39,7 @@ extern "C" {
 #include "mxm_respiration_rate_manager.h"
 #include "mxm_stress_monitoring.h"
 #include "mxm_sleep_manager.h"
+#include "mxm_sports_coaching_public.h"
 
 
 typedef struct {
@@ -81,7 +83,7 @@ typedef MxmHrvRet                                 mxm_algosuite_hrv_retcode;
 typedef mxm_respiration_rate_manager_return_code  mxm_algosuite_resp_retcode;
 typedef mxm_stress_monitoring_return_code         mxm_algosuite_stress_retcode;
 typedef mxm_sleep_manager_return                  mxm_algosuite_sleep_retcode;
-
+typedef mxm_sc_return_code                        mxm_algosuite_sc_retcode;
 
 
 typedef struct {
@@ -98,6 +100,7 @@ typedef struct {
 	 mxm_algosuite_resp_retcode   resp_status;
 	 mxm_algosuite_stress_retcode stress_status;
 	 mxm_algosuite_sleep_retcode sleep_status;
+     mxm_algosuite_sc_retcode sports_coaching_status;
 }mxm_algosuite_return_code;
 
 
@@ -106,7 +109,7 @@ typedef struct {
  	mxm_sleep_manager_output_dataframe         sleep_out_Sample;
  	mxm_respiration_rate_manager_out_data_str  resp_out_sample;
  	mxm_mxm_stress_monitoring_run_output       stress_out_sample;
-
+    mxm_sc_output                              sc_out_sample;
  }mxm_algosuite_output_data;
 
 
@@ -124,6 +127,7 @@ typedef struct {
 	mxm_respiration_rate_manager_init_str   respConfig;
 	mxm_stress_monitoring_config            stressConfig;
 	mxm_sleep_manager_config                sleepConfig;
+    mxm_sc_config                           sc_config;
 }mxm_algosuite_init_data;
 
 

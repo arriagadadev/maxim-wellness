@@ -3,6 +3,7 @@ package com.maximintegrated.algorithms;
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig;
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig;
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmInitConfig;
+import com.maximintegrated.algorithms.sports.SportsCoachingAlgorithmInitConfig;
 
 public class MaximAlgorithms {
 
@@ -21,10 +22,16 @@ public class MaximAlgorithms {
         RespiratoryRateAlgorithmInitConfig resp = algorithmInitConfig.getRespConfig();
         SleepAlgorithmInitConfig sleep = algorithmInitConfig.getSleepConfig();
         byte stress = algorithmInitConfig.getStressConfig();
+        SportsCoachingAlgorithmInitConfig sports = algorithmInitConfig.getSportCoachingConfig();
         return init(algorithmInitConfig.getEnableAlgorithmsFlag(), hrv.getSamplingPeriod(), hrv.getWindowSizeInSec(),
                 hrv.getWindowShiftSizeInSec(), resp.getSourceOptions().value, resp.getLedCodes().value,
                 resp.getSamplingRateOption().value, stress, sleep.getDetectableSleepDuration().value,
-                sleep.getUserInfo().getAge(), sleep.getUserInfo().getWeight(), sleep.getUserInfo().getGender().value, sleep.getUserInfo().getRestingHr());
+                sleep.getUserInfo().getRestingHr(), sports.getSamplingRate(), sports.getSession().value,
+                sports.getUser().getBirthYear(), sports.getUser().getGender().value, sports.getUser().getWeight(),
+                sports.getUser().getHeight(), sports.getUser().isMetric(), sports.getHistory().toFloat(),
+                sports.getEpocConfig().getExerciseDurationMinutes(), sports.getEpocConfig().getExerciseIntensity(),
+                sports.getEpocConfig().getMinutesAfterExercise(), sports.getRecoveryConfig().getLastEpocRecoveryTimestamp(),
+                sports.getRecoveryConfig().getLastRecoveryEstimateInMinutes(), sports.getRecoveryConfig().getLastHr());
     }
 
     public static boolean run(AlgorithmInput input, AlgorithmOutput output) {
@@ -41,7 +48,11 @@ public class MaximAlgorithms {
 
     public static native boolean init(int enableFlag, float hrvSamplingPeriod, int hrvWindowSizeInSec,
                                       int hrvWindowShiftSizeInSec, int respSource, int respLedCode,
-                                      int respSamplingRate, int stressConfig, int sleepDuration, int age, int weight, int gender, float restingHr);
+                                      int respSamplingRate, int stressConfig, int sleepDuration, float restingHr,
+                                      int samplingRate, int session, int birthYear, int gender, int weight, int height,
+                                      boolean isMetric, float[] records, int exerciseDurationMin, int exerciseIntensity,
+                                      int minAfterExercise, long lastEpocRecoveryTimestamp, int lastRecoveryEstimateInMinutes,
+                                      int lastHr);
 
     public static native boolean run(int sampleCount, int green, int green2, int ir, int red,
                                      int accelerationX, int accelerationY, int accelerationZ,

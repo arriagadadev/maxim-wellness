@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.maximintegrated.algorithms.sports.SportsCoachingUser
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -88,7 +89,7 @@ class SportsCoachingFragment : Fragment() {
             userSpinner.adapter = adapter
         }
 
-        if(usernameList.size > 1){
+        if (usernameList.size > 1) {
             userSpinner.setSelection(1)
         }
 
@@ -119,9 +120,9 @@ class SportsCoachingFragment : Fragment() {
             if (index > 0) {
                 index--
             } else {
-                if(usernameList.size == 1){
+                if (usernameList.size == 1) {
                     showWarningMessage(getString(R.string.should_create_profile))
-                }else{
+                } else {
                     showWarningMessage(getString(R.string.should_select_user))
                 }
                 return@setOnClickListener
@@ -134,7 +135,8 @@ class SportsCoachingFragment : Fragment() {
         signupButton.setOnClickListener {
             val name = usernameEditText.text.toString()
             val birthYear = birthYearEditText.text.toString().toIntOrNull()
-            val gender = if (maleChip.isChecked) Gender.MALE else Gender.FEMALE
+            val gender =
+                if (maleChip.isChecked) SportsCoachingUser.Gender.MALE else SportsCoachingUser.Gender.FEMALE
             val isUnitInMetric = metricsChip.isChecked
             val weight = weightEditText.text.toString().toIntOrNull()
             val height = heightEditText.text.toString().toIntOrNull()

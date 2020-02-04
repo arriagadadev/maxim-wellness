@@ -16,6 +16,7 @@ static jmethodID updateHrvOutputMethodId;
 static jmethodID updateRespOutputMethodId;
 static jmethodID updateStressOutputMethodId;
 static jmethodID updateSleepOutputMethodId;
+static jmethodID updateSportsOutputMethodId;
 static jmethodID setVersionMethodId;
 
 extern "C"
@@ -28,8 +29,16 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_init(JNIEnv *env, jclass cla
                                                          jint resp_source, jint resp_led_code,
                                                          jint resp_sampling_rate,
                                                          jint stress_config, jint sleep_duration,
-                                                         jint age, jint weight, jint gender,
-                                                         jfloat resting_hr) {
+                                                         jfloat resting_hr, jint sampling_rate, jint session,
+                                                         jint birth_year, jint gender, jint weight,
+                                                         jint height, jboolean is_metric,
+                                                         jfloatArray records,
+                                                         jint exercise_duration_min,
+                                                         jint exercise_intensity,
+                                                         jint min_after_exercise,
+                                                         jlong last_epoc_recovery_timestamp,
+                                                         jint last_recovery_estimate_in_minutes,
+                                                         jint last_hr) {
     mxm_algosuite_return_code status;
 
     initData.enabledAlgorithms = (unsigned char) enable_flag;
@@ -41,11 +50,55 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_init(JNIEnv *env, jclass cla
     initData.respConfig.sampling_rate = (mxm_respiration_rate_manager_sampling_rate_option) resp_sampling_rate;
     initData.stressConfig.dummy_config_for_compilation = (uint8_t) stress_config;
     initData.sleepConfig.mxm_sleep_detection_duration = (mxm_sleep_manager_minimum_detectable_sleep_duration) sleep_duration;
-    initData.sleepConfig.user_info.age = (uint16_t) age;
-    initData.sleepConfig.user_info.weight = (uint16_t) weight;
-    initData.sleepConfig.user_info.gender = (mxm_sleep_manager_gender) gender;
+    initData.sleepConfig.user_info.age = (uint16_t) 20;
+    initData.sleepConfig.user_info.weight = (uint16_t) 70;
+    initData.sleepConfig.user_info.gender = MXM_MALE;
     initData.sleepConfig.user_info.sleep_resting_hr = resting_hr;
+    initData.sc_config.sampling_rate = sampling_rate;
+    initData.sc_config.session_code = (mxm_sc_session) session;
+    initData.sc_config.user.birth_year = birth_year;
+    initData.sc_config.user.gender = (gender == 0) ? 'M' : 'F';
+    initData.sc_config.user.weight = weight;
+    initData.sc_config.user.height = height;
+    initData.sc_config.user.is_metric = is_metric;
 
+    jfloat *history = env->GetFloatArrayElements(records, 0);
+
+    int numOfRecords = (int) history[0];
+    if(numOfRecords > MXM_SC_MAX_HISTORY_LENGTH){
+        numOfRecords = MXM_SC_MAX_HISTORY_LENGTH;
+    }
+    initData.sc_config.history.number_of_records = numOfRecords;
+    int offset = 1;
+    for(int i = 0; i < numOfRecords; i++){
+        auto upper = (unsigned long) history[offset++];
+        auto lower = (unsigned int) history[offset++];
+        initData.sc_config.history.records[i].record_date = (upper << 32) | lower;
+        initData.sc_config.history.records[i].score.readiness.readiness_score = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.relax = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.VO2 = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.fitness_age = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.fitness_region_poor_medium = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.fitness_region_medium_good = history[offset++];
+        initData.sc_config.history.records[i].score.vo2_max.fitness_region_good_excellent = history[offset++];
+        initData.sc_config.history.records[i].score.recovery.recovery_time_min = (int) history[offset++];
+        initData.sc_config.history.records[i].score.recovery.epoc = history[offset++];
+        initData.sc_config.history.records[i].score.recovery.hr0 = (int) history[offset++];
+        initData.sc_config.history.records[i].score.recovery.last_hr = (int) history[offset++];
+        initData.sc_config.history.records[i].score.recovery.recovery_percentage = (int) history[offset++];
+        initData.sc_config.history.records[i].heart_rate_stat.min_hr = (int) history[offset++];
+        initData.sc_config.history.records[i].heart_rate_stat.max_hr = (int) history[offset++];
+        initData.sc_config.history.records[i].heart_rate_stat.mean_hr = (int) history[offset++];
+        initData.sc_config.history.records[i].session = (mxm_sc_session)((int)history[offset++]);
+    }
+    initData.sc_config.epoc_mode_config.exercise_duration_minutes = exercise_duration_min;
+    initData.sc_config.epoc_mode_config.exercise_intensity = exercise_intensity;
+    initData.sc_config.epoc_mode_config.minutes_after_exercise = min_after_exercise;
+    initData.sc_config.recovery_time_mode_config.last_epoc_recovery_timestamp = last_epoc_recovery_timestamp;
+    initData.sc_config.recovery_time_mode_config.last_recovery_estimate_in_mins = last_recovery_estimate_in_minutes;
+    initData.sc_config.recovery_time_mode_config.last_hr = last_hr;
+
+    env->ReleaseFloatArrayElements(records, history, 0);
 
     mxm_algosuite_manager_init(&initData, &status);
 
@@ -84,6 +137,14 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_init(JNIEnv *env, jclass cla
             return JNI_FALSE;
         } else {
             LOGD("SLEEP INIT SUCCESS");
+        }
+    }
+    if ((initData.enabledAlgorithms & MXM_ALGOSUITE_ENABLE_SPORTS) > 0) {
+        if (status.sports_coaching_status != MXM_SC_NO_ERROR) {
+            LOGD("SPORTS INIT FAIL");
+            return JNI_FALSE;
+        } else {
+            LOGD("SPORTS INIT SUCCESS");
         }
     }
     return JNI_TRUE;
@@ -221,6 +282,34 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
             LOGD("SLEEP RUN SUCCESS: %ld", output.sleep_out_Sample.date_info);
         }
     }
+    if ((initData.enabledAlgorithms & MXM_ALGOSUITE_ENABLE_SPORTS) > 0) {
+        if (status.sports_coaching_status != MXM_SC_NO_ERROR) {
+            LOGD("SPORTS RUN FAIL");
+            return JNI_FALSE;
+        } else {
+            env->CallVoidMethod(joutput, updateSportsOutputMethodId,
+                                output.sc_out_sample.percent_completed,
+                                output.sc_out_sample.hr_stats.min_hr,
+                                output.sc_out_sample.hr_stats.max_hr,
+                                output.sc_out_sample.hr_stats.mean_hr,
+                                output.sc_out_sample.scores.readiness.readiness_score,
+                                output.sc_out_sample.scores.vo2_max.relax,
+                                output.sc_out_sample.scores.vo2_max.VO2,
+                                output.sc_out_sample.scores.vo2_max.fitness_age,
+                                output.sc_out_sample.scores.vo2_max.fitness_region_poor_medium,
+                                output.sc_out_sample.scores.vo2_max.fitness_region_medium_good,
+                                output.sc_out_sample.scores.vo2_max.fitness_region_good_excellent,
+                                output.sc_out_sample.scores.recovery.recovery_time_min,
+                                output.sc_out_sample.scores.recovery.epoc,
+                                output.sc_out_sample.scores.recovery.hr0,
+                                output.sc_out_sample.scores.recovery.last_hr,
+                                output.sc_out_sample.scores.recovery.recovery_percentage,
+                                output.sc_out_sample.status,
+                                output.sc_out_sample.new_output_ready,
+                                output.sc_out_sample.timestamp);
+            LOGD("SPORTS RUN SUCCESS");
+        }
+    }
     return JNI_TRUE;
 }
 
@@ -260,10 +349,18 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_end(JNIEnv *env, jclass claz
     }
     if ((disable_flag & MXM_ALGOSUITE_ENABLE_SLEEP) > 0) {
         if (status.sleep_status != MXM_SLEEP_MANAGER_SUCCESS) {
-            LOGD("SLEEP RUN FAIL");
+            LOGD("SLEEP END FAIL");
             return JNI_FALSE;
         } else {
             LOGD("SLEEP END SUCCESS");
+        }
+    }
+    if ((disable_flag & MXM_ALGOSUITE_ENABLE_SPORTS) > 0) {
+        if (status.sports_coaching_status != MXM_SC_NO_ERROR) {
+            LOGD("SPORTS END FAIL");
+            return JNI_FALSE;
+        } else {
+            LOGD("SPORTS END SUCCESS");
         }
     }
     return JNI_TRUE;
@@ -320,6 +417,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     updateSleepOutputMethodId = env->GetMethodID(outputClass, "sleepUpdate",
                                                  "(IIIFIIFFFFIJ)V");
+
+    updateSportsOutputMethodId = env->GetMethodID(outputClass, "sportsUpdate",
+                                                 "(IIIIFFFFFFFIFIIIIZJ)V");
 
     setVersionMethodId = env->GetMethodID(versionClass, "set",
                                           "([CIII)V");

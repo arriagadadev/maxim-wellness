@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.google.gson.Gson
+import com.maximintegrated.algorithms.sports.SportsCoachingUser
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -68,8 +69,8 @@ class SportsCoachingProfileFragment : Fragment() {
         if (user != null) {
             usernameEditText.setText(user.userName)
             birthYearEditText.setText(user.birthYear.toString())
-            genderChipGroup.check(if (user.gender == Gender.MALE) R.id.maleChip else R.id.femaleChip)
-            if (user.isUnitInMetrics) {
+            genderChipGroup.check(if (user.gender == SportsCoachingUser.Gender.MALE) R.id.maleChip else R.id.femaleChip)
+            if (user.isMetric) {
                 unitChipGroup.check(R.id.metricsChip)
                 weightLayout.hint = getString(R.string.weight_in_kg)
                 heightLayout.hint = getString(R.string.height_in_cm)
@@ -84,8 +85,9 @@ class SportsCoachingProfileFragment : Fragment() {
 
         signupButton.setOnClickListener {
             val birthYear = birthYearEditText.text.toString().toIntOrNull()
-            val gender = if (maleChip.isChecked) Gender.MALE else Gender.FEMALE
-            val isUnitInMetric = metricsChip.isChecked
+            val gender =
+                if (maleChip.isChecked) SportsCoachingUser.Gender.MALE else SportsCoachingUser.Gender.FEMALE
+            val isMetric = metricsChip.isChecked
             val weight = weightEditText.text.toString().toIntOrNull()
             val height = heightEditText.text.toString().toIntOrNull()
             if (birthYear == null || weight == null || height == null) {
@@ -96,7 +98,7 @@ class SportsCoachingProfileFragment : Fragment() {
             if (user != null) {
                 user.birthYear = birthYear
                 user.gender = gender
-                user.isUnitInMetrics = isUnitInMetric
+                user.isMetric = isMetric
                 user.weight = weight
                 user.height = height
                 SportsCoachingSettings.currentUserJson = gson.toJson(user)

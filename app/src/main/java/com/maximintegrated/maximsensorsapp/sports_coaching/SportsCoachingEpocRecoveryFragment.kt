@@ -2,7 +2,6 @@ package com.maximintegrated.maximsensorsapp.sports_coaching
 
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +18,6 @@ import com.maximintegrated.maximsensorsapp.exts.set
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.fragment_sports_coaching_epoc_recovery.*
 import kotlinx.android.synthetic.main.view_result_card.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
@@ -69,7 +66,6 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
-        epocRecoveryView.confidenceProgressBar.progressDrawable = null
         val drawable = GradientDrawable(
             GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(
                 ContextCompat.getColor(context!!, R.color.progress_red),
@@ -83,8 +79,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
             it.setGradientCenter(0.8f, 0.2f)
         }
         epocRecoveryView.confidenceProgressBar.progressDrawable = drawable
-        epocRecoveryView.confidenceProgressBar.progress = 20
-        //epocRecoveryView.confidenceProgressBar.secondaryProgress = 80
+        epocRecoveryView.confidenceProgressBar.progress = 80
     }
 
     override fun addStreamData(streamData: HspStreamData) {
@@ -104,6 +99,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
             updateNotification()
             stopMonitoring()
         }
+        epocRecoveryView.confidenceProgressBar.progress = streamData.hrConfidence
     }
 
     private fun renderHrmModel(streamData: HspStreamData) {

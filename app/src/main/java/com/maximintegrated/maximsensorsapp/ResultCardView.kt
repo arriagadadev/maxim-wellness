@@ -111,7 +111,6 @@ class ResultCardView @JvmOverloads constructor(
 
             enableProgress = getBoolean(R.styleable.ResultCardView_rcv_enable_progress, false)
             enableScdView = getBoolean(R.styleable.ResultCardView_rcv_enable_scd_view, false)
-            confidenceProgressBar.progress = 0
             scdStateTextView.text = Scd.NO_DECISION.displayName
             recycle()
         }

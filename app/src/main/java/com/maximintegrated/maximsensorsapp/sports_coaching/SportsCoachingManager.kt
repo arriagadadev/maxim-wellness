@@ -1,13 +1,6 @@
 package com.maximintegrated.maximsensorsapp.sports_coaching
 
-enum class SportsCoachingSession {
-    UNDEFINED,
-    READINESS,
-    VO2_MAX,
-    EPOC_RECOVERY,
-    RECOVERY_TIME,
-    FITNESS_AGE
-}
+import com.maximintegrated.algorithms.sports.SportsCoachingSession
 
 class SportsCoachingManager {
     companion object {

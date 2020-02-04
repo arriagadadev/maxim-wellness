@@ -3,6 +3,7 @@ package com.maximintegrated.algorithms;
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig;
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmInitConfig;
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmInitConfig;
+import com.maximintegrated.algorithms.sports.SportsCoachingAlgorithmInitConfig;
 
 public class AlgorithmInitConfig {
 
@@ -11,6 +12,7 @@ public class AlgorithmInitConfig {
     private RespiratoryRateAlgorithmInitConfig respConfig;
     private byte stressConfig;
     private SleepAlgorithmInitConfig sleepConfig;
+    private SportsCoachingAlgorithmInitConfig sportCoachingConfig;
 
     public AlgorithmInitConfig() {
         enableAlgorithmsFlag = 0;
@@ -18,6 +20,7 @@ public class AlgorithmInitConfig {
         respConfig = new RespiratoryRateAlgorithmInitConfig();
         stressConfig = 0;
         sleepConfig = new SleepAlgorithmInitConfig();
+        sportCoachingConfig = new SportsCoachingAlgorithmInitConfig();
     }
 
     public int getEnableAlgorithmsFlag() {
@@ -58,5 +61,13 @@ public class AlgorithmInitConfig {
 
     public void setSleepConfig(SleepAlgorithmInitConfig sleepConfig) {
         this.sleepConfig = sleepConfig;
+    }
+
+    public SportsCoachingAlgorithmInitConfig getSportCoachingConfig() {
+        return sportCoachingConfig;
+    }
+
+    public void setSportCoachingConfig(SportsCoachingAlgorithmInitConfig sportCoachingConfig) {
+        this.sportCoachingConfig = sportCoachingConfig;
     }
 }

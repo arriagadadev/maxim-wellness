@@ -3,6 +3,7 @@ package com.maximintegrated.algorithms;
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmOutput;
 import com.maximintegrated.algorithms.respiratory.RespiratoryRateAlgorithmOutput;
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmOutputFrame;
+import com.maximintegrated.algorithms.sports.SportsCoachingAlgorithmOutput;
 import com.maximintegrated.algorithms.stress.StressAlgorithmOutput;
 
 public class AlgorithmOutput {
@@ -10,12 +11,14 @@ public class AlgorithmOutput {
     private RespiratoryRateAlgorithmOutput respiratory;
     private StressAlgorithmOutput stress;
     private SleepAlgorithmOutputFrame sleep;
+    private SportsCoachingAlgorithmOutput sports;
 
-    public AlgorithmOutput(HrvAlgorithmOutput hrv, RespiratoryRateAlgorithmOutput respiratory, StressAlgorithmOutput stress, SleepAlgorithmOutputFrame sleep) {
+    public AlgorithmOutput(HrvAlgorithmOutput hrv, RespiratoryRateAlgorithmOutput respiratory, StressAlgorithmOutput stress, SleepAlgorithmOutputFrame sleep, SportsCoachingAlgorithmOutput sports) {
         this.hrv = hrv;
         this.respiratory = respiratory;
         this.stress = stress;
         this.sleep = sleep;
+        this.sports = sports;
     }
 
     public AlgorithmOutput() {
@@ -23,6 +26,7 @@ public class AlgorithmOutput {
         respiratory = new RespiratoryRateAlgorithmOutput();
         stress = new StressAlgorithmOutput();
         sleep = new SleepAlgorithmOutputFrame();
+        sports = new SportsCoachingAlgorithmOutput();
     }
 
     public HrvAlgorithmOutput getHrv() {
@@ -57,6 +61,14 @@ public class AlgorithmOutput {
         this.sleep = sleep;
     }
 
+    public SportsCoachingAlgorithmOutput getSports() {
+        return sports;
+    }
+
+    public void setSports(SportsCoachingAlgorithmOutput sports) {
+        this.sports = sports;
+    }
+
     public void hrvUpdate(float avnn,
                           float sdnn,
                           float rmssd,
@@ -86,5 +98,14 @@ public class AlgorithmOutput {
         sleep.update(sleepWakeDecisionStatus, sleepWakeDecision, sleepWakeDetentionLatency,
                 sleepWakeOutputConfLevel, sleepPhaseOutputStatus, sleepPhaseOutput,
                 sleepPhaseOutputConfLevel, hr, accMag, ibi, arrayLength, dateInfo);
+    }
+
+    public void sportsUpdate(int percentCompleted, int minHr, int maxHr, int meanHr, float readiness,
+                             float relax, float vo2, float age, float poorMedium, float mediumGood,
+                             float goodExcellent, int recoveryTime, float epoc, int hr0, int lastHr,
+                             int recoveryPercentage, int status, boolean newOutputReady, long timestamp) {
+        sports.update(percentCompleted, minHr, maxHr, meanHr, readiness, relax, vo2, age, poorMedium,
+                mediumGood, goodExcellent, recoveryTime, epoc, hr0, lastHr, recoveryPercentage, status,
+                newOutputReady, timestamp);
     }
 }
