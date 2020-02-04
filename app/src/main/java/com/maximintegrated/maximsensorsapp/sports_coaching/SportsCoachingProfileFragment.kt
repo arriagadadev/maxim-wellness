@@ -102,6 +102,7 @@ class SportsCoachingProfileFragment : Fragment() {
                 user.weight = weight
                 user.height = height
                 SportsCoachingSettings.currentUserJson = gson.toJson(user)
+                SportsCoachingManager.currentUser = user
             }
             requireActivity().onBackPressed()
         }

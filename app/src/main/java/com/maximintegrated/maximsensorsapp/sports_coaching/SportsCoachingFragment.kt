@@ -70,7 +70,7 @@ class SportsCoachingFragment : Fragment() {
         noAccountTextView.paintFlags = noAccountTextView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         val usernameList: ArrayList<String> = arrayListOf(getString(R.string.select_user))
-
+        SportsCoachingManager.currentUser = null
         if (SportsCoachingSettings.userListJson != "") {
             val listType = object : TypeToken<ArrayList<SportsCoachingUser>>() {}.type
             users = gson.fromJson<ArrayList<SportsCoachingUser>>(
@@ -129,6 +129,7 @@ class SportsCoachingFragment : Fragment() {
             }
             val user = users[index]
             SportsCoachingSettings.currentUserJson = gson.toJson(user)
+            SportsCoachingManager.currentUser = user
             requireActivity().addFragment(SportsCoachingLandingFragment.newInstance())
         }
 
@@ -148,6 +149,7 @@ class SportsCoachingFragment : Fragment() {
             users.add(user)
             SportsCoachingSettings.currentUserJson = gson.toJson(user)
             SportsCoachingSettings.userListJson = gson.toJson(users)
+            SportsCoachingManager.currentUser = user
             requireActivity().addFragment(SportsCoachingLandingFragment.newInstance())
         }
     }
