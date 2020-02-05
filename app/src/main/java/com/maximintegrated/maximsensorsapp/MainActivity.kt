@@ -61,9 +61,18 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
         hspViewModel.commandResponse
             .observe(this) { response ->
                 if (response.command.name == HspCommand.COMMAND_GET_DEVICE_INFO && response.parameters.size > 1) {
+                    val version = response.parameters[1].value
+                    hspViewModel.deviceModel = when (version.split(".")[0].toIntOrNull() ?: 0) {
+                        in 10..19 -> HspViewModel.DeviceModel.ME11A
+                        in 20..29 -> HspViewModel.DeviceModel.ME11B
+                        in 30..39 -> HspViewModel.DeviceModel.ME11C
+                        in 40..49 -> HspViewModel.DeviceModel.ME11D
+                        else -> HspViewModel.DeviceModel.UNDEFINED
+                    }
+                    showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
                     serverVersion.text =
                         getString(R.string.server_version, response.parameters[0].value)
-                    hubVersion.text = getString(R.string.hub_version, response.parameters[1].value)
+                    hubVersion.text = getString(R.string.hub_version, version)
                     hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhparams"))
                 } else if (response.command.name == HspCommand.COMMAND_GET_CFG && response.parameters.isNotEmpty()) {
                     if (response.command.parameters[0].value == "sh_dhparams") {
@@ -90,7 +99,6 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
             }
 
         d("Connected bluetooth device $bluetoothDevice")
-        showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
     }
 
     private fun showMenuItems(deviceSensors: List<String>, firmwareAlgorithms: List<String>) {
@@ -119,7 +127,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                 }
             }
         } else {
-            if (getCurrentFragment() as? MainFragment != null) {
+            if (getCurrentFragment() == null || getCurrentFragment() as? MainFragment != null) {
                 startActivity(
                     Intent(this, ScannerActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

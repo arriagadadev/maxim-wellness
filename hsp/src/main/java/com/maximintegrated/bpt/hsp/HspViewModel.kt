@@ -16,6 +16,14 @@ import timber.log.Timber
 class HspViewModel(application: Application) : AndroidViewModel(application),
     HspManagerCallbacks {
 
+    enum class DeviceModel{
+        UNDEFINED,
+        ME11A,
+        ME11B,
+        ME11C,
+        ME11D
+    }
+
     var bluetoothDevice: BluetoothDevice? = null
         private set
 
@@ -39,6 +47,7 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     val isConnected: Boolean
         get() = connectionState.value?.second == BluetoothAdapter.STATE_CONNECTED
 
+    var deviceModel = DeviceModel.UNDEFINED
 
     init {
         hspManager.setGattCallbacks(this)

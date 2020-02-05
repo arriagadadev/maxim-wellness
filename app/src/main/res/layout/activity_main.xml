@@ -19,8 +19,8 @@
 
     <ProgressBar
         android:id="@+id/progressBar"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         app:layout_constraintBottom_toTopOf="@id/bottomDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,28 +65,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/versionTopGuideline" />
 
-    <TextView
-        android:id="@+id/serverVersion"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="16dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintHorizontal_chainStyle="spread"
+        android:orientation="vertical"
         app:layout_constraintStart_toEndOf="@id/logoView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/versionTopGuideline"
-        tools:text="server_version" />
-
-    <TextView
-        android:id="@+id/hubVersion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/serverVersion"
-        app:layout_constraintTop_toBottomOf="@id/serverVersion"
-        tools:text="hub_version" />
+        android:layout_marginEnd="16dp">
+        <TextView
+            android:id="@+id/serverVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textAlignment="textEnd"
+            tools:text="server_version" />
+        <TextView
+            android:id="@+id/hubVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:layout_marginTop="3dp"
+            android:textAlignment="textEnd"
+            tools:text="hub_version" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

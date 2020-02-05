@@ -56,8 +56,10 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        spo2MenuItemView.isEnabled = true
-        spo2MenuItemView.isVisible = true
+        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
+
+        spo2MenuItemView.isEnabled = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
+        spo2MenuItemView.isVisible = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
 
         whrmMenuItemView.isEnabled = true
         whrmMenuItemView.isVisible = true
@@ -79,9 +81,6 @@ class MainFragment : Fragment() {
 
         archiveMenuItemView.isEnabled = true
         archiveMenuItemView.isVisible = true
-
-
-        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
 
         hspViewModel.connectionState
             .observe(this) { (device, connectionState) ->
