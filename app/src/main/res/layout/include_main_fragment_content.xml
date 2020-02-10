@@ -23,7 +23,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/whrmMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -36,7 +36,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/spo2MenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -49,7 +49,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/hrvMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -62,7 +62,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/respiratoryMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -75,7 +75,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/sleepMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -88,7 +88,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/stressMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -101,7 +101,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/sportsCoachingMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
@@ -114,7 +114,7 @@
         <com.maximintegrated.maximsensorsapp.MenuItemView
             android:id="@+id/archiveMenuItemView"
             android:layout_width="0dp"
-            android:layout_height="@dimen/menu_item_view_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/menu_item_margin_top"
             app:cardElevation="@dimen/menu_item_card_elevation"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"

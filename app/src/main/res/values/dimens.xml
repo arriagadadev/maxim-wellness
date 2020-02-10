@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="menu_item_view_text_size">20sp</dimen>
-    <dimen name="menu_item_view_height">100dp</dimen>
-    <dimen name="menu_item_margin_top">24dp</dimen>
+    <dimen name="menu_item_view_text_size">16sp</dimen>
+    <dimen name="menu_item_view_height">65dp</dimen>
+    <dimen name="menu_item_margin_top">12dp</dimen>
     <dimen name="menu_item_card_elevation">2dp</dimen>
     <dimen name="menu_item_view_max_width">480dp</dimen>
     <dimen name="view_signal_margin">4dp</dimen>
