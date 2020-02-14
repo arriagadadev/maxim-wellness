@@ -42,6 +42,7 @@ public class SportsCoachingHistory {
         int offset = 1;
         for (int i = 0; i < numberOfRecords; i++) {
             array[offset++] = records.get(i).getTimeStampUpper();
+            array[offset++] = records.get(i).getTimeStampLower();
             array[offset++] = records.get(i).getScores().getReadiness().getReadinessScore();
             array[offset++] = records.get(i).getScores().getVo2max().getRelax();
             array[offset++] = records.get(i).getScores().getVo2max().getVo2();
