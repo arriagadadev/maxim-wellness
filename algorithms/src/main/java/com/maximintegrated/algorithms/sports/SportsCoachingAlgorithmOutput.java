@@ -92,10 +92,11 @@ public class SportsCoachingAlgorithmOutput {
         this.timestamp = timestamp;
     }
 
-    public void update(int percentCompleted, int minHr, int maxHr, int meanHr, float readiness,
+    public void update(int session, int percentCompleted, int minHr, int maxHr, int meanHr, float readiness,
                        float relax, float vo2, float age, float poorMedium, float mediumGood,
                        float goodExcellent, int recoveryTime, float epoc, int hr0, int lastHr,
                        int recoveryPercentage, int status, boolean newOutputReady, long timestamp) {
+        this.session = SportsCoachingSession.values()[session];
         this.percentCompleted = percentCompleted;
         hrStats.update(minHr, maxHr, meanHr);
         estimates.update(readiness, relax, vo2, age, poorMedium, mediumGood, goodExcellent, recoveryTime, epoc, hr0, lastHr, recoveryPercentage);

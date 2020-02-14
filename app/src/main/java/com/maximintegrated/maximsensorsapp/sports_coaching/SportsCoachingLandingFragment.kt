@@ -63,5 +63,8 @@ class SportsCoachingLandingFragment : Fragment() {
         trainingMenuItemView.setOnClickListener {
             requireActivity().addFragment(SportsCoachingTrainingFragment.newInstance())
         }
+        historyMenuItemView.setOnClickListener {
+            requireActivity().addFragment(SportsCoachingHistoryFragment.newInstance())
+        }
     }
 }

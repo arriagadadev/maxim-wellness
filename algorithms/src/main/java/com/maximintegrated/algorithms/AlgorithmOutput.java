@@ -100,11 +100,11 @@ public class AlgorithmOutput {
                 sleepPhaseOutputConfLevel, hr, accMag, ibi, arrayLength, dateInfo);
     }
 
-    public void sportsUpdate(int percentCompleted, int minHr, int maxHr, int meanHr, float readiness,
+    public void sportsUpdate(int session, int percentCompleted, int minHr, int maxHr, int meanHr, float readiness,
                              float relax, float vo2, float age, float poorMedium, float mediumGood,
                              float goodExcellent, int recoveryTime, float epoc, int hr0, int lastHr,
                              int recoveryPercentage, int status, boolean newOutputReady, long timestamp) {
-        sports.update(percentCompleted, minHr, maxHr, meanHr, readiness, relax, vo2, age, poorMedium,
+        sports.update(session, percentCompleted, minHr, maxHr, meanHr, readiness, relax, vo2, age, poorMedium,
                 mediumGood, goodExcellent, recoveryTime, epoc, hr0, lastHr, recoveryPercentage, status,
                 newOutputReady, timestamp);
     }

@@ -27,7 +27,7 @@
             <com.maximintegrated.maximsensorsapp.MenuItemView
                 android:id="@+id/trainingMenuItemView"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/menu_item_view_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="32dp"
                 app:cardElevation="@dimen/menu_item_card_elevation"
@@ -37,7 +37,7 @@
             <com.maximintegrated.maximsensorsapp.MenuItemView
                 android:id="@+id/historyMenuItemView"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/menu_item_view_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="@dimen/menu_item_margin_top"
                 android:layout_marginEnd="32dp"
@@ -48,7 +48,7 @@
             <com.maximintegrated.maximsensorsapp.MenuItemView
                 android:id="@+id/profileMenuItemView"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/menu_item_view_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="@dimen/menu_item_margin_top"
                 android:layout_marginEnd="32dp"
@@ -59,7 +59,7 @@
             <com.maximintegrated.maximsensorsapp.MenuItemView
                 android:id="@+id/logoutMenuItemView"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/menu_item_view_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="@dimen/menu_item_margin_top"
                 android:layout_marginEnd="32dp"

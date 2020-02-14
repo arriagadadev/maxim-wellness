@@ -21,6 +21,172 @@
             android:clickable="true"
             android:focusable="true">
 
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/epocRecoveryInputLayout"
+                app:cardElevation="@dimen/menu_item_card_elevation"
+                app:cardCornerRadius="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_margin="10dp"
+                android:clipToPadding="true">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_margin="10dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/exercise_duration_min"
+                        android:textStyle="bold"/>
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:singleSelection="true"
+                        android:id="@+id/durationChipGroup"
+                        app:chipSpacing="20dp"
+                        android:layout_marginTop="10dp">
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/durationChip1"
+                            android:checkable="true"
+                            android:text="@string/_0_5_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/durationChip2"
+                            android:checkable="true"
+                            android:text="@string/_5_20_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"
+                            android:checked="true"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/durationChip3"
+                            android:checkable="true"
+                            android:text="@string/_20_60_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/durationChip4"
+                            android:checkable="true"
+                            android:text="@string/gt_60_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                    </com.google.android.material.chip.ChipGroup>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/exercise_intensity"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"/>
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:singleSelection="true"
+                        android:id="@+id/intensityChipGroup"
+                        app:chipSpacing="20dp"
+                        android:layout_marginTop="10dp">
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/intensityChip1"
+                            android:checkable="true"
+                            android:text="@string/light"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/intensityChip2"
+                            android:checkable="true"
+                            android:text="@string/normal"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"
+                            android:checked="true"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/intensityChip3"
+                            android:checkable="true"
+                            android:text="@string/heavy"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                    </com.google.android.material.chip.ChipGroup>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/time_since_end_of_exercise"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"/>
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:singleSelection="true"
+                        android:id="@+id/delayChipGroup"
+                        app:chipSpacing="20dp"
+                        android:layout_marginTop="10dp">
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/delayChip1"
+                            android:checkable="true"
+                            android:text="@string/lt_30_sec"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"
+                            android:checked="true"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/delayChip2"
+                            android:checkable="true"
+                            android:text="@string/lt_1_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/delayChip3"
+                            android:checkable="true"
+                            android:text="@string/lt_2_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/delayChip4"
+                            android:checkable="true"
+                            android:text="@string/gt_2_min"
+                            android:textAlignment="center"
+                            app:chipBackgroundColor="@color/chip_state_list"
+                            app:checkedIconEnabled="false"/>
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
                 android:id="@+id/percentCompleted"
                 android:layout_width="0dp"
@@ -28,7 +194,7 @@
                 android:layout_marginTop="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/epocRecoveryInputLayout"
                 app:layout_constraintBottom_toTopOf="@id/epocRecoveryView"
                 app:mrv_title="Percentage Completed"
                 app:mrv_unit="%" />
@@ -47,7 +213,7 @@
                 app:layout_constraintWidth_max="300dp"
                 app:miv_icon="@drawable/ic_epoc_recovery"
                 app:rcv_title="@string/epoc_recovery_score"
-                app:rcv_enable_progress="true" />
+                app:rcv_enable_progress="false" />
 
             <com.maximintegrated.maximsensorsapp.ResultCardView
                 android:id="@+id/hrView"

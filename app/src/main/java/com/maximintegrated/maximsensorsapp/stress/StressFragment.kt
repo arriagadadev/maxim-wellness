@@ -19,20 +19,13 @@ import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.exts.set
-import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_stress_fragment_content.*
 import kotlinx.android.synthetic.main.view_result_card.view.*
-import java.util.concurrent.TimeUnit
 
 class StressFragment : MeasurementBaseFragment() {
     companion object {
         fun newInstance() = StressFragment()
     }
-
-    private var measurementStartTimestamp: Long? = null
-    private var minConfidenceLevel = 0
-    private var hrExpireDuration = 30
-    private var lastValidHrTimestamp: Long = 0L
 
     private var algorithmInitConfig: AlgorithmInitConfig? = null
     private val algorithmInput = AlgorithmInput()
@@ -127,7 +120,7 @@ class StressFragment : MeasurementBaseFragment() {
     }
 
     override fun addStreamData(streamData: HspStreamData) {
-        renderHrmModel(streamData)
+        hr = streamData.hr
         dataRecorder?.record(streamData)
 
         algorithmInput.set(streamData)
@@ -145,53 +138,12 @@ class StressFragment : MeasurementBaseFragment() {
         }
     }
 
-    private fun renderHrmModel(streamData: HspStreamData) {
-        if (measurementStartTimestamp == null) {
-            measurementStartTimestamp = System.currentTimeMillis()
-        }
-
-        val shouldWaitForHRMeasuringPeriod = shouldWaitForHRMeasuringPeriod()
-        if (shouldWaitForHRMeasuringPeriod) {
-            hr = null
-        }
-
-        if (isHrConfidenceHighEnough(streamData) && !shouldWaitForHRMeasuringPeriod) {
-            hr = streamData.hr
-            lastValidHrTimestamp = System.currentTimeMillis()
-        } else if (isHrObsolete()) {
-            // show HR as empty
-            hr = null
-        }
-    }
-
-    private fun shouldWaitForHRMeasuringPeriod(): Boolean {
-        return (System.currentTimeMillis() - (measurementStartTimestamp
-            ?: 0L)) < WhrmFragment.HR_MEASURING_PERIOD_IN_MILLIS
-    }
-
-    private fun isHrConfidenceHighEnough(hrmModel: HspStreamData): Boolean {
-        return if (hrmModel.hr < 40 || hrmModel.hr > 240) {
-            false
-        } else {
-            hrmModel.hrConfidence >= minConfidenceLevel
-        }
-    }
-
-    private fun isHrObsolete(): Boolean {
-        return (System.currentTimeMillis() - lastValidHrTimestamp) > TimeUnit.SECONDS.toMillis(
-            hrExpireDuration.toLong()
-        )
-    }
-
     override fun startMonitoring() {
         super.startMonitoring()
         menuItemEnabledScd.isEnabled = false
         menuItemLogToFlash.isEnabled = false
 
         clearCardViewValues()
-
-        measurementStartTimestamp = null
-
         MaximAlgorithms.init(algorithmInitConfig)
 
         percentCompleted.measurementProgress = 0

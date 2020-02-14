@@ -13,6 +13,7 @@
     <string name="sleep_quality">Sleep Quality</string>
     <string name="stress">Stress</string>
     <string name="sports_coaching">Sports Coaching</string>
+    <string name="sports_coaching_alpha">Sports Coaching\n(alpha)</string>
     <string name="ppg_signal">PPG Signal</string>
     <string name="ppg_signal_scale_seconds">4 seconds</string>
 
@@ -172,12 +173,14 @@
     <string name="signup">Sign up</string>
     <string name="all_fields_required">All the fields are required.</string>
     <string name="training">Training</string>
-    <string name="history">history</string>
+    <string name="history">History</string>
     <string name="profile">Profile</string>
     <string name="logout">Logout</string>
     <string name="readiness">Readiness</string>
     <string name="resting_vo2max">Resting VO2Max</string>
     <string name="vo2max">VO2Max</string>
+    <string name="undefined">Undefined</string>
+    <string name="vo2">VO2</string>
     <string name="epoc_recovery">EPOC Recovery</string>
     <string name="recovery_time">Recovery Time</string>
     <string name="fitness_age">Fitness Age</string>
@@ -190,6 +193,24 @@
     <string name="export_csv">Export CSV</string>
     <string name="file_already_exists">File already exists</string>
     <string name="no_data_found">No data found</string>
+    <string name="fitness_age_is_younger_than_actual_age">Your fitness age is younger than your actual age.</string>
+    <string name="fitness_age_is_older_than_actual_age">Your fitness age is older than your actual age.</string>
+    <string name="score">Score</string>
+    <string name="history_data_not_available">History data are not available.</string>
+    <string name="lt_30_sec"><![CDATA[<30 sec]]></string>
+    <string name="lt_1_min"><![CDATA[<1 min]]></string>
+    <string name="lt_2_min"><![CDATA[<2 min]]></string>
+    <string name="gt_2_min"><![CDATA[>2 min]]></string>
+    <string name="time_since_end_of_exercise">Time Since End of Exercise</string>
+    <string name="heavy">Heavy</string>
+    <string name="normal">Normal</string>
+    <string name="light">Light</string>
+    <string name="exercise_intensity">Exercise Intensity</string>
+    <string name="gt_60_min">60+</string>
+    <string name="_20_60_min">20 – 60</string>
+    <string name="_5_20_min">5 – 20</string>
+    <string name="_0_5_min">0 – 5</string>
+    <string name="exercise_duration_min">Exercise Duration (min)</string>
 
     <string-array name="chart_titles">
         <item>Select the chart</item>

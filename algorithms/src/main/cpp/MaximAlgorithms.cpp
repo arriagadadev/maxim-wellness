@@ -57,7 +57,9 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_init(JNIEnv *env, jclass cla
     initData.sc_config.sampling_rate = sampling_rate;
     initData.sc_config.session_code = (mxm_sc_session) session;
     initData.sc_config.user.birth_year = birth_year;
-    initData.sc_config.user.gender = (gender == 0) ? 'M' : 'F';
+    initData.sc_config.user.birth_day = 1;
+    initData.sc_config.user.birth_month = 1;
+    initData.sc_config.user.gender = (mxm_sc_gender) gender;
     initData.sc_config.user.weight = weight;
     initData.sc_config.user.height = height;
     initData.sc_config.user.is_metric = is_metric;
@@ -94,7 +96,7 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_init(JNIEnv *env, jclass cla
     initData.sc_config.epoc_mode_config.exercise_duration_minutes = exercise_duration_min;
     initData.sc_config.epoc_mode_config.exercise_intensity = exercise_intensity;
     initData.sc_config.epoc_mode_config.minutes_after_exercise = min_after_exercise;
-    initData.sc_config.recovery_time_mode_config.last_epoc_recovery_timestamp = last_epoc_recovery_timestamp;
+    initData.sc_config.recovery_time_mode_config.last_epoc_recovery_timestamp = (unsigned long long int)(last_epoc_recovery_timestamp);
     initData.sc_config.recovery_time_mode_config.last_recovery_estimate_in_mins = last_recovery_estimate_in_minutes;
     initData.sc_config.recovery_time_mode_config.last_hr = last_hr;
 
@@ -283,30 +285,31 @@ Java_com_maximintegrated_algorithms_MaximAlgorithms_run(JNIEnv *env, jclass claz
         }
     }
     if ((initData.enabledAlgorithms & MXM_ALGOSUITE_ENABLE_SPORTS) > 0) {
+        env->CallVoidMethod(joutput, updateSportsOutputMethodId,
+                            output.sc_out_sample.session,
+                            output.sc_out_sample.percent_completed,
+                            output.sc_out_sample.hr_stats.min_hr,
+                            output.sc_out_sample.hr_stats.max_hr,
+                            output.sc_out_sample.hr_stats.mean_hr,
+                            output.sc_out_sample.scores.readiness.readiness_score,
+                            output.sc_out_sample.scores.vo2_max.relax,
+                            output.sc_out_sample.scores.vo2_max.VO2,
+                            output.sc_out_sample.scores.vo2_max.fitness_age,
+                            output.sc_out_sample.scores.vo2_max.fitness_region_poor_medium,
+                            output.sc_out_sample.scores.vo2_max.fitness_region_medium_good,
+                            output.sc_out_sample.scores.vo2_max.fitness_region_good_excellent,
+                            output.sc_out_sample.scores.recovery.recovery_time_min,
+                            output.sc_out_sample.scores.recovery.epoc,
+                            output.sc_out_sample.scores.recovery.hr0,
+                            output.sc_out_sample.scores.recovery.last_hr,
+                            output.sc_out_sample.scores.recovery.recovery_percentage,
+                            output.sc_out_sample.status,
+                            output.sc_out_sample.new_output_ready,
+                            output.sc_out_sample.timestamp);
         if (status.sports_coaching_status != MXM_SC_NO_ERROR) {
             LOGD("SPORTS RUN FAIL");
             return JNI_FALSE;
         } else {
-            env->CallVoidMethod(joutput, updateSportsOutputMethodId,
-                                output.sc_out_sample.percent_completed,
-                                output.sc_out_sample.hr_stats.min_hr,
-                                output.sc_out_sample.hr_stats.max_hr,
-                                output.sc_out_sample.hr_stats.mean_hr,
-                                output.sc_out_sample.scores.readiness.readiness_score,
-                                output.sc_out_sample.scores.vo2_max.relax,
-                                output.sc_out_sample.scores.vo2_max.VO2,
-                                output.sc_out_sample.scores.vo2_max.fitness_age,
-                                output.sc_out_sample.scores.vo2_max.fitness_region_poor_medium,
-                                output.sc_out_sample.scores.vo2_max.fitness_region_medium_good,
-                                output.sc_out_sample.scores.vo2_max.fitness_region_good_excellent,
-                                output.sc_out_sample.scores.recovery.recovery_time_min,
-                                output.sc_out_sample.scores.recovery.epoc,
-                                output.sc_out_sample.scores.recovery.hr0,
-                                output.sc_out_sample.scores.recovery.last_hr,
-                                output.sc_out_sample.scores.recovery.recovery_percentage,
-                                output.sc_out_sample.status,
-                                output.sc_out_sample.new_output_ready,
-                                output.sc_out_sample.timestamp);
             LOGD("SPORTS RUN SUCCESS");
         }
     }
@@ -419,7 +422,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
                                                  "(IIIFIIFFFFIJ)V");
 
     updateSportsOutputMethodId = env->GetMethodID(outputClass, "sportsUpdate",
-                                                 "(IIIIFFFFFFFIFIIIIZJ)V");
+                                                 "(IIIIIFFFFFFFIFIIIIZJ)V");
 
     setVersionMethodId = env->GetMethodID(versionClass, "set",
                                           "([CIII)V");

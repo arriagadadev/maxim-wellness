@@ -21,6 +21,7 @@ import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.ioThread
 import com.maximintegrated.maximsensorsapp.service.ForegroundService
+import com.obsez.android.lib.filechooser.ChooserDialog
 import kotlinx.android.synthetic.main.include_app_bar.*
 import timber.log.Timber
 import java.io.File
@@ -46,6 +47,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     lateinit var menuItemSettings: MenuItem
     lateinit var menuItemEnabledScd: MenuItem
     lateinit var menuItemArbitraryCommand: MenuItem
+    lateinit var readFromFile: MenuItem
 
     var notificationResults: HashMap<String, String> = hashMapOf() // MXM, REF --> KEYS
 
@@ -75,6 +77,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 menuItemSettings = findItem(R.id.hrm_settings)
                 menuItemEnabledScd = findItem(R.id.enable_scd)
                 menuItemArbitraryCommand = findItem(R.id.send_arbitrary_command)
+                readFromFile = findItem(R.id.readFromFileButton)
 
                 menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
                 menuItemEnabledScd.isEnabled = true
@@ -90,6 +93,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                     R.id.info_menu_item -> showInfoDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
                     R.id.add_annotation -> showAnnotationDialog()
+                    R.id.readFromFileButton -> runFromFile()
                     else -> return@setOnMenuItemClickListener false
                 }
                 return@setOnMenuItemClickListener true
@@ -221,7 +225,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     private var errorCount = 0L
 
     private val dataStreamObserver = Observer<HspStreamData> { data ->
-        Timber.d("MELIK: $data")
+        //Timber.d("MELIK: $data")
         if (!isMonitoring) return@Observer
         dataCount++
         if (expectingSampleCount != data.sampleCount) {
@@ -409,6 +413,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
 
         alertDialog.setCancelable(false)
         alertDialog.show()
+    }
+
+    open fun runFromFile() {
+
     }
 
     fun showSnackbar(view: View, message: String, duration: Int) {

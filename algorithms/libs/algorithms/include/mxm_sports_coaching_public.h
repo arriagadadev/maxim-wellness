@@ -44,7 +44,6 @@ extern "C" {
 #define __MXM_SPORTS_COACHING_PUBLIC_H__
 
 #include <stdbool.h>
-#include <time.h>
 
 /**
 * @ingroup mxm_sports_coaching
@@ -72,7 +71,7 @@ typedef struct _mxm_sc_user_info {
     int birth_day;
     int birth_month;
     int birth_year;
-    char gender;
+    mxm_sc_gender gender;
     int weight;
     int height;
     bool is_metric;
@@ -108,7 +107,7 @@ typedef struct _mxm_sc_epoc_config {
 * @brief   Recovery time mode related configuration
 */
 typedef struct _mxm_sc_recovery_time_config {
-    time_t last_epoc_recovery_timestamp;  /**< Exercise recovery input - only needed in RECOVERY_TIME mode - Epoch timestamp of last EPOC measurement (in seconds) */
+    unsigned long long int last_epoc_recovery_timestamp;  /**< Exercise recovery input - only needed in RECOVERY_TIME mode - Epoch timestamp of last EPOC measurement (in miliseconds) */
     int last_recovery_estimate_in_mins;    /**< Exercise recovery input - only needed in RECOVERY_TIME mode - last recovery estimate */
     int last_hr;    /**< Exercise recovery input - only needed in RECOVERY_TIME mode - last HR measured during latest EPOC measurement */
 } mxm_sc_recovery_time_config;
@@ -203,11 +202,12 @@ typedef struct _mxm_sc_hr_stats {
 */
 typedef struct _mxm_sc_output {
     int percent_completed; /**< The state of the algorithm between 0% and 100% */
+    mxm_sc_session session; /**< Current session of the algorihm*/
     mxm_sc_hr_stats hr_stats; /**< Heart rate statistics calculated during the active session*/
     mxm_sc_estimate_output scores; /**< Users score calculated by the algorithm*/
     mxm_sc_status status; /**< Status of the algorithm */
     bool new_output_ready; /**< Flag to indicate if algorithm reports a new output */
-    time_t timestamp; /**< Epoch timestamp of the output in seconds */
+    unsigned long long int timestamp; /**< Epoch timestamp of the output in miliseconds */
 } mxm_sc_output;
 
 /**
@@ -215,7 +215,7 @@ typedef struct _mxm_sc_output {
 * @brief   User History Item
 */
 typedef struct _mxm_sc_user_history_record_item {
-    time_t record_date; /**< Epoch timestamp of the record in seconds */
+    unsigned long long int record_date; /**< Epoch timestamp of the record in miliseconds */
     mxm_sc_estimate_output score; /**< Estimated scores at the output of the algorithm when algorithms and with success */
     mxm_sc_hr_stats heart_rate_stat; /**< Heart rate statistics at the output of the algorithm when algorithms and with success */
     mxm_sc_session session; /**< Session type of the record */
