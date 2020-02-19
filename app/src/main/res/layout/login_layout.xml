@@ -5,6 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/disclaimerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="20dp"
+        android:text="Maxim does not use or share the user information. It is only required for the algorithms to run correctly."
+        android:drawableStart="@drawable/ic_warning"
+        android:drawablePadding="10dp"
+        android:gravity="center"
+        android:visibility="gone"/>
+
     <Button
         android:layout_width="0dp"
         android:layout_height="wrap_content"
