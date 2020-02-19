@@ -273,49 +273,50 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener,
             } else {
                 val oneHzDataList = readTimeStampAndHrFrom1HzFile(oneHzFile)
 
-                val refDataList = readTimeStampAndHrFromReferenceFile(refHrFile)
-
-                /*if (oneHzDataList.isNotEmpty()) {
-                    hrTimestampStart = oneHzDataList[0].first
-                }*/
-
-                if (refDataList.isNotEmpty()) {
-                    //hrTimestampStart = min(hrTimestampStart, refDataList[0].first)
-                    hrAlignment = HrAlignment.ALIGNMENT_FAIL
-                } else {
-                    hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
-                }
-
-                offlineChart.put(
-                    1, OfflineChartData(
-                        oneHzDataList.mapIndexed { idx, it ->
-                            Entry(
-                                idx.toFloat(),
-                                it.second.toFloat()
-                            )
-                        },
-                        "HR (bpm)",
-                        "Maxim"
-                    )
-                )
-
-                if (refDataList.isNotEmpty()) {
+                if(oneHzDataList.isEmpty()){
                     offlineChart.put(
                         1, OfflineChartData(
-                            refDataList.mapIndexed { idx, it ->
+                            offlineDataList.filterIndexed { index, it ->  index % 25 == 0}
+                                .mapIndexed { idx, it -> Entry(idx.toFloat(), it.hr.toFloat()) },
+                            "HR (bpm)",
+                            "Maxim"
+                        )
+                    )
+                }else{
+                    val refDataList = readTimeStampAndHrFromReferenceFile(refHrFile)
+                    offlineChart.put(
+                        1, OfflineChartData(
+                            oneHzDataList.mapIndexed { idx, it ->
                                 Entry(
                                     idx.toFloat(),
                                     it.second.toFloat()
                                 )
                             },
                             "HR (bpm)",
-                            "Ref"
+                            "Maxim"
                         )
                     )
-                    refDataList.clear()
+                    if (refDataList.isNotEmpty()) {
+                        //hrTimestampStart = min(hrTimestampStart, refDataList[0].first)
+                        hrAlignment = HrAlignment.ALIGNMENT_FAIL
+                        offlineChart.put(
+                            1, OfflineChartData(
+                                refDataList.mapIndexed { idx, it ->
+                                    Entry(
+                                        idx.toFloat(),
+                                        it.second.toFloat()
+                                    )
+                                },
+                                "HR (bpm)",
+                                "Ref"
+                            )
+                        )
+                        refDataList.clear()
+                    } else {
+                        hrAlignment = HrAlignment.ALIGNMENT_NO_REF_DEVICE
+                    }
+                    oneHzDataList.clear()
                 }
-
-                oneHzDataList.clear()
             }
 
             offlineChart.put(

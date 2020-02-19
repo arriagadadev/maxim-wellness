@@ -163,21 +163,40 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         var restingHr = 0f
 
         var isHeaderObtained = false
-        oneHzFile.useLines { seq ->
-            seq.forEach {
-                if (!isHeaderObtained) {
-                    isHeaderObtained = true
-                    return@forEach
+
+        if(oneHzFile.exists()){
+            oneHzFile.useLines { seq ->
+                seq.forEach {
+                    if (!isHeaderObtained) {
+                        isHeaderObtained = true
+                        return@forEach
+                    }
+                    val items = it.split(",")
+                    if (items.size < 2) return@forEach
+                    val hr = items[1].toFloatOrNull()?.toInt()
+                    if (hr != null && hr != 0) {
+                        hrSum += hr
+                        hrCount++
+                    }
                 }
-                val items = it.split(",")
-                if (items.size < 2) return@forEach
-                val hr = items[1].toIntOrNull()
-                if (hr != null && hr != 0) {
-                    hrSum += hr
-                    hrCount++
+            }
+        }else if(file.exists()){
+            file.useLines { seq ->
+                seq.forEach {
+                    if (!isHeaderObtained) {
+                        isHeaderObtained = true
+                        return@forEach
+                    }
+                    val items = it.split(",")
+                    val hr = items[10].toFloatOrNull()?.toInt()
+                    if (hr != null && hr != 0) {
+                        hrSum += hr
+                        hrCount++
+                    }
                 }
             }
         }
+
 
         if (hrCount != 0) {
             restingHr = hrSum * 1f / hrCount
