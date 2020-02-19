@@ -1,9 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    final majorVersion = 1
-    final minorVersion = 3
-    final patchVersion = 4
+    final majorVersion = 2
+    final minorVersion = 0
+    final patchVersion = 0
 
 
     final latestSdk = 28
