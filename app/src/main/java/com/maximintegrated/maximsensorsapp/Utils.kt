@@ -1,7 +1,10 @@
 package com.maximintegrated.maximsensorsapp
 
 import com.maximintegrated.algorithms.AlgorithmInput
+import de.siegmar.fastcsv.reader.CsvReader
+import de.siegmar.fastcsv.reader.CsvRow
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
@@ -11,18 +14,20 @@ fun readAlgorithmInputsFromFile(file: File?): ArrayList<AlgorithmInput> {
     if (file == null) {
         return inputs
     }
-    var isHeaderObtained = false
-    file.useLines { seq ->
-        seq.forEach {
-            if (!isHeaderObtained) {
-                isHeaderObtained = true
-                return@forEach
-            }
-            val input = csvRowToAlgorithmInput(it)
+    val reader = CsvReader()
+    reader.setContainsHeader(true)
+    try {
+        val parser = reader.parse(file, StandardCharsets.UTF_8)
+        var row: CsvRow? = parser.nextRow()
+        while (row != null) {
+            val input = csvRowToAlgorithmInput(row)
             if (input != null) {
                 inputs.add(input)
             }
+            row = parser.nextRow()
         }
+    } catch (e: Exception) {
+
     }
     return inputs
 }
@@ -59,6 +64,40 @@ fun csvRowToAlgorithmInput(row: String): AlgorithmInput? {
     input.kCal = (items[27].toFloat() * 10f).toInt()
     input.totalActEnergy = (items[28].toFloat() * 10f).toInt()
     input.timestamp = items[30].toDouble().toLong()
+    return input
+}
+
+fun csvRowToAlgorithmInput(row: CsvRow): AlgorithmInput? {
+    val input = AlgorithmInput()
+    if (row.fieldCount < 31) return null
+    input.green = row.getField(2).toFloat().toInt()
+    input.green2 = row.getField(3).toFloat().toInt()
+    input.ir = row.getField(4).toFloat().toInt()
+    input.red = row.getField(5).toFloat().toInt()
+    input.accelerationX = (row.getField(6).toFloat() * 1000f).toInt()
+    input.accelerationY = (row.getField(7).toFloat() * 1000f).toInt()
+    input.accelerationZ = (row.getField(8).toFloat() * 1000f).toInt()
+    input.operationMode = row.getField(9).toFloat().toInt()
+    input.hr = row.getField(10).toFloat().toInt()
+    input.hrConfidence = row.getField(11).toFloat().toInt()
+    input.rr = (row.getField(12).toFloat() * 10f).toInt()
+    input.rrConfidence = row.getField(13).toFloat().toInt()
+    input.activity = row.getField(14).toFloat().toInt()
+    input.r = (row.getField(15).toFloat() * 1000f).toInt()
+    input.wspo2Confidence = row.getField(16).toFloat().toInt()
+    input.spo2 = (row.getField(17).toFloat() * 10f).toInt()
+    input.wspo2PercentageComplete = row.getField(18).toFloat().toInt()
+    input.wspo2LowSnr = row.getField(19).toFloat().toInt()
+    input.wspo2Motion = row.getField(20).toFloat().toInt()
+    input.wspo2LowPi = row.getField(21).toFloat().toInt()
+    input.wspo2UnreliableR = row.getField(22).toFloat().toInt()
+    input.wspo2State = row.getField(23).toFloat().toInt()
+    input.scdState = row.getField(24).toFloat().toInt()
+    input.walkSteps = row.getField(25).toFloat().toInt()
+    input.runSteps = row.getField(26).toFloat().toInt()
+    input.kCal = (row.getField(27).toFloat() * 10f).toInt()
+    input.totalActEnergy = (row.getField(28).toFloat() * 10f).toInt()
+    input.timestamp = row.getField(30).toDouble().toLong()
     return input
 }
 

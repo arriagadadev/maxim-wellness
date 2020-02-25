@@ -10,6 +10,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.maximintegrated.algorithms.AlgorithmInitConfig
+import com.maximintegrated.algorithms.AlgorithmInput
 import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.sleep.SleepAlgorithmInitConfig
@@ -17,11 +18,13 @@ import com.maximintegrated.algorithms.sleep.SleepUserInfo
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.addFragment
+import de.siegmar.fastcsv.reader.CsvReader
+import de.siegmar.fastcsv.reader.CsvRow
 import kotlinx.android.synthetic.main.fragment_archive.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import timber.log.Timber
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.Comparator
@@ -158,49 +161,82 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
             "/1Hz/${file.nameWithoutExtension}_1Hz.csv"
         )
 
+        var sleepFound = false
+
+        if (!outputDirectory.exists()) {
+            outputDirectory.mkdirs()
+        }
+
+        val outputFile = File(outputDirectory, file.name)
+        val csvWriter = CsvWriter.open(outputFile.absolutePath)
+        csvWriter.listener = this
+        val output = AlgorithmOutput()
+
         var hrSum = 0
         var hrCount = 0
         var restingHr = 0f
 
-        var isHeaderObtained = false
-
-        if(oneHzFile.exists()){
-            oneHzFile.useLines { seq ->
-                seq.forEach {
-                    if (!isHeaderObtained) {
-                        isHeaderObtained = true
-                        return@forEach
+        if (oneHzFile.exists()) {
+            val reader = CsvReader()
+            reader.setContainsHeader(true)
+            try {
+                var parser = reader.parse(oneHzFile, StandardCharsets.UTF_8)
+                var row: CsvRow? = parser.nextRow()
+                while (row != null) {
+                    if (row.fieldCount < 2) {
+                        row = parser.nextRow()
+                        continue
                     }
-                    val items = it.split(",")
-                    if (items.size < 2) return@forEach
-                    val hr = items[1].toFloatOrNull()?.toInt()
+                    val hr = row.getField(1).toFloatOrNull()?.toInt()
                     if (hr != null && hr != 0) {
                         hrSum += hr
                         hrCount++
                     }
+                    row = parser.nextRow()
                 }
-            }
-        }else if(file.exists()){
-            file.useLines { seq ->
-                seq.forEach {
-                    if (!isHeaderObtained) {
-                        isHeaderObtained = true
-                        return@forEach
-                    }
-                    val items = it.split(",")
-                    val hr = items[10].toFloatOrNull()?.toInt()
-                    if (hr != null && hr != 0) {
-                        hrSum += hr
-                        hrCount++
-                    }
+
+                if (hrCount != 0) {
+                    restingHr = hrSum * 1f / hrCount
                 }
+                initSleepAlgo(restingHr)
+
+                parser = reader.parse(file, StandardCharsets.UTF_8)
+                row = parser.nextRow()
+                while (row != null) {
+                    val input = csvRowToAlgorithmInput(row)
+                    sleepFound = runSleepAlgo(input, output, sleepFound, csvWriter)
+                    row = parser.nextRow()
+                }
+
+            } catch (e: Exception) {
+
             }
+        } else if (file.exists()) {
+
+            val inputs = readAlgorithmInputsFromFile(file)
+
+            restingHr = inputs.filter { it.hr != 0 }.map { it.hr }.average().toFloat()
+
+            initSleepAlgo(restingHr)
+
+            for (input in inputs) {
+                sleepFound = runSleepAlgo(input, output, sleepFound, csvWriter)
+            }
+            inputs.clear()
         }
 
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
 
-        if (hrCount != 0) {
-            restingHr = hrSum * 1f / hrCount
+        csvWriter.close()
+
+        if (!sleepFound && outputFile.exists()) {
+            outputFile.delete()
         }
+
+        return sleepFound
+    }
+
+    private fun initSleepAlgo(restingHr: Float) {
         val userInfo = SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr)
 
         algorithmInitConfig.sleepConfig = SleepAlgorithmInitConfig(
@@ -214,66 +250,45 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         algorithmInitConfig.enableAlgorithmsFlag = MaximAlgorithms.FLAG_SLEEP
 
         MaximAlgorithms.init(algorithmInitConfig)
+    }
 
-        var sleepFound = false
-
-        if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs()
-        }
-
-        val outputFile = File(outputDirectory, file.name)
-        val csvWriter = CsvWriter.open(outputFile.absolutePath)
-        csvWriter.listener = this
-        val output = AlgorithmOutput()
-        var count = 0
-
-        isHeaderObtained = false
-        file.useLines { seq ->
-            seq.forEach {
-                if (!isHeaderObtained) {
-                    isHeaderObtained = true
-                    return@forEach
-                }
-                val input = csvRowToAlgorithmInput(it)
-                if (input != null) {
-                    val status = MaximAlgorithms.run(input, output)
-                    //TODO: check the sample code for this
-                    if (status) {
-                        if (output.sleep.outputDataArrayLength > 0) {
-                            count++
-                            if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
-                                sleepFound = true
-                            } else {
-                                output.sleep.output.sleepWakeDetentionLatency = -1
-                            }
-                            csvWriter.write(
-                                SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
-                                output.sleep.output.sleepWakeDecisionStatus,
-                                output.sleep.output.sleepWakeDetentionLatency,
-                                output.sleep.output.sleepWakeDecision,
-                                output.sleep.output.sleepPhaseOutputStatus,
-                                output.sleep.output.sleepPhaseOutput,
-                                output.sleep.output.hr,
-                                output.sleep.output.ibi,
-                                0,
-                                output.sleep.output.accMag
-                            )
-                        }
+    private fun runSleepAlgo(
+        input: AlgorithmInput?,
+        output: AlgorithmOutput,
+        sleepFound: Boolean,
+        writer: CsvWriter
+    ): Boolean {
+        var sleepState = sleepFound
+        if (input != null) {
+            val status = MaximAlgorithms.run(input, output)
+            //TODO: check the sample code for this
+            if (status) {
+                if (output.sleep.outputDataArrayLength > 0) {
+                    if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
+                        sleepState = true
+                    } else {
+                        output.sleep.output.sleepWakeDetentionLatency = -1
                     }
+                    recordSleepData(writer, output)
                 }
             }
         }
-        MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
+        return sleepState
+    }
 
-        csvWriter.close()
-
-        if (!sleepFound && outputFile.exists()) {
-            outputFile.delete()
-        }
-
-        Timber.tag("Archive Fragment").d("SleepQaAlgo run success result: $sleepFound")
-
-        return sleepFound
+    private fun recordSleepData(csvWriter: CsvWriter, output: AlgorithmOutput) {
+        csvWriter.write(
+            SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
+            output.sleep.output.sleepWakeDecisionStatus,
+            output.sleep.output.sleepWakeDetentionLatency,
+            output.sleep.output.sleepWakeDecision,
+            output.sleep.output.sleepPhaseOutputStatus,
+            output.sleep.output.sleepPhaseOutput,
+            output.sleep.output.hr,
+            output.sleep.output.ibi,
+            0,
+            output.sleep.output.accMag
+        )
     }
 
     private fun showSleepAlgoResultDialog(success: Boolean) {
