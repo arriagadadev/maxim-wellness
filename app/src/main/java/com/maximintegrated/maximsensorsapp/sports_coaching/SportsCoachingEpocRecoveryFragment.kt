@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.statistics_layout.view.*
 import kotlinx.android.synthetic.main.view_result_card.view.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import timber.log.Timber
 import java.util.*
 
 class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
@@ -72,7 +73,9 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
-        readFromFile.isVisible = true
+        if(BuildConfig.DEBUG){
+            readFromFile.isVisible = true
+        }
 
         val drawable = GradientDrawable(
             GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(
@@ -101,7 +104,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
-        if (success && percentage == 100) {
+        if (success && algorithmOutput.sports.isNewOutputReady) {
             epocRecovery = algorithmOutput.sports.estimates.recovery.epoc.toInt()
             statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
             statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
@@ -129,7 +132,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
                 else -> 0
             }
         val intensity =
-            when (durationChipGroup.checkedChipId) {
+            when (intensityChipGroup.checkedChipId) {
                 R.id.intensityChip1 -> 1
                 R.id.intensityChip2 -> 2
                 R.id.intensityChip3 -> 3
@@ -178,7 +181,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
     override fun runFromFile() {
         checkForEpocInput()
         ChooserDialog(requireContext())
-            .withStartFile(DataRecorder.OUTPUT_DIRECTORY.absolutePath)
+            .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
             .withChosenListener { dir, dirFile ->
                 run {
                     MaximAlgorithms.init(algorithmInitConfig)
@@ -186,6 +189,9 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
                         val inputs = readAlgorithmInputsFromFile(dirFile)
                         for (input in inputs) {
                             MaximAlgorithms.run(input, algorithmOutput)
+                            if(algorithmOutput.sports.isNewOutputReady){
+                                break
+                            }
                         }
                         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
 

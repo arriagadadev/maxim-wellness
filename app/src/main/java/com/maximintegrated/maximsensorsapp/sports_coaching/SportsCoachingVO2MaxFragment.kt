@@ -12,13 +12,18 @@ import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.sports.SportsCoachingSession
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.maximsensorsapp.HelpDialog
-import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
-import com.maximintegrated.maximsensorsapp.R
-import com.maximintegrated.maximsensorsapp.ResultCardView
+import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
+import com.obsez.android.lib.filechooser.ChooserDialog
+import kotlinx.android.synthetic.main.fragment_sports_coaching_epoc_recovery.*
 import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.*
+import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.hrView
+import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.percentCompleted
+import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.statisticLayout
 import kotlinx.android.synthetic.main.statistics_layout.view.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import java.util.*
 
 class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
 
@@ -67,6 +72,9 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
+        if(BuildConfig.DEBUG){
+            readFromFile.isVisible = true
+        }
     }
 
     override fun addStreamData(streamData: HspStreamData) {
@@ -122,6 +130,43 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
         hspViewModel.stopStreaming()
+    }
+
+    override fun runFromFile() {
+        ChooserDialog(requireContext())
+            .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
+            .withChosenListener { dir, dirFile ->
+                run {
+                    MaximAlgorithms.init(algorithmInitConfig)
+                    doAsync {
+                        val inputs = readAlgorithmInputsFromFile(dirFile)
+                        for (input in inputs) {
+                            MaximAlgorithms.run(input, algorithmOutput)
+                            if(algorithmOutput.sports.percentCompleted == 100){
+                                break
+                            }
+                        }
+                        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
+
+                        uiThread {
+                            vo2Max = algorithmOutput.sports.estimates.vo2max.relax.toInt()
+                            statisticLayout.minHrTextView.text =
+                                algorithmOutput.sports.hrStats.minHr.toString()
+                            statisticLayout.maxHrTextView.text =
+                                algorithmOutput.sports.hrStats.maxHr.toString()
+                            statisticLayout.meanHrTextView.text =
+                                algorithmOutput.sports.hrStats.meanHr.toString()
+                            saveMeasurement(
+                                algorithmOutput.sports, DataRecorder.TIMESTAMP_FORMAT.format(
+                                    Date()
+                                ), getMeasurementType()
+                            )
+                        }
+                    }
+                }
+            }
+            .build()
+            .show()
     }
 
     override fun dataLoggingToggled() {
