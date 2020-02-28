@@ -9,7 +9,7 @@ import no.nordicsemi.android.ble.data.Data
 
 interface HspResponseCallback {
     fun onCommandResponseReceived(device: BluetoothDevice, commandResponse: HspResponse<*>)
-    fun onStreamDataReceived(device: BluetoothDevice, data: HspStreamData)
+    fun onStreamDataReceived(device: BluetoothDevice, packet: ByteArray)
 }
 
 abstract class HspResponseDataCallback : DataReceivedCallback, HspResponseCallback {
@@ -17,7 +17,7 @@ abstract class HspResponseDataCallback : DataReceivedCallback, HspResponseCallba
         val packet = data.value ?: return
 
         if (packet[0] == HspResponseDataMerger.STREAM_START_BYTE) {
-            onStreamDataReceived(device, HspStreamData.fromPacket(packet))
+            onStreamDataReceived(device, packet)
         } else {
             onCommandResponseReceived(device, data.toCommandResponse())
         }

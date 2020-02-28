@@ -232,4 +232,13 @@
         <item>Total Power</item>
         <item>Stress</item>
     </string-array>
+
+    <!-- TEMP -->
+    <string name="temp">Temperature</string>
+    <string name="temp_title">Temperature</string>
+    <string name="temp_unit_celsius">°C</string>
+    <string name="temp_unit_fahrenheit">°F</string>
+    <string name="temp_legend">Temperature</string>
+    <string name="temp_sample_interval">Sample Interval</string>
+    <string name="temp_sample_interval_unit">seconds</string>
 </resources>

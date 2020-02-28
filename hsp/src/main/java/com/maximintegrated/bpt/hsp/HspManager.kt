@@ -34,8 +34,8 @@ class HspManager(context: Context) : BleManager<HspManagerCallbacks>(context) {
             mCallbacks.onCommandResponseReceived(device, commandResponse)
         }
 
-        override fun onStreamDataReceived(device: BluetoothDevice, data: HspStreamData) {
-            mCallbacks.onStreamDataReceived(device, data)
+        override fun onStreamDataReceived(device: BluetoothDevice, packet: ByteArray) {
+            mCallbacks.onStreamDataReceived(device, packet)
         }
     }
 

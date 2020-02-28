@@ -24,6 +24,12 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         ME11D
     }
 
+    enum class StreamType{
+        PPG,
+        ECG,
+        TEMP
+    }
+
     var bluetoothDevice: BluetoothDevice? = null
         private set
 
@@ -35,6 +41,9 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
 
     private val streamDataMutable = MutableLiveData<HspStreamData>()
     val streamData: LiveData<HspStreamData> get() = streamDataMutable
+
+    private val tempStreamDataMutable = MutableLiveData<HspTempStreamData>()
+    val tempStreamData: LiveData<HspTempStreamData> get() = tempStreamDataMutable
 
     private val isDeviceSupportedMutable = MutableLiveData<Boolean>()
     val isDeviceSupported: LiveData<Boolean> get() = isDeviceSupportedMutable
@@ -48,6 +57,8 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         get() = connectionState.value?.second == BluetoothAdapter.STATE_CONNECTED
 
     var deviceModel = DeviceModel.UNDEFINED
+
+    var streamType = StreamType.PPG
 
     init {
         hspManager.setGattCallbacks(this)
@@ -107,6 +118,12 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
 
         sendCommand(SetConfigurationCommand("stream", "bin"))
         sendCommand(ReadCommand("ppg", 9))
+    }
+
+    fun startTempStreaming(sampleIntervalInMillis: Int) {
+        sendCommand(SetConfigurationCommand("stream", "bin"))
+        sendCommand(SetConfigurationCommand("temp", "sr", sampleIntervalInMillis.toString()))
+        sendCommand(ReadCommand("temp", 0))
     }
 
     fun stopStreaming() {
@@ -180,7 +197,11 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         commandResponseMutable.value = commandResponse
     }
 
-    override fun onStreamDataReceived(device: BluetoothDevice, data: HspStreamData) {
-        streamDataMutable.value = data
+    override fun onStreamDataReceived(device: BluetoothDevice, packet: ByteArray) {
+        when(streamType){
+            StreamType.PPG -> streamDataMutable.value = HspStreamData.fromPacket(packet)
+            StreamType.ECG -> streamDataMutable.value = HspStreamData.fromPacket(packet)
+            StreamType.TEMP -> tempStreamDataMutable.value = HspTempStreamData.fromPacket(packet)
+        }
     }
 }

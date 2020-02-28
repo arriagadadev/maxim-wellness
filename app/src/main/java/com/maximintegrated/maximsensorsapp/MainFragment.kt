@@ -20,6 +20,7 @@ import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
 import com.maximintegrated.maximsensorsapp.sports_coaching.SportsCoachingFragment
 import com.maximintegrated.maximsensorsapp.stress.StressFragment
+import com.maximintegrated.maximsensorsapp.temp.TempFragment
 import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_main_fragment_content.*
@@ -61,6 +62,9 @@ class MainFragment : Fragment() {
         spo2MenuItemView.isEnabled = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
         spo2MenuItemView.isVisible = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
 
+        tempMenuItemView.isEnabled = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        tempMenuItemView.isVisible = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+
         whrmMenuItemView.isEnabled = true
         whrmMenuItemView.isVisible = true
 
@@ -96,6 +100,10 @@ class MainFragment : Fragment() {
 
         spo2MenuItemView.setOnClickListener {
             requireActivity().addFragment(Spo2Fragment.newInstance())
+        }
+
+        tempMenuItemView.setOnClickListener {
+            requireActivity().addFragment(TempFragment.newInstance())
         }
 
         whrmMenuItemView.setOnClickListener {

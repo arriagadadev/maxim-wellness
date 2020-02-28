@@ -6,10 +6,8 @@ import android.os.Handler
 import android.os.SystemClock
 import android.view.MenuItem
 import android.view.View
-import android.widget.Chronometer
 import android.widget.EditText
 import androidx.core.content.ContextCompat
-import androidx.core.os.HandlerCompat.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -21,7 +19,6 @@ import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.ioThread
 import com.maximintegrated.maximsensorsapp.service.ForegroundService
-import com.obsez.android.lib.filechooser.ChooserDialog
 import kotlinx.android.synthetic.main.include_app_bar.*
 import timber.log.Timber
 import java.io.File
@@ -37,6 +34,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     var dataRecorder: DataRecorder? = null
+    var useDataRecorder = true
 
     lateinit var hspViewModel: HspViewModel
 
@@ -105,8 +103,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     open fun startMonitoring() {
-        dataRecorder = DataRecorder(getMeasurementType())
-        dataRecorder?.dataRecorderListener = this
+        if(useDataRecorder){
+            dataRecorder = DataRecorder(getMeasurementType())
+            dataRecorder?.dataRecorderListener = this
+        }
         isMonitoring = true
         expectingSampleCount = 0
         dataCount = 0
