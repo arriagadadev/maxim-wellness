@@ -241,4 +241,21 @@
     <string name="temp_legend">Temperature</string>
     <string name="temp_sample_interval">Sample Interval</string>
     <string name="temp_sample_interval_unit">seconds</string>
+
+    <!-- ECG -->
+    <string name="ecg">Electrocardiogram</string>
+    <string name="ecg_data">ECG Amplitude (mV)</string>
+    <string name="ecg_sampling_rate_message">Sampling rate has been set to <b>128sps</b></string>
+    <string name="ecg_rtor_unit">BPM</string>
+    <string name="ecg_averaged_rtor">Averaged R-to-R</string>
+    <string name="ecg_current_rtor">Current R-to-R</string>
+    <string name="ecg_monitor_with_default_settings_title">Default Settings</string>
+    <string name="ecg_monitor_with_default_settings_content">Would you like to apply the default settings?</string>
+    <string name="ecg_monitor_with_default_settings_yes">Yes</string>
+    <string name="ecg_monitor_with_default_settings_no">No</string>
+    <string name="ecg_filters">Filters</string>
+    <string name="ecg_filter_notch_50">Notch50</string>
+    <string name="ecg_filter_notch_60">Notch60</string>
+    <string name="ecg_filter_low_pass_40">LowPass40</string>
+    <string name="ecg_invert">Invert ECG</string>
 </resources>

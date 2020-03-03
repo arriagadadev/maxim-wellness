@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.bpt.hsp.HspTempStreamData
+import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.SetConfigurationCommand
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
@@ -99,6 +100,7 @@ class TempFragment : MeasurementBaseFragment() {
 
     override fun startMonitoring() {
         super.startMonitoring()
+        hspViewModel.streamType = HspViewModel.StreamType.TEMP
         menuItemLogToFlash.isEnabled = true
         timestamp = DataRecorder.TIMESTAMP_FORMAT.format(Date())
         csvWriter = CsvWriter.open(getCsvFilePath(), HspTempStreamData.CSV_HEADER_ARRAY)
@@ -116,6 +118,7 @@ class TempFragment : MeasurementBaseFragment() {
         hspViewModel.tempStreamData.removeObserver(tempStreamObserver)
         super.stopMonitoring()
         csvWriter?.close()
+        csvWriter = null
         menuItemLogToFlash.isEnabled = false
 
         hspViewModel.stopStreaming()
@@ -160,5 +163,7 @@ class TempFragment : MeasurementBaseFragment() {
     override fun onDetach() {
         super.onDetach()
         hspViewModel.tempStreamData.removeObserver(tempStreamObserver)
+        csvWriter?.close()
+        csvWriter = null
     }
 }

@@ -65,6 +65,9 @@ class MainFragment : Fragment() {
         tempMenuItemView.isEnabled = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
         tempMenuItemView.isVisible = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
 
+        ecgMenuItemView.isEnabled = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        ecgMenuItemView.isVisible = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+
         whrmMenuItemView.isEnabled = true
         whrmMenuItemView.isVisible = true
 

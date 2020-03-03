@@ -103,6 +103,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     open fun startMonitoring() {
+        hspViewModel.streamType = HspViewModel.StreamType.PPG
         if(useDataRecorder){
             dataRecorder = DataRecorder(getMeasurementType())
             dataRecorder?.dataRecorderListener = this

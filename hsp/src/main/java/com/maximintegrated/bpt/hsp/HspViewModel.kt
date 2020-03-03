@@ -45,6 +45,9 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     private val tempStreamDataMutable = MutableLiveData<HspTempStreamData>()
     val tempStreamData: LiveData<HspTempStreamData> get() = tempStreamDataMutable
 
+    private val ecgStreamDataMutable = MutableLiveData<Array<HspEcgStreamData>>()
+    val ecgStreamData: LiveData<Array<HspEcgStreamData>> get() = ecgStreamDataMutable
+
     private val isDeviceSupportedMutable = MutableLiveData<Boolean>()
     val isDeviceSupported: LiveData<Boolean> get() = isDeviceSupportedMutable
 
@@ -126,6 +129,11 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         sendCommand(ReadCommand("temp", 0))
     }
 
+    fun startEcgStreaming() {
+        sendCommand(SetConfigurationCommand("stream", "bin"))
+        sendCommand(ReadCommand("ecg", 2))
+    }
+
     fun stopStreaming() {
         sendCommand(StopCommand())
     }
@@ -200,7 +208,7 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     override fun onStreamDataReceived(device: BluetoothDevice, packet: ByteArray) {
         when(streamType){
             StreamType.PPG -> streamDataMutable.value = HspStreamData.fromPacket(packet)
-            StreamType.ECG -> streamDataMutable.value = HspStreamData.fromPacket(packet)
+            StreamType.ECG -> ecgStreamDataMutable.value = HspEcgStreamData.fromPacket(packet)
             StreamType.TEMP -> tempStreamDataMutable.value = HspTempStreamData.fromPacket(packet)
         }
     }
