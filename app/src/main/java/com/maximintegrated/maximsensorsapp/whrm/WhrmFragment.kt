@@ -33,7 +33,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     companion object {
         fun newInstance() = WhrmFragment()
 
-        val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
+        //val HR_MEASURING_PERIOD_IN_MILLIS = TimeUnit.SECONDS.toMillis(13)
         val TIMEOUT_INTERVAL_IN_MILLIS = TimeUnit.SECONDS.toMillis(40)
         val MIN_CYCLE_TIME_IN_MILLIS = TimeUnit.SECONDS.toMillis(60)
     }
@@ -58,6 +58,8 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             field = value
 //            hrConfidenceView.value = value?.toFloat()
         }
+
+    private var hrReadyToDisplay = false
 
     private var ibi: String? = null
         set(value) {
@@ -168,10 +170,10 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             countDownTimer?.start()
         }
 
-        hrResultView.measurementProgress = 0
+        hrReadyToDisplay = false
 
         measurementStartTimestamp = null
-        hrResultView.measurementProgress = getMeasurementProgress()
+        hrResultView.measurementProgress = 0 //getMeasurementProgress()
         hrResultView.result = null
 
         setAlgorithmModeRadioButtonsEnabled(false)
@@ -315,7 +317,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         totalActEnergy = null
     }
 
-    private fun shouldShowMeasuringProgress(): Boolean {
+    /*private fun shouldShowMeasuringProgress(): Boolean {
         return (System.currentTimeMillis() - (measurementStartTimestamp
             ?: 0L)) < HR_MEASURING_PERIOD_IN_MILLIS
     }
@@ -323,7 +325,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     private fun getMeasurementProgress(): Int {
         return ((System.currentTimeMillis() - (measurementStartTimestamp
             ?: 0L)) * 100 / HR_MEASURING_PERIOD_IN_MILLIS).toInt()
-    }
+    }*/
 
     private fun renderHrmModel(streamData: HspStreamData) {
         if (measurementStartTimestamp == null) {
@@ -333,23 +335,19 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         chartView.addData(streamData.green, streamData.green2)
 
         if (radioButtonNormalMode.isChecked) {
-            val shouldShowMeasuringProgress = shouldShowMeasuringProgress()
-            if (shouldShowMeasuringProgress) {
-                hrConfidence = null
-
-                hrResultView.measurementProgress = getMeasurementProgress()
+            hrConfidence = streamData.hrConfidence
+            if(hrReadyToDisplay){
+                if (isHrConfidenceHighEnough(streamData)) {
+                    hrResultView.result = streamData.hr
+                    lastValidHrTimestamp = System.currentTimeMillis()
+                } else if (isHrObsolete()) {
+                    hrResultView.result = null
+                }
+            }else{
                 hrResultView.result = null
-            } else {
-                hrConfidence = streamData.hrConfidence
-            }
-
-            if (isHrConfidenceHighEnough(streamData) && !shouldShowMeasuringProgress) {
-                hrResultView.result = streamData.hr
-
-                lastValidHrTimestamp = System.currentTimeMillis()
-            } else if (isHrObsolete()) {
-                // show HR as empty
-                hrResultView.result = null
+                if(streamData.hrConfidence >= 50){
+                    hrReadyToDisplay = true
+                }
             }
         } else {
             hrResultView.result = streamData.hr

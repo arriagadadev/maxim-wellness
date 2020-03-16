@@ -275,14 +275,14 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             measurementStartTimestamp = System.currentTimeMillis()
         }
 
-        hrResultView.measurementProgress = getMeasurementProgress()
+        hrResultView.measurementProgress = 0 //getMeasurementProgress()
         hrResultView.result = streamData.hr
     }
 
-    private fun getMeasurementProgress(): Int {
+    /*private fun getMeasurementProgress(): Int {
         return ((System.currentTimeMillis() - (measurementStartTimestamp
             ?: 0L)) * 100 / WhrmFragment.HR_MEASURING_PERIOD_IN_MILLIS).toInt()
-    }
+    }*/
 
     private fun clearChart() {
         chartView.clearChart()
