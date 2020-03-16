@@ -96,7 +96,7 @@ class RespiratoryFragment : MeasurementBaseFragment() {
 
     private fun setupChart() {
         chartView.dataSetInfoList = listOf(
-            DataSetInfo(R.string.channel_red, R.color.channel_red)
+            DataSetInfo(R.string.respiration_rate, R.color.channel_red)
         )
 
         chartView.titleView.text = getString(R.string.respiration_rate)
