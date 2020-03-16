@@ -47,8 +47,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     //private var dataRecorder: DataRecorder? = null
 
     private var measurementStartTimestamp: Long? = null
-    private var minConfidenceLevel = 0
-    private var hrExpireDuration = 30
     private var lastValidHrTimestamp: Long = 0L
 
     private var countDownTimer: CountDownTimer? = null
@@ -336,16 +334,17 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
         if (radioButtonNormalMode.isChecked) {
             hrConfidence = streamData.hrConfidence
-            if(hrReadyToDisplay){
+            if (hrReadyToDisplay) {
+                hrResultView.result = streamData.hr
                 if (isHrConfidenceHighEnough(streamData)) {
-                    hrResultView.result = streamData.hr
                     lastValidHrTimestamp = System.currentTimeMillis()
+                    hrConfidenceWarningView.visibility = View.INVISIBLE
                 } else if (isHrObsolete()) {
-                    hrResultView.result = null
+                    hrConfidenceWarningView.visibility = View.VISIBLE
                 }
-            }else{
+            } else {
                 hrResultView.result = null
-                if(streamData.hrConfidence >= 50){
+                if (streamData.hrConfidence >= 50) {
                     hrReadyToDisplay = true
                 }
             }
@@ -365,13 +364,13 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         return if (hrmModel.hr < 40 || hrmModel.hr > 240) {
             false
         } else {
-            hrmModel.hrConfidence >= minConfidenceLevel
+            hrmModel.hrConfidence >= WhrmSettings.minConfidenceLevel
         }
     }
 
     private fun isHrObsolete(): Boolean {
         return (System.currentTimeMillis() - lastValidHrTimestamp) > TimeUnit.SECONDS.toMillis(
-            hrExpireDuration.toLong()
+            WhrmSettings.confidenceThresholdInSeconds.toLong()
         )
     }
 

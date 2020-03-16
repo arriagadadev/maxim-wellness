@@ -84,6 +84,7 @@
     <string name="polar_empty_value">--</string>
     <string name="polar_devices">Polar HRM Chest Straps</string>
     <string name="write_sampled_mode_cycle_time">Write Sample Mode Cycle Time</string>
+    <string name="sample_mode_cycle_time">Sample Mode Cycle Time</string>
     <string name="write_low_power_cycle_time">Write Low Power Cycle Time</string>
 
     <string name="empty_value">--</string>
@@ -269,4 +270,6 @@
     <string name="archive">Archive</string>
     <string name="flash_log_parser">Flash Log Parser</string>
     <string name="wrong_format">Wrong Fomat</string>
+    <string name="hr_confidence_level">HR Confidence Level (0–100)</string>
+    <string name="hr_expiration_threshold">HR Expiration Threshold (sec)</string>
 </resources>
