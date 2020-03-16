@@ -110,7 +110,7 @@ class EcgFragment : MeasurementBaseFragment() {
         super.startMonitoring()
         hspViewModel.streamType = HspViewModel.StreamType.ECG
         menuItemLogToFlash.isEnabled = true
-        timestamp = DataRecorder.TIMESTAMP_FORMAT.format(Date())
+        timestamp = HspStreamData.TIMESTAMP_FORMAT.format(Date())
         csvWriter = CsvWriter.open(getCsvFilePath(), HspEcgStreamData.CSV_HEADER_ARRAY)
 
         averageRtoR = null

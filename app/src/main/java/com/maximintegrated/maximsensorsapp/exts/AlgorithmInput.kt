@@ -5,7 +5,7 @@ import com.maximintegrated.bpt.hsp.HspStreamData
 
 fun AlgorithmInput.set(data: HspStreamData) {
     sampleCount = data.sampleCount
-    sampleTime = data.sampleTimeInt
+    sampleTime = data.sampleTime
     green = data.green
     green2 = data.green2
     ir = data.ir

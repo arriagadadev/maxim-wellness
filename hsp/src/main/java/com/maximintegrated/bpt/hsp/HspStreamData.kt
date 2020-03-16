@@ -1,9 +1,12 @@
 package com.maximintegrated.bpt.hsp
 
+import java.text.SimpleDateFormat
+import java.util.*
+
 
 data class HspStreamData(
     val sampleCount: Int,
-    val sampleTime: Float,
+    val sampleTime: Int,
     val green: Int,
     val green2: Int,
     val ir: Int,
@@ -31,10 +34,9 @@ data class HspStreamData(
     val runSteps: Int,
     val kCal: Float,
     val totalActEnergy: Float,
-    val currentTimeMillis: Long = System.currentTimeMillis()
+    var currentTimeMillis: Long = System.currentTimeMillis()
 ) {
 
-    var sampleTimeInt = sampleTime.toInt()
     var accelerationXInt = (accelerationX * 1000f).toInt()
     var accelerationYInt = (accelerationY * 1000f).toInt()
     var accelerationZInt = (accelerationZ * 1000f).toInt()
@@ -51,11 +53,49 @@ data class HspStreamData(
         //{wspo2lowSNR,1},{wspo2motion,1},{wspo2lowpi,1},{wspo2unreliableR,1},{wspo2state,4},{scdstate,4},
         //{wSteps,32},{rSteps,32},{kCal,32, 1},{totalActEnergy,32, 1}
 
+        const val NUMBER_OF_BYTES_IN_PACKET =
+            52 // including 1 byte data stream start(aa), 1 byte crc
+
+        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
+        val CSV_HEADER_HSP = arrayOf(
+            "sample_count",
+            "sample_time",
+            "green",
+            "green2",
+            "ir",
+            "red",
+            "acceleration_x",
+            "acceleration_y",
+            "acceleration_z",
+            "op_mode",
+            "hr",
+            "hr_confidence",
+            "rr",
+            "rr_confidence",
+            "activity",
+            "r",
+            "spo2_confidence",
+            "spo2",
+            "spo2_percentage_complete",
+            "spo2_low_snr",
+            "spo2_motion",
+            "spo2_low_pi",
+            "spo2_unreliable_r",
+            "spo2_state",
+            "scd_state",
+            "walking_steps",
+            "running_steps",
+            "calorie",
+            "totalActEnergy",
+            "timestamp",
+            "timestamp_milis"
+        )
+
         fun fromPacket(packet: ByteArray): HspStreamData {
             return with(BitStreamReader(packet, 8)) {
                 HspStreamData(
                     sampleCount = nextInt(8),
-                    sampleTime = nextFloat(32, 1),
+                    sampleTime = nextInt(32),
                     green = nextInt(20),
                     green2 = nextInt(20),
                     ir = nextInt(20),
@@ -86,5 +126,41 @@ data class HspStreamData(
                 )
             }
         }
+    }
+
+    fun toCsvModel(): String {
+        return arrayOf(
+            sampleCount,
+            TIMESTAMP_FORMAT.format(Date(sampleTime.toLong() * 1000)),
+            green,
+            green2,
+            ir,
+            red,
+            accelerationX,
+            accelerationY,
+            accelerationZ,
+            operationMode,
+            hr,
+            hrConfidence,
+            rr,
+            rrConfidence,
+            activity,
+            r,
+            wspo2Confidence,
+            spo2,
+            wspo2PercentageComplete,
+            wspo2LowSnr,
+            wspo2Motion,
+            wspo2LowPi,
+            wspo2UnreliableR,
+            wspo2State,
+            scdState,
+            walkSteps,
+            runSteps,
+            kCal,
+            totalActEnergy,
+            TIMESTAMP_FORMAT.format(Date(currentTimeMillis)),
+            currentTimeMillis
+        ).joinToString(separator = ",")
     }
 }

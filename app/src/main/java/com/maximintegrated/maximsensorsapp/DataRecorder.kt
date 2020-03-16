@@ -6,47 +6,12 @@ import com.maximintegrated.bpt.polar.HeartRateMeasurement
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import timber.log.Timber
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 
 class DataRecorder(var type: String) {
 
     companion object {
         val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp")
-        val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
-        private val CSV_HEADER_HSP = arrayOf(
-            "sample_count",
-            "sample_time",
-            "green",
-            "green2",
-            "ir",
-            "red",
-            "acceleration_x",
-            "acceleration_y",
-            "acceleration_z",
-            "op_mode",
-            "hr",
-            "hr_confidence",
-            "rr",
-            "rr_confidence",
-            "activity",
-            "r",
-            "spo2_confidence",
-            "spo2",
-            "spo2_percentage_complete",
-            "spo2_low_snr",
-            "spo2_motion",
-            "spo2_low_pi",
-            "spo2_unreliable_r",
-            "spo2_state",
-            "scd_state",
-            "walking_steps",
-            "running_steps",
-            "calorie",
-            "totalActEnergy",
-            "timestamp",
-            "timestamp_milis"
-        )
 
         private val CSV_HEADER_HSP_1Hz = arrayOf(
             "timestamp",
@@ -63,7 +28,7 @@ class DataRecorder(var type: String) {
 
     private val referenceDevice: CsvWriter
 
-    val timestamp = TIMESTAMP_FORMAT.format(Date())
+    val timestamp = HspStreamData.TIMESTAMP_FORMAT.format(Date())
 
     private var oneHzFileIsFinished = false
     private var referenceFileIsFinished = false
@@ -73,7 +38,7 @@ class DataRecorder(var type: String) {
     init {
         csvWriter = CsvWriter.open(
             getCsvFilePath(type),
-            CSV_HEADER_HSP
+            HspStreamData.CSV_HEADER_HSP
         )
 
         csvWriter1Hz = CsvWriter.open(
@@ -89,7 +54,7 @@ class DataRecorder(var type: String) {
 
     private var oneHzListener = object : CsvWriter.Companion.CsvWriterListener {
         override fun onCompleted(isSuccessful: Boolean) {
-            if(!isSuccessful) return
+            if (!isSuccessful) return
             oneHzFileIsFinished = true
             if (referenceFileIsFinished) {
                 dataRecorderListener?.onFilesAreReadyForAlignment(
@@ -105,7 +70,7 @@ class DataRecorder(var type: String) {
 
     private var referenceListener = object : CsvWriter.Companion.CsvWriterListener {
         override fun onCompleted(isSuccessful: Boolean) {
-            if(!isSuccessful) return
+            if (!isSuccessful) return
             referenceFileIsFinished = true
             if (oneHzFileIsFinished) {
                 dataRecorderListener?.onFilesAreReadyForAlignment(
@@ -138,39 +103,7 @@ class DataRecorder(var type: String) {
         ).absolutePath
 
     fun record(data: HspStreamData) {
-        csvWriter.write(
-            data.sampleCount,
-            TIMESTAMP_FORMAT.format(Date(data.sampleTime.toLong())),
-            data.green,
-            data.green2,
-            data.ir,
-            data.red,
-            data.accelerationX,
-            data.accelerationY,
-            data.accelerationZ,
-            data.operationMode,
-            data.hr,
-            data.hrConfidence,
-            data.rr,
-            data.rrConfidence,
-            data.activity,
-            data.r,
-            data.wspo2Confidence,
-            data.spo2,
-            data.wspo2PercentageComplete,
-            data.wspo2LowSnr,
-            data.wspo2Motion,
-            data.wspo2LowPi,
-            data.wspo2UnreliableR,
-            data.wspo2State,
-            data.scdState,
-            data.walkSteps,
-            data.runSteps,
-            data.kCal,
-            data.totalActEnergy,
-            TIMESTAMP_FORMAT.format(Date(data.currentTimeMillis)),
-            data.currentTimeMillis
-        )
+        csvWriter.write(data.toCsvModel())
 
         if (count % 25 == 0) {
             csvWriter1Hz.write(
@@ -199,7 +132,7 @@ class DataRecorder(var type: String) {
             csvWriter1Hz.close()
             referenceDevice.close()
         } catch (e: Exception) {
-            Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
+            Timber.tag(DataRecorder::class.java.simpleName).e(e.message.toString())
         }
     }
 

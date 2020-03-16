@@ -236,7 +236,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
             }
             if (previousData != null) {
                 val sampleCount = expectingSampleCount
-                val sampleTime = ((data.sampleTime + previousData!!.sampleTime) / 2).toInt()
+                val sampleTime = ((data.sampleTime + previousData!!.sampleTime) / 2)
                 val green = (data.green + previousData!!.green) / 2
                 val green2 = (data.green2 + previousData!!.green2) / 2
                 val ir = (data.ir + previousData!!.ir) / 2
@@ -268,7 +268,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 val timestamp = (data.currentTimeMillis + previousData!!.currentTimeMillis) / 2
 
                 val backupData = HspStreamData(
-                    sampleCount, sampleTime.toFloat(), green, green2, ir,
+                    sampleCount, sampleTime, green, green2, ir,
                     red, accX, accY, accZ, opMode, hr, hrConfidence, rr, rrConfidence, activity, r,
                     spo2Confidence, spo2, spo2PercentageComplete, spo2LowSnr, spo2Motion, spo2LowPi,
                     spo2UnreliableR, spo2State, scdState, walk, run, kcal, totalActEnergy, timestamp
@@ -353,7 +353,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         }
     }
 
-    private val timestamp = DataRecorder.TIMESTAMP_FORMAT.format(Date())
+    private val timestamp = HspStreamData.TIMESTAMP_FORMAT.format(Date())
     private var annotationWriter: CsvWriter? = null
     private var errorWriter: CsvWriter? = null
 

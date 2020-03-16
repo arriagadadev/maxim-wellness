@@ -157,7 +157,7 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
                             statisticLayout.meanHrTextView.text =
                                 algorithmOutput.sports.hrStats.meanHr.toString()
                             saveMeasurement(
-                                algorithmOutput.sports, DataRecorder.TIMESTAMP_FORMAT.format(
+                                algorithmOutput.sports, HspStreamData.TIMESTAMP_FORMAT.format(
                                     Date()
                                 ), getMeasurementType()
                             )

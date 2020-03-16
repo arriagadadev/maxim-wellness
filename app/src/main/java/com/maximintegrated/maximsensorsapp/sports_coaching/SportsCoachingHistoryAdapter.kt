@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.maximintegrated.algorithms.sports.SportsCoachingAlgorithmOutput
+import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.DataRecorder
 import com.maximintegrated.maximsensorsapp.R
 import kotlinx.android.synthetic.main.sports_coaching_history_item.view.*
@@ -50,7 +51,7 @@ class HistoryViewHolder(
     fun bind(output: SportsCoachingAlgorithmOutput) {
         this.output = output
         sessionTextView.text = getStringValueOfSession(parent.context, output.session)
-        dateTextView.text = DataRecorder.TIMESTAMP_FORMAT.format(Date(output.timestamp))
+        dateTextView.text = HspStreamData.TIMESTAMP_FORMAT.format(Date(output.timestamp))
         scoreTextView.text = "%d".format(getScore(output).toInt())
     }
 
