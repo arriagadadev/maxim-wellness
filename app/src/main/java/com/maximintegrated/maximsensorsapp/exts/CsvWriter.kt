@@ -28,6 +28,8 @@ class CsvWriter private constructor(var filePath: String) {
 
     var listener: CsvWriterListener? = null
 
+    private var delete = false
+
     init {
         ioThread {
             val file = File(filePath)
@@ -51,7 +53,7 @@ class CsvWriter private constructor(var filePath: String) {
                     }
 
                 }
-                if (count == 1 && !flushed) {
+                if ((count == 1 && !flushed) || delete) {
                     listener?.onCompleted(false)
                     file.delete()
                 }else{
@@ -77,6 +79,10 @@ class CsvWriter private constructor(var filePath: String) {
         } else {
             throw IllegalStateException("Writer is already closed!")
         }
+    }
+
+    fun delete(){
+        delete = true
     }
 }
 

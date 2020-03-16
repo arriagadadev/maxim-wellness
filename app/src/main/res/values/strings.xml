@@ -258,4 +258,15 @@
     <string name="ecg_filter_notch_60">Notch60</string>
     <string name="ecg_filter_low_pass_40">LowPass40</string>
     <string name="ecg_invert">Invert ECG</string>
+    <string name="parse">Parse</string>
+    <string name="importFile">Import File</string>
+    <string name="maxim_log_file">Maxim Log File</string>
+    <string name="saved_to">Saved to</string>
+    <string name="file_format_no_match">The file format does not match!</string>
+    <string name="file_saved_successfully">File is parsed and saved successfully!</string>
+    <string name="not_maxim_log_file">The file is not a Maxim log file!</string>
+    <string name="error_occured">Error occured!</string>
+    <string name="archive">Archive</string>
+    <string name="flash_log_parser">Flash Log Parser</string>
+    <string name="wrong_format">Wrong Fomat</string>
 </resources>

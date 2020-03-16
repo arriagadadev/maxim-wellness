@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
 
         hspViewModel.isDeviceSupported
             .observe(this) {
+                hspViewModel.sendCommand(HspCommand.fromText("set_cfg lcd time ${System.currentTimeMillis() / 1000}"))
                 hspViewModel.sendCommand(HspCommand.fromText("get_device_info"))
             }
 

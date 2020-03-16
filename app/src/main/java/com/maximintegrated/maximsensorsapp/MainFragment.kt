@@ -16,6 +16,7 @@ import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.archive.ArchiveFragment
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
+import com.maximintegrated.maximsensorsapp.log_parser.LogParserFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
 import com.maximintegrated.maximsensorsapp.sports_coaching.SportsCoachingFragment
@@ -62,11 +63,11 @@ class MainFragment : Fragment() {
         spo2MenuItemView.isEnabled = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
         spo2MenuItemView.isVisible = (hspViewModel.deviceModel != HspViewModel.DeviceModel.ME11B)
 
-        tempMenuItemView.isEnabled = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
-        tempMenuItemView.isVisible = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        tempMenuItemView.isEnabled = false //(hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        tempMenuItemView.isVisible = false //(hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
 
-        ecgMenuItemView.isEnabled = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
-        ecgMenuItemView.isVisible = (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        ecgMenuItemView.isEnabled = false //(hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
+        ecgMenuItemView.isVisible = false //(hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11B)
 
         whrmMenuItemView.isEnabled = true
         whrmMenuItemView.isVisible = true
@@ -88,6 +89,9 @@ class MainFragment : Fragment() {
 
         archiveMenuItemView.isEnabled = true
         archiveMenuItemView.isVisible = true
+
+        parserMenuItemView.isEnabled = true
+        parserMenuItemView.isVisible = true
 
         hspViewModel.connectionState
             .observe(this) { (device, connectionState) ->
@@ -144,26 +148,14 @@ class MainFragment : Fragment() {
 
         sportsCoachingMenuItemView.setOnClickListener {
             requireActivity().addFragment(SportsCoachingFragment.newInstance())
-            /*val intent = Intent(Intent.ACTION_SEND)
-            intent.component = ComponentName(
-                "com.maximintegrated.sportscoaching",
-                "com.maximintegrated.sportscoaching.view.MainActivity"
-            )
-            try {
-                startActivity(intent)
-            } catch (ignore: Exception) {
-                if (context != null) {
-                    Toast.makeText(
-                        context!!,
-                        "Sports Coaching does not exist",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }*/
         }
 
         archiveMenuItemView.setOnClickListener {
             requireActivity().addFragment(ArchiveFragment.newInstance())
+        }
+
+        parserMenuItemView.setOnClickListener {
+            requireActivity().addFragment(LogParserFragment.newInstance())
         }
     }
 
