@@ -161,12 +161,24 @@
             app:layout_constraintWidth_max="@dimen/menu_item_view_max_width"
             app:miv_icon="@drawable/ic_import"
             app:miv_title="@string/flash_log_parser" />
+        <com.maximintegrated.maximsensorsapp.MenuItemView
+            android:id="@+id/alignmentMenuItemView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/menu_item_margin_top"
+            app:cardElevation="@dimen/menu_item_card_elevation"
+            app:layout_constraintEnd_toEndOf="@id/endGuideline"
+            app:layout_constraintStart_toStartOf="@id/startGuideline"
+            app:layout_constraintTop_toBottomOf="@+id/parserMenuItemView"
+            app:layout_constraintWidth_max="@dimen/menu_item_view_max_width"
+            app:miv_icon="@drawable/ic_alignment"
+            app:miv_title="@string/hr_alignment" />
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
             app:layout_constraintStart_toStartOf="@id/startGuideline"
-            app:layout_constraintTop_toBottomOf="@+id/parserMenuItemView"
+            app:layout_constraintTop_toBottomOf="@+id/alignmentMenuItemView"
             android:layout_marginTop="24dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

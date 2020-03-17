@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspViewModel
+import com.maximintegrated.maximsensorsapp.alignment.AlignmentFragment
 import com.maximintegrated.maximsensorsapp.archive.ArchiveFragment
 import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
@@ -156,6 +157,10 @@ class MainFragment : Fragment() {
 
         parserMenuItemView.setOnClickListener {
             requireActivity().addFragment(LogParserFragment.newInstance())
+        }
+
+        alignmentMenuItemView.setOnClickListener {
+            requireActivity().addFragment(AlignmentFragment.newInstance())
         }
     }
 

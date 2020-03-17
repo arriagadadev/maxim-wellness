@@ -1,8 +1,11 @@
 package com.maximintegrated.maximsensorsapp
 
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
+import de.siegmar.fastcsv.reader.CsvReader
+import de.siegmar.fastcsv.reader.CsvRow
 import timber.log.Timber
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -35,6 +38,50 @@ fun align(alignedFilePath: String, maxim1HzFilePath: String, refFilePath: String
     } catch (e: Exception) {
         Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
     }
+}
+
+@Throws(Exception::class)
+fun align(maximRawFile: File, refFile: File): File? {
+    val maximPairs = readTimeStampAndHrFromRawFile(maximRawFile)
+    val refPairs = readTimeStampAndHrFromReferenceFile(refFile)
+    if (maximPairs.isEmpty()) {
+        throw Exception("Maxim Raw File is not appropriate!")
+    }
+    if (refPairs.isEmpty()) {
+        throw Exception("Reference HR File is not appropriate!")
+    }
+    val alignedTriples = getAlignedTriples(maximPairs, refPairs)
+    if (alignedTriples.isEmpty()) {
+        throw Exception("Alignment should be done manually")
+    }
+
+    try{
+        maximRawFile.copyTo(File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/RAW/${maximRawFile.name}"
+        ))
+    }catch (_: Exception){
+
+    }
+
+    val alignFile = File(
+            DataRecorder.OUTPUT_DIRECTORY,
+            "/ALIGNED/${maximRawFile.nameWithoutExtension}_aligned.csv"
+        )
+    val csvWriterAligned = CsvWriter.open(
+        alignFile.absolutePath,
+        arrayOf("timestamp", "maxim_hr", "ref_hr")
+    )
+    for (triple in alignedTriples) {
+        csvWriterAligned.write(triple.first, triple.second, triple.third)
+    }
+
+    try {
+        csvWriterAligned.close()
+    } catch (e: Exception) {
+        Timber.tag(DataRecorder.javaClass.simpleName).e(e.message.toString())
+    }
+    return alignFile
 }
 
 private fun getAlignedTriples(
@@ -164,6 +211,25 @@ fun readTimeStampAndHrFromReferenceFile(file: File?): ArrayList<Pair<Long, Int>>
         val items = row.split(",")
         if (items.size < 2) continue
         pairs.add(Pair(items[0].toLong(), items[1].toInt()))
+    }
+    return pairs
+}
+
+fun readTimeStampAndHrFromRawFile(file: File?): ArrayList<Pair<Long, Int>> {
+    val pairs: ArrayList<Pair<Long, Int>> = arrayListOf()
+    if (file == null) {
+        return pairs
+    }
+    var count = 0
+    val rows = file.bufferedReader().readLines().drop(1)
+    for (row in rows) {
+        count++
+        if(count == 25){
+            count = 0
+            val items = row.split(",")
+            if (items.size < 31) continue
+            pairs.add(Pair(items[30].toDouble().toLong(), items[10].toFloat().toInt()))
+        }
     }
     return pairs
 }

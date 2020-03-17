@@ -272,4 +272,11 @@
     <string name="wrong_format">Wrong Fomat</string>
     <string name="hr_confidence_level">HR Confidence Level (0–100)</string>
     <string name="hr_expiration_threshold">HR Expiration Threshold (sec)</string>
+    <string name="maxim_legal_info">The collected data is used to improve the accuracy of Maxim algorithms that run on this device. It is not shared with any 3rd parties.</string>
+    <string name="maxim_raw_data">Maxim Raw Data File</string>
+    <string name="reference_hr_file">Reference HR File</string>
+    <string name="align">Align</string>
+    <string name="hr_alignment">HR Alignment</string>
+    <string name="reference_hr_file_example">Reference HR File Example</string>
+    <string name="ref_file_info_message">The file should be in the csv format. The first column in the file needs to contain unix timestamp(milliseconds) information. The second column should display the HR (bpm) values. Below, you can see an example:</string>
 </resources>
