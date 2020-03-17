@@ -13,11 +13,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="20dp"
-        android:text="Maxim does not use or share the user information. It is only required for the algorithms to run correctly."
+        android:text="@string/maxim_legal_info"
         android:drawableStart="@drawable/ic_warning"
         android:drawablePadding="10dp"
-        android:gravity="center"
-        android:visibility="gone"/>
+        android:gravity="center"/>
 
     <Button
         android:layout_width="0dp"
