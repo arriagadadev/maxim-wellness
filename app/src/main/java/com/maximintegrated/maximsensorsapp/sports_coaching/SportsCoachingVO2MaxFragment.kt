@@ -119,6 +119,7 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendAlgoMode()
                 sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }

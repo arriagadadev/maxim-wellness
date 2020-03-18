@@ -120,6 +120,7 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
             .observe(this) {
                 sendDefaultSettings()
                 sendLogToFlashCommand()
+                sendAlgoMode()
                 hspViewModel.startStreaming()
             }
     }

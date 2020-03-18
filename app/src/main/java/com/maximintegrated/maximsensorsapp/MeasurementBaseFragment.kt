@@ -148,6 +148,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
     }
 
+    open fun sendAlgoMode() {
+        hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "0"))
+    }
+
     open fun sendLogToFlashCommand() {
         hspViewModel.sendCommand(
             SetConfigurationCommand(

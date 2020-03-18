@@ -111,6 +111,7 @@ class SportsCoachingReadinessFragment : MeasurementBaseFragment() {
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendAlgoMode()
                 sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }

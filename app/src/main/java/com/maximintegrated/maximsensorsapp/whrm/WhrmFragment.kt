@@ -144,7 +144,7 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         chartView.maximumEntryCount = 100
     }
 
-    private fun sendAlgoMode() {
+    override fun sendAlgoMode() {
         if (radioButtonNormalMode.isChecked) {
             hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "2"))
         } else if (radioButtonSampledMode.isChecked) {

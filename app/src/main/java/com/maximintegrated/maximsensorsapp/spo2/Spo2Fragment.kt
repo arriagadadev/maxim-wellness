@@ -135,7 +135,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         )
     }
 
-    private fun sendAlgoMode() {
+    override fun sendAlgoMode() {
         if (algorithmModeContinuousRadioButton.isChecked) {
             hspViewModel.sendCommand(SetConfigurationCommand("wearablesuite", "algomode", "0"))
         } else if (algorithmModeOneShotRadioButton.isChecked) {

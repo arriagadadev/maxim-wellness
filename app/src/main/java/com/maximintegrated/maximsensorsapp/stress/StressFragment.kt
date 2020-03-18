@@ -154,6 +154,7 @@ class StressFragment : MeasurementBaseFragment() {
         hspViewModel.isDeviceSupported
             .observe(this) {
                 sendDefaultSettings()
+                sendAlgoMode()
                 sendLogToFlashCommand()
                 hspViewModel.startStreaming()
             }
