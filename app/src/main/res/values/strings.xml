@@ -279,4 +279,5 @@
     <string name="hr_alignment">HR Alignment</string>
     <string name="reference_hr_file_example">Reference HR File Example</string>
     <string name="ref_file_info_message">The file should be in the csv format. The first column in the file needs to contain unix timestamp(milliseconds) information. The second column should display the HR (bpm) values. Below, you can see an example:</string>
+    <string name="packet_lost_message">Data packets lost. Please restart the measurement.</string>
 </resources>

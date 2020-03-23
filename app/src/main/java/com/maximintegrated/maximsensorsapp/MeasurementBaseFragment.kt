@@ -219,7 +219,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 }
                 showSnackbar(
                     view!!,
-                    "Restart the measurement in a less noisy environment.",
+                    getString(R.string.packet_lost_message),
                     Snackbar.LENGTH_INDEFINITE
                 )
             }
