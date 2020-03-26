@@ -19,6 +19,16 @@ import com.maximintegrated.maximsensorsapp.ResultCardView
 import com.maximintegrated.maximsensorsapp.exts.set
 import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.*
 import kotlinx.android.synthetic.main.statistics_layout.view.*
+import com.maximintegrated.maximsensorsapp.*
+import com.obsez.android.lib.filechooser.ChooserDialog
+import kotlinx.android.synthetic.main.fragment_sports_coaching_epoc_recovery.*
+import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.hrView
+import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.percentCompleted
+import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.statisticLayout
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import java.util.*
+
 
 class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
 
@@ -60,7 +70,7 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
             this.user = SportsCoachingManager.currentUser!!
             this.history = getHistoryFromFiles(SportsCoachingManager.currentUser!!.userName)
             val historyItem =
-                this.history.records.firstOrNull { it.session == SportsCoachingSession.RECOVERY_TIME }
+                this.history.records.firstOrNull { it.session == SportsCoachingSession.EPOC_RECOVERY }
             if (historyItem != null) {
                 this.recoveryConfig.lastEpocRecoveryTimestamp = historyItem.timestamp
                 this.recoveryConfig.lastRecoveryEstimateInMinutes =
@@ -75,6 +85,10 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
+
+        if(BuildConfig.DEBUG){
+            readFromFile.isVisible = true
+        }
     }
 
     override fun addStreamData(streamData: HspStreamData) {
@@ -84,7 +98,7 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
         algorithmInput.set(streamData)
 
         val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
-        val percentage = algorithmOutput.hrv.percentCompleted
+        val percentage = algorithmOutput.sports.percentCompleted
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
@@ -140,6 +154,52 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
     override fun showSettingsDialog() {
 
     }
+
+    override fun runFromFile() {
+        ChooserDialog(requireContext())
+            .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
+            .withChosenListener { dir, dirFile ->
+                run {
+                    val success1 = MaximAlgorithms.init(algorithmInitConfig)
+                    doAsync {
+                        val inputs = readAlgorithmInputsFromFile(dirFile)
+                        for (input in inputs) {
+                            val success2 =  MaximAlgorithms.run(input, algorithmOutput)
+                            val percentage = algorithmOutput.sports.percentCompleted
+                            percentCompleted.measurementProgress = percentage
+                            notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
+                            updateNotification()
+                            if(algorithmOutput.sports.isNewOutputReady){
+                                if ( percentage == 100) {
+                                    recoveryTime = algorithmOutput.sports.estimates.recovery.recoveryTimeMin
+                                    algorithmOutput.sports.session = SportsCoachingSession.RECOVERY_TIME
+                                    uiThread {
+                                        statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
+                                        statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
+                                        statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
+
+                                        saveMeasurement(
+                                            algorithmOutput.sports, HspStreamData.TIMESTAMP_FORMAT.format(
+                                                Date()
+                                            ), getMeasurementType()
+                                        )
+                                    }
+
+                                    notificationResults[MXM_KEY] = "Recovery time: $recoveryTime"
+                                    updateNotification()
+                                    stopMonitoring()
+                                }
+                            }
+                        }
+                        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
+
+                    }
+                }
+            }
+            .build()
+            .show()
+    }
+
 
     override fun showInfoDialog() {
         val helpDialog =
