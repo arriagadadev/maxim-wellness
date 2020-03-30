@@ -75,20 +75,18 @@ class SportsCoachingReadinessFragment : MeasurementBaseFragment() {
 
         algorithmInput.set(streamData)
 
-        val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
         val percentage = algorithmOutput.sports.percentCompleted
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
-        if (success && percentage == 100) {
+        if (algorithmOutput.sports.isNewOutputReady && percentage == 100) {
             readiness = algorithmOutput.sports.estimates.readiness.readinessScore.toInt()
             statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
             statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
             statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
             algorithmOutput.sports.session = SportsCoachingSession.READINESS
             saveMeasurement(algorithmOutput.sports, dataRecorder!!.timestamp, getMeasurementType())
-            notificationResults[MXM_KEY] = "Readiness score: $readiness"
-            updateNotification()
             stopMonitoring()
         }
     }

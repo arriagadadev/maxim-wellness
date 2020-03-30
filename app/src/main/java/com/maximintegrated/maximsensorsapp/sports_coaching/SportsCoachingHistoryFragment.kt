@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.maximintegrated.algorithms.sports.SportsCoachingAlgorithmOutput
+import com.maximintegrated.algorithms.sports.SportsCoachingSession
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
@@ -59,15 +60,16 @@ class SportsCoachingHistoryFragment : Fragment(), HistoryViewHolder.HistoryItemC
         super.onViewCreated(view, savedInstanceState)
         toolbar.pageTitle = getString(R.string.history)
 
-        //TODO progress bar async
         initRecyclerView()
 
         progressBar.visibility = View.VISIBLE
         doAsync {
-            adapter.outputs = getSportsCoachingOutputsFromFiles(SportsCoachingManager.currentUser!!.userName)
+            adapter.outputs =
+                getSportsCoachingOutputsFromFiles(SportsCoachingManager.currentUser!!.userName).filter { it.session != SportsCoachingSession.VO2MAX_RELAX }
+                    .toMutableList()
             uiThread {
                 progressBar.visibility = View.GONE
-                if(adapter.outputs.isEmpty()){
+                if (adapter.outputs.isEmpty()) {
                     fileRecyclerView.visibility = View.GONE
                     warningGroup.visibility = View.VISIBLE
                 }

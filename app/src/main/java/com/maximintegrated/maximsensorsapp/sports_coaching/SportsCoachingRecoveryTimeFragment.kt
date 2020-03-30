@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.observe
 import com.maximintegrated.algorithms.AlgorithmInitConfig
 import com.maximintegrated.algorithms.AlgorithmInput
@@ -12,19 +13,11 @@ import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
 import com.maximintegrated.algorithms.sports.SportsCoachingSession
 import com.maximintegrated.bpt.hsp.HspStreamData
-import com.maximintegrated.maximsensorsapp.HelpDialog
-import com.maximintegrated.maximsensorsapp.MeasurementBaseFragment
-import com.maximintegrated.maximsensorsapp.R
-import com.maximintegrated.maximsensorsapp.ResultCardView
+import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
+import com.obsez.android.lib.filechooser.ChooserDialog
 import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.*
 import kotlinx.android.synthetic.main.statistics_layout.view.*
-import com.maximintegrated.maximsensorsapp.*
-import com.obsez.android.lib.filechooser.ChooserDialog
-import kotlinx.android.synthetic.main.fragment_sports_coaching_epoc_recovery.*
-import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.hrView
-import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.percentCompleted
-import kotlinx.android.synthetic.main.fragment_sports_coaching_recovery_time.statisticLayout
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.util.*
@@ -39,6 +32,8 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
     private lateinit var algorithmInitConfig: AlgorithmInitConfig
     private val algorithmInput = AlgorithmInput()
     private val algorithmOutput = AlgorithmOutput()
+
+    private var epocFound = false
 
     private var hr: Int? = null
         set(value) {
@@ -76,6 +71,7 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
                 this.recoveryConfig.lastRecoveryEstimateInMinutes =
                     historyItem.scores.recovery.recoveryTimeMin
                 this.recoveryConfig.lastHr = historyItem.scores.recovery.lastHr
+                epocFound = true
             }
         }
         algorithmInitConfig.enableAlgorithmsFlag =
@@ -86,7 +82,7 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
 
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             readFromFile.isVisible = true
         }
     }
@@ -97,20 +93,18 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
 
         algorithmInput.set(streamData)
 
-        val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
         val percentage = algorithmOutput.sports.percentCompleted
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
-        if (success && percentage == 100) {
+        if (algorithmOutput.sports.isNewOutputReady && percentage == 100) {
             recoveryTime = algorithmOutput.sports.estimates.recovery.recoveryTimeMin
             statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
             statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
             statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
             algorithmOutput.sports.session = SportsCoachingSession.RECOVERY_TIME
             saveMeasurement(algorithmOutput.sports, dataRecorder!!.timestamp, getMeasurementType())
-            notificationResults[MXM_KEY] = "Recovery time: $recoveryTime"
-            updateNotification()
             stopMonitoring()
         }
     }
@@ -120,11 +114,18 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
     }
 
     override fun startMonitoring() {
+        if (!epocFound) {
+            Toast.makeText(
+                requireContext(),
+                R.string.epoc_requirement,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         super.startMonitoring()
         menuItemEnabledScd.isEnabled = false
         clearCardViewValues()
         MaximAlgorithms.init(algorithmInitConfig)
-
         percentCompleted.measurementProgress = 0
         percentCompleted.isMeasuring = true
         percentCompleted.result = null
@@ -156,44 +157,43 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
     }
 
     override fun runFromFile() {
+        if (!epocFound) {
+            Toast.makeText(
+                requireContext(),
+                R.string.epoc_requirement,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         ChooserDialog(requireContext())
             .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
             .withChosenListener { dir, dirFile ->
-                run {
-                    val success1 = MaximAlgorithms.init(algorithmInitConfig)
-                    doAsync {
-                        val inputs = readAlgorithmInputsFromFile(dirFile)
-                        for (input in inputs) {
-                            val success2 =  MaximAlgorithms.run(input, algorithmOutput)
-                            val percentage = algorithmOutput.sports.percentCompleted
-                            percentCompleted.measurementProgress = percentage
-                            notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
-                            updateNotification()
-                            if(algorithmOutput.sports.isNewOutputReady){
-                                if ( percentage == 100) {
-                                    recoveryTime = algorithmOutput.sports.estimates.recovery.recoveryTimeMin
-                                    algorithmOutput.sports.session = SportsCoachingSession.RECOVERY_TIME
-                                    uiThread {
-                                        statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
-                                        statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
-                                        statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
+                MaximAlgorithms.init(algorithmInitConfig)
+                doAsync {
+                    val inputs = readAlgorithmInputsFromFile(dirFile)
+                    for (input in inputs) {
+                        MaximAlgorithms.run(input, algorithmOutput)
+                        if (algorithmOutput.sports.isNewOutputReady && algorithmOutput.sports.percentCompleted == 100) {
+                            with(algorithmOutput.sports) {
+                                recoveryTime = estimates.recovery.recoveryTimeMin
+                                session = SportsCoachingSession.RECOVERY_TIME
+                                uiThread {
+                                    statisticLayout.minHrTextView.text = hrStats.minHr.toString()
+                                    statisticLayout.maxHrTextView.text = hrStats.maxHr.toString()
+                                    statisticLayout.meanHrTextView.text = hrStats.meanHr.toString()
 
-                                        saveMeasurement(
-                                            algorithmOutput.sports, HspStreamData.TIMESTAMP_FORMAT.format(
-                                                Date()
-                                            ), getMeasurementType()
-                                        )
-                                    }
-
-                                    notificationResults[MXM_KEY] = "Recovery time: $recoveryTime"
-                                    updateNotification()
-                                    stopMonitoring()
+                                    saveMeasurement(
+                                        this, HspStreamData.TIMESTAMP_FORMAT.format(
+                                            Date()
+                                        ), getMeasurementType()
+                                    )
                                 }
                             }
+                            break
                         }
-                        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
-
                     }
+                    MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
+
                 }
             }
             .build()

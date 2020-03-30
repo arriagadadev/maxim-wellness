@@ -37,14 +37,15 @@ fun getHistoryFromFiles(username: String): SportsCoachingHistory {
         return SportsCoachingHistory(0)
     }
 
-    val historyList = outputs.map {
-        SportsCoachingHistoryItem(
-            it.timestamp,
-            it.estimates,
-            it.hrStats,
-            it.session
-        )
-    }
+    val historyList =
+        outputs.filter { it.session != SportsCoachingSession.VO2MAX_FROM_HISTORY }.map {
+            SportsCoachingHistoryItem(
+                it.timestamp,
+                it.estimates,
+                it.hrStats,
+                it.session
+            )
+        }
 
     return SportsCoachingHistory(historyList as ArrayList<SportsCoachingHistoryItem>)
 }

@@ -10,16 +10,13 @@ import com.maximintegrated.algorithms.AlgorithmInput
 import com.maximintegrated.algorithms.AlgorithmOutput
 import com.maximintegrated.algorithms.MaximAlgorithms
 import com.maximintegrated.algorithms.hrv.HrvAlgorithmInitConfig
+import com.maximintegrated.algorithms.sports.SportsCoachingHistoryItem
 import com.maximintegrated.algorithms.sports.SportsCoachingSession
 import com.maximintegrated.bpt.hsp.HspStreamData
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.set
 import com.obsez.android.lib.filechooser.ChooserDialog
-import kotlinx.android.synthetic.main.fragment_sports_coaching_epoc_recovery.*
 import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.*
-import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.hrView
-import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.percentCompleted
-import kotlinx.android.synthetic.main.fragment_sports_coaching_vo2max.statisticLayout
 import kotlinx.android.synthetic.main.statistics_layout.view.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -72,7 +69,7 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             readFromFile.isVisible = true
         }
     }
@@ -83,22 +80,50 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
 
         algorithmInput.set(streamData)
 
-        val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
         val percentage = algorithmOutput.sports.percentCompleted
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
-        if (success && percentage == 100) {
-            vo2Max = algorithmOutput.sports.estimates.vo2max.relax.toInt()
-            statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
-            statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
-            statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
-            algorithmOutput.sports.session = SportsCoachingSession.VO2MAX_RELAX
-            saveMeasurement(algorithmOutput.sports, dataRecorder!!.timestamp, getMeasurementType())
-            notificationResults[MXM_KEY] = "Resting VO2Max: $vo2Max"
-            updateNotification()
+        if (algorithmOutput.sports.isNewOutputReady && percentage == 100) {
+            calculateVo2MaxFromHistory()
             stopMonitoring()
         }
+    }
+
+    private fun calculateVo2MaxFromHistory() {
+        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
+        val item: SportsCoachingHistoryItem
+        with(algorithmOutput.sports) {
+            item = SportsCoachingHistoryItem(timestamp, estimates, hrStats, session)
+            statisticLayout.minHrTextView.text = hrStats.minHr.toString()
+            statisticLayout.maxHrTextView.text = hrStats.maxHr.toString()
+            statisticLayout.meanHrTextView.text = hrStats.meanHr.toString()
+        }
+        with(algorithmInitConfig.sportCoachingConfig) {
+            session = SportsCoachingSession.VO2MAX_FROM_HISTORY
+            history = getHistoryFromFiles(SportsCoachingManager.currentUser!!.userName)
+            history.records.add(0, item)
+            history.numberOfRecords++
+        }
+        algorithmOutput.sports.session = SportsCoachingSession.VO2MAX_RELAX
+        val timestamp = algorithmOutput.sports.timestamp
+        saveMeasurement(
+            algorithmOutput.sports,
+            HspStreamData.TIMESTAMP_FORMAT.format(Date(timestamp)),
+            getMeasurementType()
+        )
+
+        MaximAlgorithms.init(algorithmInitConfig)
+        MaximAlgorithms.run(AlgorithmInput(), algorithmOutput)
+        vo2Max = algorithmOutput.sports.estimates.vo2max.relax.toInt()
+        algorithmOutput.sports.session = SportsCoachingSession.VO2MAX_FROM_HISTORY
+        algorithmOutput.sports.timestamp = timestamp
+        saveMeasurement(
+            algorithmOutput.sports,
+            HspStreamData.TIMESTAMP_FORMAT.format(Date(timestamp)),
+            getMeasurementType() + "History"
+        )
     }
 
     override fun getMeasurementType(): String {
@@ -137,33 +162,19 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
         ChooserDialog(requireContext())
             .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
             .withChosenListener { dir, dirFile ->
-                run {
-                    MaximAlgorithms.init(algorithmInitConfig)
-                    doAsync {
-                        val inputs = readAlgorithmInputsFromFile(dirFile)
-                        for (input in inputs) {
-                            MaximAlgorithms.run(input, algorithmOutput)
-                            if(algorithmOutput.sports.percentCompleted == 100){
-                                break
+                MaximAlgorithms.init(algorithmInitConfig)
+                doAsync {
+                    val inputs = readAlgorithmInputsFromFile(dirFile)
+                    for (input in inputs) {
+                        MaximAlgorithms.run(input, algorithmOutput)
+                        if (algorithmOutput.sports.percentCompleted == 100 && algorithmOutput.sports.isNewOutputReady) {
+                            uiThread {
+                                calculateVo2MaxFromHistory()
                             }
-                        }
-                        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
-
-                        uiThread {
-                            vo2Max = algorithmOutput.sports.estimates.vo2max.relax.toInt()
-                            statisticLayout.minHrTextView.text =
-                                algorithmOutput.sports.hrStats.minHr.toString()
-                            statisticLayout.maxHrTextView.text =
-                                algorithmOutput.sports.hrStats.maxHr.toString()
-                            statisticLayout.meanHrTextView.text =
-                                algorithmOutput.sports.hrStats.meanHr.toString()
-                            saveMeasurement(
-                                algorithmOutput.sports, HspStreamData.TIMESTAMP_FORMAT.format(
-                                    Date()
-                                ), getMeasurementType()
-                            )
+                            break
                         }
                     }
+                    MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
                 }
             }
             .build()

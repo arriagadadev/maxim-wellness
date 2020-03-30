@@ -142,12 +142,14 @@
         \n\n  It is scaled between 1–100.\n\n  Taken early first thing in the morning.\n\n  Sit comfortably
         and relax a few minutes before starting.</string>
     <string name="vo2max_info">  VO2Max is a single best indicator of fitness and cardiovascular health.
-        \n\n  VO2Max score ranges between 1-100.\n\n  Sit comfortably and relax a few minutes before
-        starting.</string>
-    <string name="epoc_recovery_info">  EPOC is the excess oxygen consumed following exercise.</string>
-    <string name="recovery_time_info">  Recovery time after exercise is calculated and reported.
-        \n\n The fitter you are, the faster you recover.\n\n  Sit comfortably and start measurement.
-        It will take about 3 minutes.</string>
+        \n\n  VO2Max score ranges between 1-100.\n\n  This function needs 3-6 minutes of data collected
+        from the user while they are sitting in a relax state. Relax state is where user is fully recovered
+        from last training and not effected by any kind of food, drug or alcohol.</string>
+    <string name="epoc_recovery_info">  EPOC is an abbreviation for Excess Post–Exercise Oxygen Consumption.
+        To estimate their EPOC value, user needs to start the algorithm after training and collect data for 5–6
+        minutes in resting state.</string>
+    <string name="recovery_time_info">  Recovery time is the amount of the time until user reaches to their homeostasis.
+        Algorithm needs to gather 2–3 minutes of data from user to estimate their recovery time.</string>
     <string name="fitness_age_info">  The fitness age calculation is based on how fit you are, rather
         than your actual age.\n\n  It uses VO2Max values measured and stored in history.</string>
 
@@ -280,4 +282,6 @@
     <string name="reference_hr_file_example">Reference HR File Example</string>
     <string name="ref_file_info_message">The file should be in the csv format. The first column in the file needs to contain unix timestamp(milliseconds) information. The second column should display the HR (bpm) values. Below, you can see an example:</string>
     <string name="packet_lost_message">Data packets lost. Please restart the measurement.</string>
+    <string name="epoc_requirement">There should be at least 1 EPOC measurement in history.</string>
+    <string name="vo2max_requirement">There should be at least 1 VO2Max measurement in history.</string>
 </resources>

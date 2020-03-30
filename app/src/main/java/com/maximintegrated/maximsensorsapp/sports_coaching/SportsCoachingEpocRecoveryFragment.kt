@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.observe
 import com.maximintegrated.algorithms.AlgorithmInitConfig
@@ -23,7 +24,6 @@ import kotlinx.android.synthetic.main.statistics_layout.view.*
 import kotlinx.android.synthetic.main.view_result_card.view.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import timber.log.Timber
 import java.util.*
 
 class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
@@ -48,6 +48,8 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
             epocRecoveryView.emptyValue = value?.toString() ?: ResultCardView.EMPTY_VALUE
         }
 
+    private var vo2MaxFound = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,6 +67,8 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
             this.session = SportsCoachingSession.EPOC_RECOVERY
             this.user = SportsCoachingManager.currentUser!!
             this.history = getHistoryFromFiles(SportsCoachingManager.currentUser!!.userName)
+            vo2MaxFound =
+                this.history.records.any { it.session == SportsCoachingSession.VO2MAX_RELAX }
         }
         algorithmInitConfig.enableAlgorithmsFlag =
             MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS
@@ -73,7 +77,7 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
         menuItemArbitraryCommand.isVisible = false
         menuItemLogToFlash.isVisible = false
         menuItemSettings.isVisible = false
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             readFromFile.isVisible = true
         }
 
@@ -99,20 +103,18 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
 
         algorithmInput.set(streamData)
 
-        val success = MaximAlgorithms.run(algorithmInput, algorithmOutput)
+        MaximAlgorithms.run(algorithmInput, algorithmOutput)
         val percentage = algorithmOutput.sports.percentCompleted
         percentCompleted.measurementProgress = percentage
         notificationResults[MXM_KEY] = "Sports Coaching progress: $percentage%"
         updateNotification()
-        if (success && algorithmOutput.sports.isNewOutputReady) {
+        if (algorithmOutput.sports.isNewOutputReady && algorithmOutput.sports.isNewOutputReady) {
             epocRecovery = algorithmOutput.sports.estimates.recovery.epoc.toInt()
             statisticLayout.minHrTextView.text = algorithmOutput.sports.hrStats.minHr.toString()
             statisticLayout.maxHrTextView.text = algorithmOutput.sports.hrStats.maxHr.toString()
             statisticLayout.meanHrTextView.text = algorithmOutput.sports.hrStats.meanHr.toString()
             algorithmOutput.sports.session = SportsCoachingSession.EPOC_RECOVERY
             saveMeasurement(algorithmOutput.sports, dataRecorder!!.timestamp, getMeasurementType())
-            notificationResults[MXM_KEY] = "EPOC Recovery: $epocRecovery"
-            updateNotification()
             stopMonitoring()
         }
         epocRecoveryView.confidenceProgressBar.progress = streamData.hrConfidence
@@ -151,6 +153,14 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
     }
 
     override fun startMonitoring() {
+        if (!vo2MaxFound) {
+            Toast.makeText(
+                requireContext(),
+                R.string.vo2max_requirement,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         checkForEpocInput()
         super.startMonitoring()
         menuItemEnabledScd.isEnabled = false
@@ -180,37 +190,44 @@ class SportsCoachingEpocRecoveryFragment : MeasurementBaseFragment() {
     }
 
     override fun runFromFile() {
+        if (!vo2MaxFound) {
+            Toast.makeText(
+                requireContext(),
+                R.string.vo2max_requirement,
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
         checkForEpocInput()
         ChooserDialog(requireContext())
             .withStartFile(DataRecorder.OUTPUT_DIRECTORY.parent)
             .withChosenListener { dir, dirFile ->
-                run {
-                    MaximAlgorithms.init(algorithmInitConfig)
-                    doAsync {
-                        val inputs = readAlgorithmInputsFromFile(dirFile)
-                        for (input in inputs) {
-                            MaximAlgorithms.run(input, algorithmOutput)
-                            if(algorithmOutput.sports.isNewOutputReady){
-                                break
-                            }
-                        }
-                        MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
+                MaximAlgorithms.init(algorithmInitConfig)
+                doAsync {
+                    val inputs = readAlgorithmInputsFromFile(dirFile)
+                    for (input in inputs) {
+                        MaximAlgorithms.run(input, algorithmOutput)
+                        if (algorithmOutput.sports.isNewOutputReady && algorithmOutput.sports.percentCompleted == 100) {
+                            with(algorithmOutput.sports) {
+                                epocRecovery =
+                                    algorithmOutput.sports.estimates.recovery.epoc.toInt()
+                                session = SportsCoachingSession.EPOC_RECOVERY
+                                uiThread {
+                                    statisticLayout.minHrTextView.text = hrStats.minHr.toString()
+                                    statisticLayout.maxHrTextView.text = hrStats.maxHr.toString()
+                                    statisticLayout.meanHrTextView.text = hrStats.meanHr.toString()
 
-                        uiThread {
-                            epocRecovery = algorithmOutput.sports.estimates.recovery.epoc.toInt()
-                            statisticLayout.minHrTextView.text =
-                                algorithmOutput.sports.hrStats.minHr.toString()
-                            statisticLayout.maxHrTextView.text =
-                                algorithmOutput.sports.hrStats.maxHr.toString()
-                            statisticLayout.meanHrTextView.text =
-                                algorithmOutput.sports.hrStats.meanHr.toString()
-                            saveMeasurement(
-                                algorithmOutput.sports, HspStreamData.TIMESTAMP_FORMAT.format(
-                                    Date()
-                                ), getMeasurementType()
-                            )
+                                    saveMeasurement(
+                                        this, HspStreamData.TIMESTAMP_FORMAT.format(
+                                            Date()
+                                        ), getMeasurementType()
+                                    )
+                                }
+                            }
+                            break
                         }
                     }
+                    MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
                 }
             }
             .build()

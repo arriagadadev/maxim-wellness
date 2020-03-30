@@ -33,6 +33,7 @@ public class SportsCoachingHistory {
 
     public void setRecords(ArrayList<SportsCoachingHistoryItem> records) {
         this.records = records;
+        numberOfRecords = records.size();
     }
 
     public float[] toFloat() {
