@@ -330,6 +330,15 @@ class MultiChannelChartView @JvmOverloads constructor(
             .forEach { (it as Chip).isChecked = false }
     }
 
+    fun changeCheckStateOfTheChip(index: Int, isChecked: Boolean) {
+        val chip = chipGroupView[index] as? Chip
+        chip?.let {
+            if (it.isChecked != isChecked) {
+                it.isChecked = isChecked
+            }
+        }
+    }
+
     private fun uncheckedAllChipsExceptTheFirst() {
         chipGroupView.children.filter { it is Chip && it.isChecked }.drop(1)
             .forEach { (it as Chip).isChecked = false }

@@ -95,6 +95,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         )
 
         chartView.maximumEntryCount = 100
+        chartView.changeCheckStateOfTheChip(0, false)
     }
 
     override fun getMeasurementType(): String {
