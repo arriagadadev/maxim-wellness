@@ -117,6 +117,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         spo2ResultView.isMeasuring = true
         spo2ResultView.result = null
         spo2ResultView.isTimeout = false
+        spo2ResultView.showProgressTogetherWithResult = algorithmModeOneShotRadioButton.isChecked
 
         setAlgorithmModeRadioButtonsEnabled(false)
 
@@ -256,13 +257,22 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
     private fun renderSpo2Model(model: HspStreamData) {
         chartView.addData(model.ir, model.red)
 
-        spo2ResultView.measurementProgress = model.wspo2PercentageComplete
+        val spo2Calculated = (model.wspo2PercentageComplete and 0x80) > 0
+        val percentage = model.wspo2PercentageComplete and 0x7F
 
-        if (algorithmModeContinuousRadioButton.isChecked) {
+        spo2ResultView.measurementProgress = percentage
+
+        if (algorithmModeOneShotRadioButton.isChecked) {
+            if(percentage == 100){
+                spo2ResultView.result = model.spo2.roundToInt()
+                stopMonitoring()
+            }else{
+                if(spo2Calculated){
+                    spo2ResultView.result = model.spo2.roundToInt()
+                }
+            }
+        }else{
             spo2ResultView.result = model.spo2.roundToInt()
-        } else if (model.wspo2PercentageComplete == 100) {
-            spo2ResultView.result = model.spo2.roundToInt()
-            stopMonitoring()
         }
 
         if (model.wspo2State == STATUS_TIMEOUT) {

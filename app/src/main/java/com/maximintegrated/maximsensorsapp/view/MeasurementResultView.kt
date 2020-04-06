@@ -57,6 +57,8 @@ class MeasurementResultView @JvmOverloads constructor(
 
     var alphaAnimation: Animation
 
+    var showProgressTogetherWithResult = false
+
     init {
         inflate(context, R.layout.view_measurement_result, this)
 
@@ -118,7 +120,7 @@ class MeasurementResultView @JvmOverloads constructor(
 
     private fun showResult() {
         readyToStartMessageView.isVisible = false
-        measuringGroup.isVisible = false
+        measuringGroup.isVisible = showProgressTogetherWithResult && measurementProgress != 100
         timeoutGroup.isVisible = false
 
         resultView.isVisible = true
