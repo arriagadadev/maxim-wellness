@@ -72,6 +72,9 @@ class BluetoothScannerDelegate(
 
     var scanStateChangeHandler: (() -> Unit)? = null
 
+    val showingAnyErrorModel
+        get() = deviceListController.errorModel != null
+
     init {
         viewModel.adapterState
             .observe(lifecycleOwner, Observer {

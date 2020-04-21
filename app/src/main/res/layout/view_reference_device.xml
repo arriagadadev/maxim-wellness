@@ -100,10 +100,25 @@
             android:text="@string/polar_heart_rate_unit"
             android:textAlignment="center"
             android:textAppearance="?textAppearanceCaption"
-            app:layout_constraintBottom_toTopOf="@id/connection_info_divider"
+            app:layout_constraintBottom_toTopOf="@id/ref_device_warning_text_view"
             app:layout_constraintEnd_toEndOf="@id/heart_rate_value_view"
             app:layout_constraintStart_toStartOf="@id/heart_rate_value_view"
             app:layout_constraintTop_toBottomOf="@id/contact_detected_value_view" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/heart_rate_unit_view"
+            app:layout_constraintBottom_toTopOf="@id/connection_info_divider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/ref_device_warning_text_view"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/ic_warning"
+            android:gravity="center_vertical"
+            android:drawablePadding="10dp"
+            android:text="@string/multiple_connection_warning"
+            android:lineSpacingExtra="5dp"/>
 
         <View
             android:id="@+id/connection_info_divider"
@@ -115,7 +130,7 @@
             app:layout_constraintBottom_toTopOf="@id/ble_connection_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/heart_rate_unit_view" />
+            app:layout_constraintTop_toBottomOf="@id/ref_device_warning_text_view" />
 
         <com.maximintegrated.maximsensorsapp.view.BleConnectionView
             android:id="@+id/ble_connection_view"

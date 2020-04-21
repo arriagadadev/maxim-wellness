@@ -268,7 +268,7 @@
     <string name="file_format_no_match">The file format does not match!</string>
     <string name="file_saved_successfully">File is parsed and saved successfully!</string>
     <string name="not_maxim_log_file">The file is not a Maxim log file!</string>
-    <string name="error_occured">Error occured!</string>
+    <string name="error_occured">Error occurred!</string>
     <string name="archive">Archive</string>
     <string name="flash_log_parser">Flash Log Parser</string>
     <string name="wrong_format">Wrong Fomat</string>
@@ -284,4 +284,5 @@
     <string name="packet_lost_message">Data packets lost. Please restart the measurement.</string>
     <string name="epoc_requirement">There should be at least 1 EPOC measurement in history.</string>
     <string name="vo2max_requirement">There should be at least 1 VO2Max measurement in history.</string>
+    <string name="multiple_connection_warning">Connecting to multiple BLE devices may result in data packet loss. Please ensure that a proper mobile device is used for evaluation.</string>
 </resources>

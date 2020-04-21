@@ -20,4 +20,6 @@
 
     <string name="bluetooth_storage_permission_message">Storage permission is required for logging</string>
     <string name="bluetooth_storage_permission_action">Grant</string>
+    <string name="multiple_connection_warning">In environments with weak BLE connections to Maxim’s and 3rd party reference devices, data packet losses may occur. To avoid this, it is recommended that access to other wireless radios be limited while evaluating the application.</string>
+    <string name="warning">Warning!</string>
 </resources>

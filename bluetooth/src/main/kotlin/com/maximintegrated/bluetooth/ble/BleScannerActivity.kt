@@ -106,6 +106,9 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.action_scan_start).isVisible = scannerDelegate.isScanStartVisible
         menu.findItem(R.id.action_scan_stop).isVisible = scannerDelegate.isScanStopVisible
+        if(!scannerDelegate.showingAnyErrorModel){
+            scannerWarningCardView.visibility = View.VISIBLE
+        }
         return true
     }
 
