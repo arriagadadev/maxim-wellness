@@ -6,13 +6,17 @@ buildscript {
     final patchVersion = 2
 
 
-    final latestSdk = 28
+    final minSdk = 21
+    final latestSdk = 29
+    final buildToolsVersion = "29.0.2"
 
     ext.config = [
             versionCode: 1000000 * majorVersion + 1000 * minorVersion + patchVersion,
             versionName: "$majorVersion.$minorVersion.$patchVersion",
             compileSdk : latestSdk,
-            targetSdk  : latestSdk
+            targetSdk  : latestSdk,
+            minSdk     : minSdk,
+            buildToolsVersion : buildToolsVersion
     ]
 
     final versions = [

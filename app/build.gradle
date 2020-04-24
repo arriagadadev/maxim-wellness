@@ -1,21 +1,19 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
-
 apply plugin: 'org.jetbrains.kotlin.android.extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "29.0.2"
+    compileSdkVersion config.compileSdk
+    buildToolsVersion config.buildToolsVersion
     dataBinding {
         enabled true
     }
     defaultConfig {
         applicationId "com.maximintegrated.maximsensorsapp"
-        minSdkVersion 21
-        targetSdkVersion 28
+        minSdkVersion config.minSdk
+        targetSdkVersion config.targetSdk
         versionCode config.versionCode
         versionName config.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
