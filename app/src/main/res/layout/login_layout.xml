@@ -53,7 +53,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
-        android:background="@android:drawable/editbox_background"
+        android:background="@android:drawable/editbox_background_normal"
         android:id="@+id/userSpinner"/>
 
     <ImageView

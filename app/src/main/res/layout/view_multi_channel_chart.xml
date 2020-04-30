@@ -13,12 +13,10 @@
             android:id="@+id/titleView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             android:gravity="center_horizontal"
             android:text="@string/ppg_signal"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/chip_group_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -38,9 +36,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
             app:chipSpacing="@dimen/chip_spacing"
-            app:layout_constraintBottom_toTopOf="@id/line_chart_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/titleView"
@@ -51,23 +48,10 @@
             android:id="@+id/line_chart_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/scaleSecondsView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/titleView" />
-
-        <TextView
-            android:id="@+id/scaleSecondsView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/ppg_signal_scale_seconds"
-            android:textAppearance="@style/TextAppearance.Maxim.PpgChannel"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/line_chart_view" />
+            app:layout_constraintTop_toBottomOf="@id/chip_group_view"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

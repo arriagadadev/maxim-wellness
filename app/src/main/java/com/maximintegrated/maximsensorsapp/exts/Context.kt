@@ -4,6 +4,9 @@
 package com.maximintegrated.maximsensorsapp.exts
 
 import android.content.Context
+import android.os.Build
+import android.text.Html
+import android.text.Spanned
 import android.util.TypedValue
 import androidx.annotation.*
 import androidx.core.content.ContextCompat
@@ -47,6 +50,12 @@ inline fun FragmentActivity.addFragment(fragment: Fragment, @IdRes containerId: 
 
 inline fun FragmentActivity.replaceFragment(fragment: Fragment, @IdRes containerId: Int = R.id.fragmentContainer) {
     supportFragmentManager.beginTransaction()
+        .setCustomAnimations(
+            R.anim.bottom_sheet_slide_in,
+            R.anim.bottom_sheet_slide_out,
+            R.anim.bottom_sheet_slide_in,
+            R.anim.bottom_sheet_slide_out
+        )
         .replace(containerId, fragment)
         .commit()
 }
@@ -55,3 +64,12 @@ inline fun  FragmentActivity.getCurrentFragment(): Fragment? {
     return supportFragmentManager.findFragmentById(R.id.fragmentContainer)
 }
 
+fun String.toHtmlSpan(): Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY)
+} else {
+    Html.fromHtml(this)
+}
+
+fun Context.getHtmlSpannedString(@StringRes id: Int): Spanned = resources.getString(id).toHtmlSpan()
+
+fun Context.getHtmlSpannedString(@StringRes id: Int, vararg formatArgs: Any): Spanned = resources.getString(id, *formatArgs).toHtmlSpan()

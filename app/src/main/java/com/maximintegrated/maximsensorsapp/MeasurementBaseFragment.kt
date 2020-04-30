@@ -97,9 +97,8 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 return@setOnMenuItemClickListener true
             }
             setTitle(title)
+            pageTitle = title
         }
-
-        toolbar.pageTitle = title
     }
 
     open fun startMonitoring() {

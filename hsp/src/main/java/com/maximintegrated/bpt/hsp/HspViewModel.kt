@@ -5,13 +5,13 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.maximintegrated.bpt.hsp.protocol.*
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HspViewModel(application: Application) : AndroidViewModel(application),
     HspManagerCallbacks {
@@ -27,7 +27,8 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
     enum class StreamType{
         PPG,
         ECG,
-        TEMP
+        TEMP,
+        BPT
     }
 
     var bluetoothDevice: BluetoothDevice? = null
@@ -47,6 +48,9 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
 
     private val ecgStreamDataMutable = MutableLiveData<Array<HspEcgStreamData>>()
     val ecgStreamData: LiveData<Array<HspEcgStreamData>> get() = ecgStreamDataMutable
+
+    private val bptStreamDataMutable = MutableLiveData<HspBptStreamData>()
+    val bptStreamData: LiveData<HspBptStreamData> get() = bptStreamDataMutable
 
     private val isDeviceSupportedMutable = MutableLiveData<Boolean>()
     val isDeviceSupported: LiveData<Boolean> get() = isDeviceSupportedMutable
@@ -134,6 +138,51 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
         sendCommand(ReadCommand("ecg", 2))
     }
 
+    fun startBptCalibrationStreaming() {
+        sendCommand(ReadCommand("bpt", 0))
+    }
+
+    fun startBptEstimationStreaming() {
+        sendCommand(ReadCommand("bpt", 1))
+    }
+
+    fun setBptDateTime(){
+        val timestamp = SimpleDateFormat("yyMMdd hhmmss").format(Date())
+        sendCommand(SetConfigurationCommand("bpt", "date_time", timestamp))
+    }
+
+    fun setSysBp(sbp: Int){
+        setSysBp(sbp, sbp, sbp)
+    }
+
+    fun setSysBp(sbp0: Int, sbp1: Int, sbp2: Int){
+        sendCommand(SetConfigurationCommand("bpt","sys_bp", "$sbp0 $sbp1 $sbp2"))
+    }
+
+    fun setDiaBp(dbp: Int){
+        setDiaBp(dbp, dbp, dbp)
+    }
+
+    fun setDiaBp(dbp0: Int, dbp1: Int, dbp2: Int){
+        sendCommand(SetConfigurationCommand("bpt","dia_bp", "$dbp0 $dbp1 $dbp2"))
+    }
+
+    fun setSpO2Coefficients(a: Float, b: Float, c: Float){
+        val constant = 1e5f
+        val strA = "%08X".format((a * constant).toInt())
+        val strB = "%08X".format((b * constant).toInt())
+        val strC = "%08X".format((c * constant).toInt())
+        sendCommand(SetConfigurationCommand("bpt","spo2_coefs", "$strA $strB $strC"))
+    }
+
+    fun setCalibrationResult(calibrationResultsInHexString: String){
+        sendCommand(SetConfigurationCommand("bpt", "cal_result", calibrationResultsInHexString))
+    }
+
+    fun getBptCalibrationResults(){
+        sendCommand(GetConfigurationCommand("bpt", "cal_result"))
+    }
+
     fun stopStreaming() {
         sendCommand(StopCommand())
     }
@@ -210,6 +259,7 @@ class HspViewModel(application: Application) : AndroidViewModel(application),
             StreamType.PPG -> streamDataMutable.value = HspStreamData.fromPacket(packet)
             StreamType.ECG -> ecgStreamDataMutable.value = HspEcgStreamData.fromPacket(packet)
             StreamType.TEMP -> tempStreamDataMutable.value = HspTempStreamData.fromPacket(packet)
+            StreamType.BPT -> bptStreamDataMutable.value = HspBptStreamData.fromPacket(packet)
         }
     }
 }

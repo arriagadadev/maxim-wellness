@@ -18,7 +18,7 @@
         android:layout_marginTop="40dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:background="@android:drawable/editbox_background"
+        android:background="@android:drawable/editbox_background_normal"
         />
 
     <ImageView

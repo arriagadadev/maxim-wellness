@@ -14,7 +14,7 @@ import com.maximintegrated.bluetooth.view.ErrorModel
 class BluetoothScannerDelegate(
     lifecycleOwner: LifecycleOwner,
     viewModel: BaseBluetoothViewModel,
-    private val deviceNamePrefix: String? = null
+    private val deviceNamePrefixList: Array<String>? = null
 ) {
     private val deviceListController = BluetoothDeviceListController()
 
@@ -88,27 +88,38 @@ class BluetoothScannerDelegate(
 
         viewModel.pairedDevices
             .observe(lifecycleOwner, Observer {
-                deviceListController.pairedDevices = if (deviceNamePrefix == null) {
+                deviceListController.pairedDevices = if (deviceNamePrefixList == null) {
                     it
                 } else {
                     it.filter { device ->
                         val deviceName = device.name ?: ""
-                        deviceName.startsWith(deviceNamePrefix, true)
+                       deviceNameCheck(deviceName)
                     }
                 }
             })
 
         viewModel.availableDevices
             .observe(lifecycleOwner, Observer {
-                deviceListController.availableDevices = if (deviceNamePrefix == null) {
+                deviceListController.availableDevices = if (deviceNamePrefixList == null) {
                     it
                 } else {
                     it.filter { device ->
                         val deviceName = device.name ?: ""
-                        deviceName.startsWith(deviceNamePrefix, true)
+                        deviceNameCheck(deviceName)
                     }
                 }
             })
+    }
+
+    private fun deviceNameCheck(deviceName: String): Boolean{
+        var found = false
+        for(name in deviceNamePrefixList!!){
+            if(deviceName.startsWith(name, true)){
+                found = true
+                break
+            }
+        }
+        return found;
     }
 
     fun showLocationPermissionMessage(actionClickListener: View.OnClickListener) {

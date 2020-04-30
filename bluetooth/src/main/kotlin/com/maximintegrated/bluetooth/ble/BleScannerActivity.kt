@@ -26,6 +26,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
         const val REQUEST_LOCATION_PERMISSION = 1
         const val REQUEST_STORAGE_PERMISSION = 2
         private const val DEVICE_NAME_PREFIX_HSP = "HSP"
+        private const val DEVICE_NAME_PREFIX_MAX30101 = "MAX30101"
 
         fun start(context: Context) {
             val intent = Intent(context, BleScannerActivity::class.java)
@@ -41,7 +42,7 @@ open class BleScannerActivity : AppCompatActivity(), OnBluetoothDeviceClickListe
 
         scannerDelegate = BluetoothScannerDelegate(
             this,
-            ViewModelProviders.of(this).get(BleScannerViewModel::class.java), DEVICE_NAME_PREFIX_HSP
+            ViewModelProviders.of(this).get(BleScannerViewModel::class.java), arrayOf(DEVICE_NAME_PREFIX_HSP, DEVICE_NAME_PREFIX_MAX30101)
         ).apply {
             deviceClickListener = this@BleScannerActivity
             scanStateChangeHandler = this@BleScannerActivity::invalidateOptionsMenu

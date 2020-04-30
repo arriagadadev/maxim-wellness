@@ -29,4 +29,12 @@
         <attr name="mcv_single_selection" format="boolean" />
         <attr name="mcv_show_settings" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="CalibrationView">
+        <attr name="cv_title" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="OldProtocolCalibrationView">
+        <attr name="opcv_title" format="string"/>
+    </declare-styleable>
 </resources>

@@ -261,6 +261,8 @@
     <string name="ecg_filter_notch_60">Notch60</string>
     <string name="ecg_filter_low_pass_40">LowPass40</string>
     <string name="ecg_invert">Invert ECG</string>
+
+    <!-- Flash Log Parser -->
     <string name="parse">Parse</string>
     <string name="importFile">Import File</string>
     <string name="maxim_log_file">Maxim Log File</string>
@@ -271,18 +273,77 @@
     <string name="error_occured">Error occurred!</string>
     <string name="archive">Archive</string>
     <string name="flash_log_parser">Flash Log Parser</string>
-    <string name="wrong_format">Wrong Fomat</string>
+    <string name="wrong_format">Wrong Format</string>
+
+
     <string name="hr_confidence_level">HR Confidence Level (0–100)</string>
     <string name="hr_expiration_threshold">HR Expiration Threshold (sec)</string>
     <string name="maxim_legal_info">The collected data is used to improve the accuracy of Maxim algorithms that run on this device. It is not shared with any 3rd parties.</string>
+
+    <!-- HR Alignment -->
     <string name="maxim_raw_data">Maxim Raw Data File</string>
     <string name="reference_hr_file">Reference HR File</string>
     <string name="align">Align</string>
     <string name="hr_alignment">HR Alignment</string>
     <string name="reference_hr_file_example">Reference HR File Example</string>
     <string name="ref_file_info_message">The file should be in the csv format. The first column in the file needs to contain unix timestamp(milliseconds) information. The second column should display the HR (bpm) values. Below, you can see an example:</string>
+
     <string name="packet_lost_message">Data packets lost. Please restart the measurement.</string>
     <string name="epoc_requirement">There should be at least 1 EPOC measurement in history.</string>
     <string name="vo2max_requirement">There should be at least 1 VO2Max measurement in history.</string>
+
+    <!-- BP Trending -->
+    <string name="bp_history">BP History</string>
+    <string name="or">OR</string>
+    <string name="create_a_new_user">Create a new user</string>
+    <string name="bp_trending">BP Trending</string>
+    <string name="username_already_exists">This username already exists.</string>
+    <string name="critical_information">Critical Information</string>
+    <string name="calibration_warning">Calibration is very important and valid for 4 weeks. Any error
+        in this protocol will cause incorrect reports, thereafter. Please use an FDA approved BP device for
+        reference measurements.</string>
+    <string name="calibration">Calibration</string>
+    <string name="resting_5_minutes">Resting 5 minutes!</string>
+    <string name="resting_warning">Please rest at least 5 minutes before taking reference measurements.</string>
+    <string name="restart_timer">Restart Timer</string>
+    <string name="sbp">SBP</string>
+    <string name="dbp">DBP</string>
+    <string name="sbp_mmhg">SBP (mm Hg)</string>
+    <string name="dbp_mmhg">DBP (mm Hg)</string>
+    <string name="calibration_completed">Calibration completed</string>
+    <string name="second_calibration">Second Calibration</string>
+    <string name="first_calibration">First Calibration</string>
+    <string name="third_calibration">Third Calibration</string>
+    <string name="calculated">Calculated</string>
+    <string name="collect_data">Collect data</string>
+    <string name="hr_title">HR (bpm)</string>
+    <string name="spo2_title">SpO2 (%)</string>
+    <string name="signal">Signal:</string>
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="hr_format">HR (BPM): %1$s</string>
+    <string name="spo2_format">SpO2 (%%): %1$s</string>
+    <string name="hr_spo2_format">&lt;b>HR: &lt;/b> %1$d bpm  &lt;b>SpO2:&lt;/b> %2$d%%</string>
+    <string name="percent_format">%1$s %%</string>
+    <string name="measurement">Measurement</string>
+    <string name="sbp_dbp_format">%1$d / %2$d</string>
+    <string name="wait">Wait</string>
+    <string name="done">Done</string>
+    <string name="ref_bp_zero_warning">Reference measurements cannot be 0.</string>
+    <string name="ref_bp_required_fields_warning">You should enter 3 reference measurements.</string>
+    <string name="calibration_required_warning">You should calibrate first!</string>
+    <string name="username_empty_error">Username cannot be empty.</string>
+    <string name="user_not_selected_error">User is not selected.</string>
+
+    <string-array name="bpt_algorithm_out_status">
+        <item>No Signal</item>
+        <item>Progress</item>
+        <item>Success</item>
+        <item>Bad Signal</item>
+        <item>Motion</item>
+        <item>Failure</item>
+        <item>Progress</item>
+    </string-array>
+
     <string name="multiple_connection_warning">Connecting to multiple BLE devices may result in data packet loss. Please ensure that a proper mobile device is used for evaluation.</string>
 </resources>

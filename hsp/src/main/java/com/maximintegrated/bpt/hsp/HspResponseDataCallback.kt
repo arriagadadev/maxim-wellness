@@ -6,6 +6,7 @@ import com.maximintegrated.bpt.hsp.HspResponseDataMerger.Companion.COMMAND_RESPO
 import com.maximintegrated.bpt.hsp.protocol.HspResponse
 import no.nordicsemi.android.ble.callback.DataReceivedCallback
 import no.nordicsemi.android.ble.data.Data
+import timber.log.Timber
 
 interface HspResponseCallback {
     fun onCommandResponseReceived(device: BluetoothDevice, commandResponse: HspResponse<*>)
@@ -13,13 +14,30 @@ interface HspResponseCallback {
 }
 
 abstract class HspResponseDataCallback : DataReceivedCallback, HspResponseCallback {
+
+    companion object{
+        private const val MAX_RETURN_LEN = 2048
+    }
+
+    private val responsePacket = ByteArray(MAX_RETURN_LEN)
+    private var responseIndex = 0
+
     override fun onDataReceived(device: BluetoothDevice, data: Data) {
         val packet = data.value ?: return
 
         if (packet[0] == HspResponseDataMerger.STREAM_START_BYTE) {
             onStreamDataReceived(device, packet)
         } else {
-            onCommandResponseReceived(device, data.toCommandResponse())
+            for(b in packet){
+                responsePacket[responseIndex++] = b
+                if(b == COMMAND_RESPONSE_END_BYTE){
+                    val response = responsePacket.sliceArray(0 until responseIndex).toResponseString()
+                    if(response != ""){
+                        onCommandResponseReceived(device, HspResponse.fromText(response))
+                    }
+                    responseIndex = 0
+                }
+            }
         }
     }
 
@@ -31,6 +49,13 @@ abstract class HspResponseDataCallback : DataReceivedCallback, HspResponseCallba
             ' '
         )
     } ?: ""
+
+    private fun ByteArray.toResponseString() = String(this).trim(
+        COMMAND_RESPONSE_PADDING_BYTE.toChar(),
+        COMMAND_RESPONSE_END_BYTE.toChar(),
+        '\r',
+        ' '
+    )
 
     private fun Data.toCommandResponse() = HspResponse.fromText(toText())
 }

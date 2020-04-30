@@ -109,7 +109,7 @@ class BleScannerDialog : AppCompatDialogFragment() {
         scannerDelegate = BluetoothScannerDelegate(
             this,
             ViewModelProviders.of(this).get(BleScannerViewModel::class.java),
-            deviceNamePrefix
+            deviceNamePrefix?.let { arrayOf(it) }
         ).apply {
             deviceClickListener = this@BleScannerDialog.deviceClickListener
             scanStateChangeHandler = this@BleScannerDialog::updateDialogButtons

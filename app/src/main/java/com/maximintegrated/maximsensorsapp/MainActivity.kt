@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ import com.maximintegrated.bluetooth.devicelist.OnBluetoothDeviceClickListener
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.bpt.hsp.protocol.HspCommand
 import com.maximintegrated.bpt.hsp.protocol.Status
+import com.maximintegrated.maximsensorsapp.bpt.BptMainFragment
 import com.maximintegrated.maximsensorsapp.exts.getCurrentFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
 import com.maximintegrated.maximsensorsapp.service.ForegroundService
@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
 
         hspViewModel.isDeviceSupported
             .observe(this) {
-                hspViewModel.sendCommand(HspCommand.fromText("set_cfg lcd time ${System.currentTimeMillis() / 1000}"))
                 hspViewModel.sendCommand(HspCommand.fromText("get_device_info"))
             }
 
@@ -71,11 +70,17 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                         in 40..49 -> HspViewModel.DeviceModel.ME11D
                         else -> HspViewModel.DeviceModel.UNDEFINED
                     }
-                    showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
+
+                    if (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11D) {
+                        showBptItems()
+                    } else {
+                        showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))
+                        hspViewModel.sendCommand(HspCommand.fromText("set_cfg lcd time ${System.currentTimeMillis() / 1000}"))
+                        hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhparams"))
+                    }
                     serverVersion.text =
                         getString(R.string.server_version, response.parameters[0].value)
                     hubVersion.text = getString(R.string.hub_version, version)
-                    hspViewModel.sendCommand(HspCommand.fromText("get_cfg sh_dhparams"))
                 } else if (response.command.name == HspCommand.COMMAND_GET_CFG && response.parameters.isNotEmpty()) {
                     if (response.command.parameters[0].value == "sh_dhparams") {
                         val auth =
@@ -113,6 +118,11 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
         )
     }
 
+    private fun showBptItems() {
+        progressBar.isVisible = false
+        replaceFragment(BptMainFragment.newInstance())
+    }
+
     private fun showAuthenticationFailMessage() {
         Toast.makeText(this, "Authentication failed!", Toast.LENGTH_SHORT).show()
     }
@@ -129,7 +139,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                 }
             }
         } else {
-            if (getCurrentFragment() == null || getCurrentFragment() as? MainFragment != null) {
+            if (getCurrentFragment() == null || getCurrentFragment() as? LandingPage != null) {
                 startActivity(
                     Intent(this, ScannerActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

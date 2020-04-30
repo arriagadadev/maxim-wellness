@@ -54,7 +54,17 @@ sealed class HspCommand(val name: String, val parameters: List<HspParameter> = e
                 }
                 COMMAND_GET_CFG -> {
                     checkCommandParameters(command, parameters, 1)
-                    GetConfigurationCommand(parameters[0].value)
+                    if (parameters.size > 3) {
+                        GetConfigurationCommand(
+                            sensorName = parameters[0].value,
+                            configuration = parameters[1].value
+                        )
+                    }else{
+                        GetConfigurationCommand(
+                            sensorName = null,
+                            configuration = parameters[0].value
+                        )
+                    }
                 }
                 COMMAND_SET_CFG -> {
                     checkCommandParameters(command, parameters, 2)
@@ -174,12 +184,14 @@ data class SetRegisterCommand(
         )
     )
 
-data class GetConfigurationCommand(val configuration: String) :
+data class GetConfigurationCommand(val sensorName: String? = null, val configuration: String) :
     HspCommand(
         COMMAND_GET_CFG,
-        listOf(
-            HspParameter(configuration)
-        )
+        if (sensorName == null) {
+            listOf(HspParameter(configuration))
+        } else {
+            listOf(HspParameter(sensorName), HspParameter(configuration))
+        }
     )
 
 data class SetConfigurationCommand(

@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_main_fragment_content.*
 
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), LandingPage {
 
     companion object {
         private const val ARG_DEVICE_SENSORS = "device_sensors"
