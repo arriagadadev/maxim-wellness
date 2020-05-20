@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MaximSensorsApp"
         tools:ignore="GoogleAppIndexingWarning"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        android:requestLegacyExternalStorage="true">
 
         <service
             android:name=".service.ForegroundService"
