@@ -364,7 +364,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         val name = getMeasurementType()
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
-            "/ANNOTATIONS/MaximSensorsApp_${timestamp}_${name}_annotation.csv"
+            "${File.separator}ANNOTATIONS${File.separator}MaximSensorsApp_${timestamp}_${name}_annotation.csv"
         ).absolutePath
     }
 
@@ -375,7 +375,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     private fun getCsvFilePathError(): String {
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
-            "/ERROR/MaximSensorsApp_${dataRecorder?.timestamp}_${dataRecorder?.type}_error.csv"
+            "${File.separator}ERROR${File.separator}MaximSensorsApp_${dataRecorder?.timestamp}_${dataRecorder?.type}_error.csv"
         ).absolutePath
     }
 

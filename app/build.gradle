@@ -79,6 +79,8 @@ dependencies {
     implementation deps.mpAndroidChart
     implementation deps.circleProgress
 
+    implementation 'com.github.RohitSurwase.UCE-Handler:uce_handler:1.4'
+
     testImplementation deps.junit
     androidTestImplementation deps.atsl
     androidTestImplementation deps.espresso

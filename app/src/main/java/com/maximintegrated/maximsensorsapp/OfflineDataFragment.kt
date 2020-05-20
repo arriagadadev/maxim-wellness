@@ -73,17 +73,17 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener,
         fun newInstance(logFile: File): OfflineDataFragment {
             val fragment = OfflineDataFragment()
             fragment.logFile = logFile
-            var refPath = File(
+            val refPath = File(
                 DataRecorder.OUTPUT_DIRECTORY,
-                "/REFERENCE_DEVICE/${logFile.nameWithoutExtension}_reference_device.csv"
+                "${File.separator}REFERENCE_DEVICE${File.separator}${logFile.nameWithoutExtension}_reference_device.csv"
             ).absolutePath
-            var oneHzPath = File(
+            val oneHzPath = File(
                 DataRecorder.OUTPUT_DIRECTORY,
-                "/1Hz/${logFile.nameWithoutExtension}_1Hz.csv"
+                "${File.separator}1Hz${File.separator}${logFile.nameWithoutExtension}_1Hz.csv"
             ).absolutePath
-            var alignPath = File(
+            val alignPath = File(
                 DataRecorder.OUTPUT_DIRECTORY,
-                "/ALIGNED/${logFile.nameWithoutExtension}_aligned.csv"
+                "${File.separator}ALIGNED${File.separator}${logFile.nameWithoutExtension}_aligned.csv"
             ).absolutePath
             fragment.refHrFile = if (File(refPath).exists()) File(refPath) else null
             fragment.oneHzFile = if (File(oneHzPath).exists()) File(oneHzPath) else null
@@ -611,7 +611,7 @@ class OfflineDataFragment : Fragment(), AdapterView.OnItemSelectedListener,
     private fun getOutputFile(suffix: String): File {
         return File(
             DataRecorder.OUTPUT_DIRECTORY,
-            "/OUTPUT/${logFile?.nameWithoutExtension}_$suffix.csv"
+            "${File.separator}OUTPUT${File.separator}${logFile?.nameWithoutExtension}_$suffix.csv"
         )
     }
 

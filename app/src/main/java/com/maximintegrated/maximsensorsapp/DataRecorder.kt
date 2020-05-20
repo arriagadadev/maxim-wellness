@@ -85,21 +85,21 @@ class DataRecorder(var type: String) {
     }
 
     private fun getCsvFilePath(type: String) =
-        File(OUTPUT_DIRECTORY, "/RAW/MaximSensorsApp_${timestamp}_$type.csv").absolutePath
+        File(OUTPUT_DIRECTORY, "${File.separator}RAW${File.separator}MaximSensorsApp_${timestamp}_$type.csv").absolutePath
 
     private fun getCsvFilePath1Hz(type: String) =
-        File(OUTPUT_DIRECTORY, "/1Hz/MaximSensorsApp_${timestamp}_${type}_1Hz.csv").absolutePath
+        File(OUTPUT_DIRECTORY, "${File.separator}1Hz${File.separator}MaximSensorsApp_${timestamp}_${type}_1Hz.csv").absolutePath
 
     private fun getCsvFilePathReferenceDevice(type: String) =
         File(
             OUTPUT_DIRECTORY,
-            "/REFERENCE_DEVICE/MaximSensorsApp_${timestamp}_${type}_reference_device.csv"
+            "${File.separator}REFERENCE_DEVICE${File.separator}MaximSensorsApp_${timestamp}_${type}_reference_device.csv"
         ).absolutePath
 
     private fun getCsvFilePathAligned(type: String) =
         File(
             OUTPUT_DIRECTORY,
-            "/ALIGNED/MaximSensorsApp_${timestamp}_${type}_aligned.csv"
+            "${File.separator}ALIGNED${File.separator}MaximSensorsApp_${timestamp}_${type}_aligned.csv"
         ).absolutePath
 
     fun record(data: HspStreamData) {

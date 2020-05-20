@@ -145,7 +145,7 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
 
     private fun initCsvWriter(){
         val timestamp = HspBptStreamData.TIMESTAMP_FORMAT.format(Date())
-        val file = File(BptViewModel.OUTPUT_DIRECTORY, "/${BptSettings.currentUser}/BPTrending_${timestamp}_calibration.csv")
+        val file = File(BptViewModel.OUTPUT_DIRECTORY, "${File.separator}${BptSettings.currentUser}${File.separator}BPTrending_${timestamp}_calibration.csv")
         csvWriter = CsvWriter.open(file.absolutePath, HspBptStreamData.CSV_HEADER_ARRAY)
     }
 

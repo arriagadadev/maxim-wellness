@@ -9,13 +9,13 @@ import java.util.regex.Pattern
 val HISTORY_FILE: File
     get() = File(
         BptViewModel.OUTPUT_DIRECTORY,
-        "/${BptSettings.currentUser}/BPTrending_history.csv"
+        "${File.separator}${BptSettings.currentUser}${File.separator}BPTrending_history.csv"
     )
 
 val CALIBRATION_FILE: File
     get() = File(
         BptViewModel.OUTPUT_DIRECTORY,
-        "/${BptSettings.currentUser}/BPTrending_calibration_data.txt"
+        "${File.separator}${BptSettings.currentUser}${File.separator}BPTrending_calibration_data.txt"
     )
 
 
@@ -28,7 +28,7 @@ const val NUMBER_OF_CALIBRATION_DATA_IN_CALIBRATION_RESULT = 2
 
 fun saveHistoryData(historyData: BptHistoryData) {
     if (!HISTORY_FILE.exists()) {
-        HISTORY_FILE.parentFile.mkdirs()
+        HISTORY_FILE.parentFile?.mkdirs()
         HISTORY_FILE.createNewFile()
         HISTORY_FILE.appendText(BptHistoryData.CSV_HEADER_ARRAY.joinToString(",") + "\n")
     }
@@ -65,7 +65,7 @@ fun readHistoryData(): List<BptHistoryData> {
 
 fun saveCalibrationData(vararg calibrations: BptCalibrationData){
     if (!CALIBRATION_FILE.exists()) {
-        CALIBRATION_FILE.parentFile.mkdirs()
+        CALIBRATION_FILE.parentFile?.mkdirs()
         CALIBRATION_FILE.createNewFile()
     }
     for(calibration in calibrations){

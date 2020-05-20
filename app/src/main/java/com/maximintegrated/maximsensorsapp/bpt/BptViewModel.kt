@@ -35,7 +35,7 @@ private const val CALIBRATION_TIMEOUT_IN_SEC = 10
 class BptViewModel(private val app: Application) : AndroidViewModel(app) {
 
     companion object {
-        val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp/BP Trending")
+        val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp${File.separator}BP Trending")
     }
 
     private val _userList = MutableLiveData<MutableList<String>>(arrayListOf())
@@ -75,7 +75,7 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     private fun readSpO2ConfigFile(){
-        val file = File(OUTPUT_DIRECTORY, "/SPO2.conf")
+        val file = File(OUTPUT_DIRECTORY, "${File.separator}SPO2.conf")
         if(!file.exists()){
             OUTPUT_DIRECTORY.mkdirs()
             file.createNewFile()

@@ -131,7 +131,7 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
         val timestamp = HspBptStreamData.TIMESTAMP_FORMAT.format(Date())
         val file = File(
             BptViewModel.OUTPUT_DIRECTORY,
-            "/${BptSettings.currentUser}/BPTrending_${timestamp}_estimation.csv"
+            "${File.separator}${BptSettings.currentUser}${File.separator}BPTrending_${timestamp}_estimation.csv"
         )
         csvWriter = CsvWriter.open(file.absolutePath, HspBptStreamData.CSV_HEADER_ARRAY)
     }

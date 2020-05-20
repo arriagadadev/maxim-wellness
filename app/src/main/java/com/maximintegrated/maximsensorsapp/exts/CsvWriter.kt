@@ -33,7 +33,7 @@ class CsvWriter private constructor(var filePath: String) {
     init {
         ioThread {
             val file = File(filePath)
-            file.parentFile.mkdirs()
+            file.parentFile?.mkdirs()
 
             file.printWriter().use { out ->
                 var count = 0

@@ -158,7 +158,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
 
         val oneHzFile = File(
             DataRecorder.OUTPUT_DIRECTORY,
-            "/1Hz/${file.nameWithoutExtension}_1Hz.csv"
+            "${File.separator}1Hz${File.separator}${file.nameWithoutExtension}_1Hz.csv"
         )
 
         var sleepFound = false
