@@ -35,6 +35,8 @@ class DataRecorder(var type: String) {
 
     var dataRecorderListener: DataRecorderListener? = null
 
+    var packetLossOccurred = false
+
     init {
         csvWriter = CsvWriter.open(
             getCsvFilePath(type),
@@ -128,9 +130,9 @@ class DataRecorder(var type: String) {
         csvWriter1Hz.listener = oneHzListener
         referenceDevice.listener = referenceListener
         try {
-            csvWriter.close()
-            csvWriter1Hz.close()
-            referenceDevice.close()
+            csvWriter.close(packetLossOccurred)
+            csvWriter1Hz.close(packetLossOccurred)
+            referenceDevice.close(packetLossOccurred)
         } catch (e: Exception) {
             Timber.tag(DataRecorder::class.java.simpleName).e(e.message.toString())
         }

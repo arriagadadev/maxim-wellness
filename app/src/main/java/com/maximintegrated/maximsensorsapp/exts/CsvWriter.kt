@@ -30,6 +30,8 @@ class CsvWriter private constructor(var filePath: String) {
 
     private var delete = false
 
+    private var packetLossOccurred = false
+
     init {
         ioThread {
             val file = File(filePath)
@@ -56,6 +58,10 @@ class CsvWriter private constructor(var filePath: String) {
                 if ((count == 1 && !flushed) || delete) {
                     listener?.onCompleted(false)
                     file.delete()
+                }else if(packetLossOccurred){
+                    listener?.onCompleted(false)
+                    val renamedFile = File(file.parentFile, File.separator + file.nameWithoutExtension + "!!!." + file.extension)
+                    file.renameTo(renamedFile)
                 }else{
                     listener?.onCompleted(true)
                 }
@@ -72,7 +78,8 @@ class CsvWriter private constructor(var filePath: String) {
         }
     }
 
-    fun close() {
+    fun close(packetLossOccurred: Boolean = false) {
+        this.packetLossOccurred = packetLossOccurred
         if (isOpen) {
             isOpen = false
             linesQueue.offer(POISON_PILL)

@@ -212,6 +212,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     private var shouldShowDataLossError = false
         set(value) {
             field = value
+            dataRecorder?.packetLossOccurred = value
             if (value) {
                 if (view == null) {
                     return
@@ -239,7 +240,7 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
             }
             if (previousData != null) {
                 val sampleCount = expectingSampleCount
-                val sampleTime = ((data.sampleTime + previousData!!.sampleTime) / 2)
+                val sampleTime = ((data.sampleTime.toLong() + previousData!!.sampleTime.toLong()) / 2).toInt()
                 val green = (data.green + previousData!!.green) / 2
                 val green2 = (data.green2 + previousData!!.green2) / 2
                 val ir = (data.ir + previousData!!.ir) / 2
