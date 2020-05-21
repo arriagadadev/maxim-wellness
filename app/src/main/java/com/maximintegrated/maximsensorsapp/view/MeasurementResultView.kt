@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.view
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -10,6 +11,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.card.MaterialCardView
 import com.maximintegrated.maximsensorsapp.R
 import kotlinx.android.synthetic.main.view_measurement_result.view.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class MeasurementResultView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -30,6 +32,12 @@ class MeasurementResultView @JvmOverloads constructor(
     var isMeasuring: Boolean = false
         set(value) {
             field = value
+            timerCount.set(0)
+            if(value){
+                handler.postDelayed(tickRunnable, 1000)
+            }else{
+                handler.removeCallbacks(tickRunnable)
+            }
             updateViewVisibilities()
         }
 
@@ -48,6 +56,7 @@ class MeasurementResultView @JvmOverloads constructor(
     var result: Int? = null
         set(value) {
             field = value
+            timerCount.set(0)
             updateResultText()
             updateViewVisibilities()
             flashResultView(flash)
@@ -58,6 +67,36 @@ class MeasurementResultView @JvmOverloads constructor(
     var alphaAnimation: Animation
 
     var showProgressTogetherWithResult = false
+
+    var confidence: Int = 100
+        set(value){
+            field = value
+            if(value > 0){
+                resultView.setTextColor(defaultResultViewTextColor)
+            }else{
+                resultView.setTextColor(Color.RED)
+            }
+        }
+
+    private var defaultResultViewTextColor = 0
+
+    private val obsoleteThresholdInSeconds =  10
+
+    private var timerCount = AtomicInteger(0)
+
+    private val tickRunnable = object : Runnable {
+        override fun run() {
+            if (isMeasuring) {
+                if(timerCount.incrementAndGet() >= obsoleteThresholdInSeconds){
+                    resultView.text = "--"
+                }
+                handler.postDelayed(this, 1000)
+            }else{
+                timerCount.set(0)
+                handler.removeCallbacks(this)
+            }
+        }
+    }
 
     init {
         inflate(context, R.layout.view_measurement_result, this)
@@ -81,6 +120,7 @@ class MeasurementResultView @JvmOverloads constructor(
         alphaAnimation.startOffset = 0
         alphaAnimation.repeatMode = Animation.RESTART
         alphaAnimation.repeatCount = 0
+        defaultResultViewTextColor = resultView.currentTextColor
     }
 
     private fun showAsReadyToMeasure() {
@@ -89,6 +129,7 @@ class MeasurementResultView @JvmOverloads constructor(
         timeoutGroup.isVisible = false
 
         readyToStartMessageView.isVisible = true
+        confidence = 100
     }
 
     private fun showAsMeasuringIndeterminate() {
@@ -120,7 +161,14 @@ class MeasurementResultView @JvmOverloads constructor(
 
     private fun showResult() {
         readyToStartMessageView.isVisible = false
-        measuringGroup.isVisible = showProgressTogetherWithResult && measurementProgress != 100
+        val visibility = showProgressTogetherWithResult && measurementProgress != 100
+        if(visibility){
+            measuringCircleView.stopSpinning()
+            measuringCircleView.setValue(measurementProgress.toFloat())
+            measuringGroup.isVisible = true
+        }else{
+            measuringGroup.isVisible = false
+        }
         timeoutGroup.isVisible = false
 
         resultView.isVisible = true

@@ -78,16 +78,40 @@
             app:mrv_unit="%"
             app:mrv_enable_flash="true"/>
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/signalQuality"
+            app:layout_constraintBottom_toBottomOf="@id/signalQuality"
+            android:layout_marginStart="5dp"
+            android:src="@drawable/ic_info"
+            android:tint="@color/color_primary"
+            android:id="@+id/signalQualityInfoButton"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/motion"
+            app:layout_constraintBottom_toBottomOf="@id/motion"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/ic_info"
+            android:tint="@color/color_primary"
+            android:id="@+id/motionInfoButton"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
         <TextView
-            android:id="@+id/lowSnr"
+            android:id="@+id/signalQuality"
             android:layout_width="0dp"
             android:layout_height="30dp"
             android:layout_margin="5dp"
             android:background="@drawable/rectangle"
             android:gravity="center"
-            android:text="@string/snr"
+            android:text="@string/signalQuality"
             app:layout_constraintEnd_toStartOf="@id/motion"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/signalQualityInfoButton"
             app:layout_constraintTop_toBottomOf="@id/spo2ResultView" />
 
         <TextView
@@ -98,36 +122,9 @@
             android:background="@drawable/rectangle"
             android:gravity="center"
             android:text="@string/motion"
-            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
-            app:layout_constraintEnd_toStartOf="@id/lowPi"
-            app:layout_constraintStart_toEndOf="@id/lowSnr"
-            app:layout_constraintTop_toTopOf="@id/lowSnr" />
-
-        <TextView
-            android:id="@+id/lowPi"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/rectangle"
-            android:gravity="center"
-            android:text="@string/pi"
-            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
-            app:layout_constraintEnd_toStartOf="@id/unreliableR"
-            app:layout_constraintStart_toEndOf="@id/motion"
-            app:layout_constraintTop_toTopOf="@id/lowSnr" />
-
-        <TextView
-            android:id="@+id/unreliableR"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/rectangle"
-            android:gravity="center"
-            android:text="@string/reliable_r"
-            app:layout_constraintBottom_toBottomOf="@id/lowSnr"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/lowPi"
-            app:layout_constraintTop_toTopOf="@id/lowSnr" />
+            app:layout_constraintEnd_toStartOf="@id/motionInfoButton"
+            app:layout_constraintStart_toEndOf="@id/signalQuality"
+            app:layout_constraintTop_toBottomOf="@id/spo2ResultView" />
 
         <com.maximintegrated.maximsensorsapp.view.MeasurementResultView
             android:id="@+id/hrResultView"
@@ -136,7 +133,7 @@
             android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/unreliableR"
+            app:layout_constraintTop_toBottomOf="@id/signalQuality"
             app:mrv_title="HR"
             app:mrv_unit="bpm"
             app:mrv_enable_flash="false"/>

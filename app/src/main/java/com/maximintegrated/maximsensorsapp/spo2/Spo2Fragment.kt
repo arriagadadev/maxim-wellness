@@ -31,6 +31,7 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     companion object {
         fun newInstance() = Spo2Fragment()
+        const val STATUS_COMPLETED = 2
         const val STATUS_TIMEOUT = 3
     }
 
@@ -86,6 +87,26 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
         setupChart()
         setupToolbar(getString(R.string.spo2))
+
+        signalQualityInfoButton.setOnClickListener {
+            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            alertDialog.setTitle(getString(R.string.signalQuality))
+            alertDialog.setMessage(getString(R.string.signal_quality_warning))
+                .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+                    dialog.dismiss()
+                }
+            alertDialog.show()
+        }
+
+        motionInfoButton.setOnClickListener {
+            val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            alertDialog.setTitle(getString(R.string.motion))
+            alertDialog.setMessage(getString(R.string.motion_warning))
+                .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+                    dialog.dismiss()
+                }
+            alertDialog.show()
+        }
     }
 
     private fun setupChart() {
@@ -232,8 +253,8 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         renderHrmModel(streamData)
 
         when (streamData.wspo2LowSnr) {
-            1 -> lowSnr.background.setTint(Color.RED)
-            else -> lowSnr.background.setTint(Color.GREEN)
+            1 -> signalQuality.background.setTint(Color.RED)
+            else -> signalQuality.background.setTint(Color.GREEN)
         }
 
         when (streamData.wspo2Motion) {
@@ -241,15 +262,15 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             else -> motion.background.setTint(Color.GREEN)
         }
 
-        when (streamData.wspo2LowPi) {
-            1 -> lowPi.background.setTint(Color.RED)
-            else -> lowPi.background.setTint(Color.GREEN)
-        }
-
-        when (streamData.wspo2UnreliableR) {
-            1 -> unreliableR.background.setTint(Color.RED)
-            else -> unreliableR.background.setTint(Color.GREEN)
-        }
+//        when (streamData.wspo2LowPi) {
+//            1 -> lowPi.background.setTint(Color.RED)
+//            else -> lowPi.background.setTint(Color.GREEN)
+//        }
+//
+//        when (streamData.wspo2UnreliableR) {
+//            1 -> unreliableR.background.setTint(Color.RED)
+//            else -> unreliableR.background.setTint(Color.GREEN)
+//        }
 
         rResult = streamData.r
     }
@@ -261,9 +282,10 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
         val percentage = model.wspo2PercentageComplete and 0x7F
 
         spo2ResultView.measurementProgress = percentage
+        spo2ResultView.confidence = model.wspo2Confidence
 
         if (algorithmModeOneShotRadioButton.isChecked) {
-            if(percentage == 100){
+            if(model.wspo2State == STATUS_COMPLETED){
                 spo2ResultView.result = model.spo2.roundToInt()
                 stopMonitoring()
             }else{
@@ -272,7 +294,9 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
                 }
             }
         }else{
-            spo2ResultView.result = model.spo2.roundToInt()
+            if(spo2Calculated){
+                spo2ResultView.result = model.spo2.roundToInt()
+            }
         }
 
         if (model.wspo2State == STATUS_TIMEOUT) {
