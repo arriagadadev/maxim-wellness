@@ -9,6 +9,6 @@ class MaximSensorsApp : Application(){
     override fun onCreate() {
         super.onCreate()
         Kotpref.init(this)
-        UCEHandler.Builder(applicationContext).addCommaSeparatedEmailAddresses("mlkshckr@gmail.com").build()
+        UCEHandler.Builder(applicationContext).build()
     }
 }

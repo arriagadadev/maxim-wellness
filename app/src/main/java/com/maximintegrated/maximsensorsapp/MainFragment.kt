@@ -1,12 +1,9 @@
 package com.maximintegrated.maximsensorsapp
 
-import android.content.ComponentName
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -19,6 +16,7 @@ import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.hrv.HrvFragment
 import com.maximintegrated.maximsensorsapp.log_parser.LogParserFragment
 import com.maximintegrated.maximsensorsapp.respiratory.RespiratoryFragment
+import com.maximintegrated.maximsensorsapp.sleep.SleepFragment
 import com.maximintegrated.maximsensorsapp.spo2.Spo2Fragment
 import com.maximintegrated.maximsensorsapp.sports_coaching.SportsCoachingFragment
 import com.maximintegrated.maximsensorsapp.stress.StressFragment
@@ -127,20 +125,7 @@ class MainFragment : Fragment(), LandingPage {
         }
 
         sleepMenuItemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.component =
-                ComponentName("maximintegrated.com", "maximintegrated.com.MainActivity")
-            try {
-                startActivity(intent)
-            } catch (ignore: Exception) {
-                if (context != null) {
-                    Toast.makeText(
-                        context!!,
-                        "Sleep Quality Assessment does not exist",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+            requireActivity().addFragment(SleepFragment.newInstance())
         }
 
         stressMenuItemView.setOnClickListener {

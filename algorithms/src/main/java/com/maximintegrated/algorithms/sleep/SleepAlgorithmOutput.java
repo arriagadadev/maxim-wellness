@@ -23,6 +23,10 @@ public class SleepAlgorithmOutput {
         SleepWakeDecision(int value) {
             this.value = value;
         }
+
+        public int getValue() {
+            return value;
+        }
     }
 
     public enum SleepPhaseOutputStatus {
@@ -46,6 +50,10 @@ public class SleepAlgorithmOutput {
 
         SleepPhaseOutput(int value) {
             this.value = value;
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 

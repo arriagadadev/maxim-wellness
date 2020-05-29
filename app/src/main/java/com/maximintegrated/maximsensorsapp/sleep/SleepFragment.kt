@@ -2,62 +2,41 @@ package com.maximintegrated.maximsensorsapp.sleep
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.observe
-import com.maximintegrated.bpt.hsp.HspViewModel
-import com.maximintegrated.maximsensorsapp.BleConnectionInfo
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.maximintegrated.maximsensorsapp.R
-import kotlinx.android.synthetic.main.include_app_bar.*
-import timber.log.Timber
+import com.maximintegrated.maximsensorsapp.exts.addFragment
+import com.maximintegrated.maximsensorsapp.sleep.adapters.PieChartAdapter
+import com.maximintegrated.maximsensorsapp.sleep.utils.ColorUtil
+import com.maximintegrated.maximsensorsapp.sleep.viewmodels.SourceAndAllSleepsViewModel
+import com.maximintegrated.maximsensorsapp.sleep.viewmodels.SourceViewModel
+import kotlinx.android.synthetic.main.include_sleep_fragment_content.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.math.round
 
-class SleepFragment : Fragment() {
+class SleepFragment : Fragment(),
+    PieChartAdapter.OnItemClickListener {
     companion object {
         fun newInstance() = SleepFragment()
     }
 
-    private lateinit var hspViewModel: HspViewModel
+    private lateinit var sourceAndAllSleepsViewModel: SourceAndAllSleepsViewModel
+    private lateinit var sourceViewModel: SourceViewModel
+    private val pieChartAdapter = PieChartAdapter()
 
-    private lateinit var menuItemStartMonitoring: MenuItem
-    private lateinit var menuItemStopMonitoring: MenuItem
-    private lateinit var menuItemLogToFile: MenuItem
-    private lateinit var menuItemLogToFlash: MenuItem
-    private lateinit var menuItemSettings: MenuItem
-
-    private var isMonitoring: Boolean = false
-        set(value) {
-            field = value
-            menuItemStopMonitoring.isVisible = value
-            menuItemStartMonitoring.isVisible = !value
-
-        }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        hspViewModel = ViewModelProviders.of(requireActivity()).get(HspViewModel::class.java)
-
-        hspViewModel.connectionState
-            .observe(this) { (device, connectionState) ->
-                toolbar.connectionInfo = if (hspViewModel.bluetoothDevice != null) {
-                    BleConnectionInfo(connectionState, device.name, device.address)
-                } else {
-                    null
-                }
-            }
-
-        hspViewModel.commandResponse
-            .observe(this) { hspResponse ->
-                Timber.d(hspResponse.toString())
-            }
-
-        hspViewModel.streamData
-            .observe(this) { hspStreamData ->
-                Timber.d(hspStreamData.toString())
-            }
-    }
+    private var dataAvailable = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,75 +46,91 @@ class SleepFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_sleep, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar()
-    }
+        sourceViewModel = ViewModelProviders.of(requireActivity()).get(SourceViewModel::class.java)
 
-    private fun setupToolbar() {
+        sourceViewModel.getSleepData()
 
-        toolbar.apply {
-            inflateMenu(R.menu.toolbar_menu)
-            menu.apply {
-                menuItemStartMonitoring = findItem(R.id.monitoring_start)
-                menuItemStopMonitoring = findItem(R.id.monitoring_stop)
-                menuItemLogToFile = findItem(R.id.log_to_file)
-                menuItemLogToFlash = findItem(R.id.log_to_flash)
-                menuItemSettings = findItem(R.id.hrm_settings)
-            }
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.monitoring_start -> startMonitoring()
-                    R.id.monitoring_stop -> stopMonitoring()
-                    R.id.log_to_file -> dataLoggingToggled()
-                    R.id.log_to_flash -> flashLoggingToggled()
-                    R.id.hrm_settings -> showSettingsDialog()
-                    else -> return@setOnMenuItemClickListener false
+        sourceAndAllSleepsViewModel =
+            ViewModelProviders.of(requireActivity()).get(SourceAndAllSleepsViewModel::class.java)
+
+        sourceAndAllSleepsViewModel.sourceWithSleepsList.observe(this, Observer { t ->
+
+            if (t != null) {
+                val result: ArrayList<SleepDataModel> = arrayListOf()
+                for (data in t) {
+                    val sleepDataModel = SleepDataModel.parseSleepList(data)
+                    if(sleepDataModel != null){
+                        result.add(sleepDataModel)
+                    }
                 }
-                return@setOnMenuItemClickListener true
+
+                val temp = result.sortedBy { it.date }.reversed().take(7)
+                val barChartEntryList = temp.map {
+                    BarEntry(
+                        temp.indexOf(it).toFloat(),
+                        getFormattedHour(it.totalCount.toFloat())
+                    )
+                }
+                val barSet = BarDataSet(barChartEntryList, "")
+                barSet.color = ColorUtil.COLOR_REM
+
+                val dataSets = ArrayList<IBarDataSet>()
+                dataSets.add(barSet)
+                val barData = BarData(barSet)
+                barData.setDrawValues(false)
+                weeklyChart.data = barData
+                barData.barWidth = 0.9f
+                val xAxis = weeklyChart.xAxis
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.setDrawGridLines(false)
+                xAxis.granularity = 1f
+                xAxis.labelCount = 7
+
+                xAxis.setDrawLabels(true)
+                val sdf = SimpleDateFormat("dd MMM", Locale.US)
+                val list =
+                    result.sortedBy { it.date }.reversed().take(7).map { sdf.format(it.date) }
+                        .toTypedArray()
+                xAxis.valueFormatter = DateAxisValueFormatter(list)
+
+                weeklyChart.axisRight.isEnabled = false
+                weeklyChart.legend.isEnabled = false
+                weeklyChart.description.isEnabled = false
+                val axisLeft = weeklyChart.axisLeft
+                axisLeft.valueFormatter = HourValueFormatter()
+                axisLeft.axisMinimum = 0f
+                axisLeft.axisMaximum = 15f
+                axisLeft.labelCount = 3
+                axisLeft.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART)
+                axisLeft.yOffset = -5f
+
+                weeklyChart.notifyDataSetChanged()
+                weeklyChart.invalidate()
+                val ascOrder = result.sortedBy { it.date }.reversed()
+
+                pieChartAdapter.dataSet = ascOrder
+                dataAvailable = ascOrder.isNotEmpty()
+                sleepProgressBar.isVisible = false
+                dataAvailableGroup.isVisible = ascOrder.isNotEmpty()
+                dataNotAvailableGroup.isVisible = ascOrder.isEmpty()
             }
-            setNavigationOnClickListener {
-                onBackPressed()
-            }
-            setTitle(R.string.sleep_quality)
-        }
+        })
 
-        toolbar.pageTitle = requireContext().getString(R.string.sleep_quality)
-
+        pieChartAdapter.setOnItemClickListener(this)
+        rvSleepData.adapter = pieChartAdapter
     }
 
-    private fun startMonitoring() {
-        isMonitoring = true
-
-        hspViewModel.isDeviceSupported
-            .observe(this) {
-                hspViewModel.startStreaming()
-            }
+    override fun onItemClick(model: SleepDataModel) {
+        requireActivity().addFragment(SleepDetailsFragment.newInstance(model))
     }
 
-    private fun stopMonitoring() {
-        isMonitoring = false
-
-        hspViewModel.stopStreaming()
-    }
-
-    private fun dataLoggingToggled() {
-
-    }
-
-    private fun flashLoggingToggled() {
-
-    }
-
-    private fun showSettingsDialog() {
-
-    }
-
-    private fun onBackPressed() {
-
+    private fun getFormattedHour(time: Float): Float {
+        var hours = (time / 60).toInt()
+        val minutes = (hours % 60) / 60.0
+        hours /= 60
+        val res = hours.toDouble() + minutes
+        return (round(res * 100) / 100).toFloat()
     }
 }

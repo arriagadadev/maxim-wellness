@@ -25,4 +25,9 @@
     <color name="chipChecked">#00B2A9</color>
     <color name="chipUnchecked">#E0E0E0</color>
 
+    <color name="color_deep">#FFC220</color>
+    <color name="color_light">#6E2585</color>
+    <color name="color_rem">#9EC3DE</color>
+    <color name="color_wake">#F15C22</color>
+
 </resources>

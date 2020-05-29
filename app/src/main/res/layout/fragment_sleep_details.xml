@@ -7,6 +7,6 @@
     android:focusable="true"
     android:orientation="vertical">
 
-    <include layout="@layout/include_sleep_fragment_content" />
+    <include layout="@layout/include_sleep_details_fragment_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

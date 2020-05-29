@@ -18,6 +18,8 @@ import com.maximintegrated.algorithms.sleep.SleepUserInfo
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.exts.addFragment
+import com.maximintegrated.maximsensorsapp.sleep.database.entity.Sleep
+import com.maximintegrated.maximsensorsapp.sleep.utils.postProcessing
 import de.siegmar.fastcsv.reader.CsvReader
 import de.siegmar.fastcsv.reader.CsvRow
 import kotlinx.android.synthetic.main.fragment_archive.*
@@ -35,7 +37,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
 
     var algorithmInitConfig = AlgorithmInitConfig()
 
-    var algoResult = false
+    private var algorithmResult = false
 
     companion object {
         private val OUTPUT_DIRECTORY =
@@ -53,13 +55,16 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
             "hr",
             "ibi",
             "spo2",
-            "acc_magnitude"
+            "acc_magnitude",
+            "phase_output_processed"
         )
 
         fun newInstance() = ArchiveFragment()
     }
 
     private val adapter: FileListAdapter by lazy { FileListAdapter(this) }
+    private val algorithmOutput = AlgorithmOutput()
+    private var sleepList: ArrayList<Sleep> = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -130,7 +135,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
     override fun onSleepClicked(file: File) {
         progressBar.visibility = View.VISIBLE
         doAsync {
-            algoResult = runSleepAlgo(file)
+            algorithmResult = runSleepAlgorithm(file)
         }
     }
 
@@ -153,8 +158,8 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         alertDialog.show()
     }
 
-    private fun runSleepAlgo(file: File): Boolean {
-        val outputDirectory = OUTPUT_DIRECTORY
+    private fun runSleepAlgorithm(file: File): Boolean {
+        sleepList.clear()
 
         val oneHzFile = File(
             DataRecorder.OUTPUT_DIRECTORY,
@@ -163,14 +168,11 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
 
         var sleepFound = false
 
-        if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs()
+        if (!OUTPUT_DIRECTORY.exists()) {
+            OUTPUT_DIRECTORY.mkdirs()
         }
 
-        val outputFile = File(outputDirectory, file.name)
-        val csvWriter = CsvWriter.open(outputFile.absolutePath)
-        csvWriter.listener = this
-        val output = AlgorithmOutput()
+        val outputFile = File(OUTPUT_DIRECTORY, file.name)
 
         var hrSum = 0
         var hrCount = 0
@@ -198,18 +200,18 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
                 if (hrCount != 0) {
                     restingHr = hrSum * 1f / hrCount
                 }
-                initSleepAlgo(restingHr)
+                initSleepAlgorithm(restingHr)
 
                 parser = reader.parse(file, StandardCharsets.UTF_8)
                 row = parser.nextRow()
                 while (row != null) {
                     val input = csvRowToAlgorithmInput(row)
-                    sleepFound = runSleepAlgo(input, output, sleepFound, csvWriter)
+                    sleepFound = runSleepAlgorithm(input, sleepFound)
                     row = parser.nextRow()
                 }
 
             } catch (e: Exception) {
-
+                e.printStackTrace()
             }
         } else if (file.exists()) {
 
@@ -217,26 +219,45 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
 
             restingHr = inputs.filter { it.hr != 0 }.map { it.hr }.average().toFloat()
 
-            initSleepAlgo(restingHr)
+            initSleepAlgorithm(restingHr)
 
             for (input in inputs) {
-                sleepFound = runSleepAlgo(input, output, sleepFound, csvWriter)
+                sleepFound = runSleepAlgorithm(input, sleepFound)
             }
             inputs.clear()
         }
 
         MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
 
-        csvWriter.close()
+        if(sleepList.isNotEmpty() && sleepFound){
+            postProcessing(sleepList)
+            val csvWriter = CsvWriter.open(outputFile.absolutePath)
+            csvWriter.listener = this
 
-        if (!sleepFound && outputFile.exists()) {
-            outputFile.delete()
+            for(sleep in sleepList){
+                csvWriter.write(
+                    SLEEP_TIMESTAMP_FORMAT.format(sleep.date),
+                    sleep.isSleep,
+                    sleep.latency,
+                    sleep.sleepWakeOutput,
+                    sleep.sleepPhasesReady,
+                    sleep.sleepPhasesOutput,
+                    sleep.hr,
+                    sleep.ibi,
+                    0,
+                    sleep.accMag,
+                    sleep.sleepPhasesOutputProcessed
+                )
+            }
+            csvWriter.close()
+        }else{
+            onCompleted(false)
         }
 
         return sleepFound
     }
 
-    private fun initSleepAlgo(restingHr: Float) {
+    private fun initSleepAlgorithm(restingHr: Float) {
         val userInfo = SleepUserInfo(20, 70, SleepUserInfo.Gender.MALE, restingHr)
 
         algorithmInitConfig.sleepConfig = SleepAlgorithmInitConfig(
@@ -252,57 +273,53 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         MaximAlgorithms.init(algorithmInitConfig)
     }
 
-    private fun runSleepAlgo(
-        input: AlgorithmInput?,
-        output: AlgorithmOutput,
-        sleepFound: Boolean,
-        writer: CsvWriter
-    ): Boolean {
+    private fun runSleepAlgorithm(input: AlgorithmInput?, sleepFound: Boolean): Boolean {
         var sleepState = sleepFound
         if (input != null) {
-            val status = MaximAlgorithms.run(input, output)
+            val status = MaximAlgorithms.run(input, algorithmOutput)
             //TODO: check the sample code for this
             if (status) {
-                if (output.sleep.outputDataArrayLength > 0) {
-                    if (output.sleep.output.sleepWakeDetentionLatency >= 0) {
-                        sleepState = true
-                    } else {
-                        output.sleep.output.sleepWakeDetentionLatency = -1
+                with(algorithmOutput.sleep) {
+                    if (outputDataArrayLength > 0) {
+                        if (output.sleepWakeDetentionLatency >= 0) {
+                            sleepState = true
+                        } else {
+                            output.sleepWakeDetentionLatency = -1
+                        }
+                        val sleep = Sleep(
+                            id = 0,
+                            sourceId = 0,
+                            date = Date(dateInfo),
+                            isSleep = output.sleepWakeDecisionStatus,
+                            latency = output.sleepWakeDetentionLatency,
+                            sleepWakeOutput = output.sleepWakeDecision,
+                            sleepPhasesReady = output.sleepPhaseOutputStatus,
+                            sleepPhasesOutput = output.sleepPhaseOutput,
+                            hr = output.hr.toDouble(),
+                            ibi = output.ibi.toDouble(),
+                            spo2 = 0,
+                            accMag = output.accMag.toDouble(),
+                            sleepPhasesOutputProcessed = 0
+                        )
+                        sleepList.add(sleep)
                     }
-                    recordSleepData(writer, output)
                 }
+
             }
         }
         return sleepState
     }
 
-    private fun recordSleepData(csvWriter: CsvWriter, output: AlgorithmOutput) {
-        csvWriter.write(
-            SLEEP_TIMESTAMP_FORMAT.format(Date(output.sleep.dateInfo)),
-            output.sleep.output.sleepWakeDecisionStatus,
-            output.sleep.output.sleepWakeDetentionLatency,
-            output.sleep.output.sleepWakeDecision,
-            output.sleep.output.sleepPhaseOutputStatus,
-            output.sleep.output.sleepPhaseOutput,
-            output.sleep.output.hr,
-            output.sleep.output.ibi,
-            0,
-            output.sleep.output.accMag
-        )
-    }
-
-    private fun showSleepAlgoResultDialog(success: Boolean) {
-        val message: String
-
-        if (success) {
-            message = "Algorithm finished successfully"
+    private fun showSleepAlgorithmResultDialog(success: Boolean) {
+        val message =  if (success) {
+            getString(R.string.algorithm_finished_successfully)
         } else {
-            message = "Algorithm did not found a sleep state in the given data"
+            getString(R.string.algorithm_not_found_sleep_state)
         }
         val alertDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-        alertDialog.setTitle("Sleep Algorithm Result")
+        alertDialog.setTitle(getString(R.string.sleep_algorithm_result))
         alertDialog.setMessage(message)
-            .setPositiveButton("OK") { dialog, which ->
+            .setPositiveButton(getString(R.string.ok)) { dialog, which ->
                 dialog.dismiss()
             }
 
@@ -313,7 +330,7 @@ class ArchiveFragment : RecyclerViewClickListener, Fragment(),
         doAsync {
             uiThread {
                 progressBar.visibility = View.GONE
-                showSleepAlgoResultDialog(algoResult)
+                showSleepAlgorithmResultDialog(algorithmResult)
             }
         }
     }

@@ -349,4 +349,18 @@
     <string name="multiple_connection_warning">Connecting to multiple BLE devices may result in data packet loss. Please ensure that a proper mobile device is used for evaluation.</string>
     <string name="signal_quality_warning">Adjust your watch for better signal if the signal quality is displayed as red.</string>
     <string name="motion_warning">You should stay still if the motion is displayed as red.</string>
+    <string name="details">Details</string>
+    <string name="no_data_available">No data available.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="wake">Wake</string>
+    <string name="rem">REM</string>
+    <string name="deep">Deep</string>
+    <string name="total_sleep_time">Total Sleep Time</string>
+    <string name="bed_time">Bed Time</string>
+    <string name="wake_time">Wake Time</string>
+    <string name="algorithm_finished_successfully">Algorithm finished successfully</string>
+    <string name="algorithm_not_found_sleep_state">Algorithm did not found a sleep state in the given data</string>
+    <string name="sleep_algorithm_result">Sleep Algorithm Result</string>
 </resources>
