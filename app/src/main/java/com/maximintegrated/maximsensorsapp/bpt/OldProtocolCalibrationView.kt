@@ -1,6 +1,7 @@
 package com.maximintegrated.maximsensorsapp.bpt
 
 import android.content.Context
+import android.os.Handler
 import android.text.Editable
 import android.util.AttributeSet
 import android.view.View
@@ -41,6 +42,7 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
                     confirmCheckBox1.isEnabled = false
                     confirmCheckBox2.isEnabled = false
                     confirmCheckBox3.isEnabled = false
+                    myHandler.removeCallbacks(tickRunnable)
                 }
                 CalibrationStatus.PROCESSING -> {
                     progressBar.isVisible = true
@@ -124,6 +126,8 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
 
     private val order = LinkedList<Int>()
 
+    private val myHandler = Handler()
+
     private fun updateCalibrationViews() {
         when (referenceMeasurementState) {
             1 -> {
@@ -155,7 +159,7 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
         override fun run() {
             if (counter != 0) {
                 counter--
-                handler.postDelayed(this, 1000)
+                myHandler.postDelayed(this, 1000)
             }
             if (counter == 0) {
                 when (referenceMeasurementState) {
@@ -175,7 +179,7 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
                         timerTextView3.isInvisible = true
                     }
                 }
-                handler.removeCallbacks(this)
+                myHandler.removeCallbacks(this)
             }
             when (referenceMeasurementState) {
                 1 -> {
@@ -231,9 +235,9 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             repeatButton.isEnabled = enableButton
             if (referenceMeasurementState == 2) {
                 if (order.isNotEmpty()) {
-                    handler.removeCallbacks(tickRunnable)
+                    myHandler.removeCallbacks(tickRunnable)
                     counter = WAITING_TIME_FOR_NEW_REFERENCE_DATA_IN_SEC
-                    handler.postDelayed(tickRunnable, 1000)
+                    myHandler.postDelayed(tickRunnable, 1000)
                     referenceMeasurementState = order.removeFirst()
                 } else {
                     referenceMeasurementState = 0
@@ -248,9 +252,9 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             repeatButton.isEnabled = enableButton
             if (referenceMeasurementState == 3) {
                 if (order.isNotEmpty()) {
-                    handler.removeCallbacks(tickRunnable)
+                    myHandler.removeCallbacks(tickRunnable)
                     counter = WAITING_TIME_FOR_NEW_REFERENCE_DATA_IN_SEC
-                    handler.postDelayed(tickRunnable, 1000)
+                    myHandler.postDelayed(tickRunnable, 1000)
                     referenceMeasurementState = order.removeFirst()
                 } else {
                     referenceMeasurementState = 0

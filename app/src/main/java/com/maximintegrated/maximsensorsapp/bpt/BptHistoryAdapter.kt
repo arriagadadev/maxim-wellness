@@ -1,16 +1,16 @@
 package com.maximintegrated.maximsensorsapp.bpt
 
-import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.maximintegrated.bpt.hsp.HspBptStreamData
 import com.maximintegrated.maximsensorsapp.R
-import com.maximintegrated.maximsensorsapp.exts.getHtmlSpannedString
 import kotlinx.android.synthetic.main.bpt_history_item.view.*
 import java.util.*
 
@@ -38,16 +38,37 @@ class BptHistoryAdapter :
     ) {
         private val dateTextView: TextView by lazy { itemView.historyDateTextView }
         private val typeTextView: TextView by lazy { itemView.historyTypeTextView }
-        private val sbpDbpTextView: TextView by lazy { itemView.historySbpDbpTextView }
+        private val measurementTextView: TextView by lazy { itemView.historyMeasurementTextView }
+        private val calibrationTextView: TextView by lazy { itemView.historyCalibrationRefTextView }
         private val hrSpo2TextView: TextView by lazy { itemView.historyHrSpo2TextView }
 
         fun bind(item: BptHistoryData) {
             dateTextView.text = HspBptStreamData.TIMESTAMP_FORMAT.format(Date(item.timestamp))
             typeTextView.text =
                 parent.context.getString(if (item.isCalibration) R.string.calibration else R.string.measurement)
-            sbpDbpTextView.text = parent.context.getString(R.string.sbp_dbp_format, item.sbp, item.dbp)
-            val spannedText = SpannableStringBuilder().bold { append() }
-            hrSpo2TextView.setText(parent.context.getHtmlSpannedString(R.string.hr_spo2_format, item.hr, item.spo2))
+            if (item.isCalibration) {
+                calibrationTextView.isInvisible = false
+                measurementTextView.isInvisible = true
+                calibrationTextView.text = buildSpannedString {
+                    bold { append("Ref 1: ") }
+                    append("${item.sbp1} / ${item.dbp1}\n")
+                    bold { append("Ref 2: ") }
+                    append("${item.sbp2} / ${item.dbp2}\n")
+                    bold { append("Ref 3: ") }
+                    append("${item.sbp3} / ${item.dbp3}")
+                }
+            } else {
+                calibrationTextView.isInvisible = true
+                measurementTextView.isInvisible = false
+                measurementTextView.text =
+                    parent.context.getString(R.string.sbp_dbp_format, item.sbp1, item.dbp1)
+            }
+            hrSpo2TextView.text = buildSpannedString {
+                bold { append("HR: ") }
+                append("${item.hr} bpm  ")
+                bold { append("SpO2: ") }
+                append("${item.spo2} %")
+            }
         }
     }
 

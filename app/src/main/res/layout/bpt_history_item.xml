@@ -50,24 +50,36 @@
             tools:text="110 / 70"
             android:textSize="30sp"
             android:textAlignment="center"
-            android:id="@+id/historySbpDbpTextView"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/historyMeasurementTextView"
+            app:layout_constraintBottom_toBottomOf="@id/historyCalibrationRefTextView"
+            app:layout_constraintTop_toTopOf="@id/historyCalibrationRefTextView"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"/>
+            android:visibility="invisible"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="@id/historySbpDbpTextView"
-            app:layout_constraintTop_toBottomOf="@id/historySbpDbpTextView"
+            android:textSize="16sp"
+            android:textAlignment="textStart"
+            android:id="@+id/historyCalibrationRefTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="10dp"
+            app:layout_constraintHeight_min="50dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/historyMeasurementTextView"
+            app:layout_constraintTop_toBottomOf="@id/historyCalibrationRefTextView"
             app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/historyHrSpo2TextView"
             tools:text="@string/hr_spo2_format"
             app:layout_constraintVertical_bias="1"
             android:layout_marginBottom="4dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="5dp"
             android:textSize="12sp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

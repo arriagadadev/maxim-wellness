@@ -69,9 +69,6 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private var calibrationTimePassed = AtomicInteger(-1)
 
-    var refSbp = 0
-    var refDbp = 0
-
     init {
         prepareUserList()
         // read SpO2 config file
@@ -160,14 +157,12 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun startDataCollection(index: Int, refSbp: Int, refDbp: Int) {
+    fun startDataCollection(index: Int) {
         if (!_isMonitoring.value!!) {
             val state = Pair(index, CalibrationStatus.STARTED)
             _calibrationStates.value = state
             _isMonitoring.value = true
             startTimer()
-            this.refSbp = refSbp
-            this.refDbp = refDbp
         }
     }
 

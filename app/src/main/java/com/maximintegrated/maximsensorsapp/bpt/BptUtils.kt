@@ -47,13 +47,23 @@ fun readHistoryData(): List<BptHistoryData> {
         var row: CsvRow? = parser.nextRow()
         while (row != null) {
             val timestamp = row.getField(0).toLongOrZero()
-            val sbp = row.getField(1).toIntOrZero()
-            val dbp = row.getField(2).toIntOrZero()
+            val sbp1 = row.getField(1).toIntOrZero()
+            val dbp1 = row.getField(2).toIntOrZero()
             val hr = row.getField(3).toIntOrZero()
             val spo2 = row.getField(4).toIntOrZero()
             val pulseFlag = row.getField(5).toIntOrZero()
             val isCalibration = row.getField(6) == "Calibration"
-            val data = BptHistoryData(timestamp, isCalibration, sbp, dbp, hr, spo2, pulseFlag)
+            var sbp2 = 0
+            var dbp2 = 0
+            var sbp3 = 0
+            var dbp3 = 0
+            if(row.fieldCount > 10){
+                sbp2 = row.getField(7).toIntOrZero()
+                dbp2 = row.getField(8).toIntOrZero()
+                sbp3 = row.getField(9).toIntOrZero()
+                dbp3 = row.getField(10).toIntOrZero()
+            }
+            val data = BptHistoryData(timestamp, isCalibration, sbp1, dbp1, hr, spo2, pulseFlag, sbp2, dbp2, sbp3, dbp3)
             list.add(data)
             row = parser.nextRow()
         }

@@ -164,7 +164,7 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
     private fun startMonitoring(index: Int, sbp1: Int, dbp1: Int, sbp2: Int, dbp2: Int, sbp3: Int, dbp3: Int){
         if(bptViewModel.isMonitoring.value!!) return
         chartView.clearChart()
-        bptViewModel.startDataCollection(index, sbp3, dbp3)
+        bptViewModel.startDataCollection(index)
         initCsvWriter()
         hspViewModel.streamType = HspViewModel.StreamType.BPT
         hspViewModel.bptStreamData.observeForever(dataStreamObserver)
@@ -202,10 +202,14 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
             hspViewModel.stopStreaming()
             hspViewModel.getBptCalibrationResults()
             bptViewModel.onCalibrationResultsRequested()
-            data.sbp = bptViewModel.refSbp
-            data.dbp = bptViewModel.refDbp
-            //saveHistoryData(data.toHistoryModel(true))
-
+            data.sbp = calibrationCardView.sbp1
+            data.dbp = calibrationCardView.dbp1
+            val historyData = data.toHistoryModel(true)
+            historyData.sbp2 = calibrationCardView.sbp2
+            historyData.dbp2 = calibrationCardView.dbp2
+            historyData.sbp3 = calibrationCardView.sbp3
+            historyData.dbp3 = calibrationCardView.dbp3
+            saveHistoryData(historyData)
         }else if(data.status == BptAlgoOutStatus.FAILURE.ordinal){
             stopMonitoring()
         }
