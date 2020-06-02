@@ -4,13 +4,11 @@
 
     <item
         android:id="@+id/monitoring_start"
-        android:icon="@drawable/ic_start"
         android:title="@string/start"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/monitoring_stop"
-        android:icon="@drawable/ic_stop"
         android:title="@string/stop"
         android:visible="false"
         app:showAsAction="ifRoom" />

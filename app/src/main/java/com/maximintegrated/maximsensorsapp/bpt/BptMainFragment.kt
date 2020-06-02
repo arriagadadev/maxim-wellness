@@ -17,8 +17,11 @@ import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.LandingPage
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.exts.addFragment
+import com.maximintegrated.maximsensorsapp.showAlertDialog
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_bpt_main_fragment_content.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class BptMainFragment : Fragment(), LandingPage {
 
@@ -69,6 +72,21 @@ class BptMainFragment : Fragment(), LandingPage {
             }
         }
 
+        bptViewModel.historyDataList.observe(this){
+            if(it == null){
+                calibrationMenuItemView.isEnabled = false
+                measureBpMenuItemView.isEnabled = false
+                bpHistoryMenuItemView.isEnabled = false
+            }else{
+                calibrationMenuItemView.isEnabled = true
+                measureBpMenuItemView.isEnabled = true
+                bpHistoryMenuItemView.isEnabled = true
+            }
+        }
+
+        bptViewModel.refreshHistoryData()
+
+
         userSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
@@ -107,8 +125,18 @@ class BptMainFragment : Fragment(), LandingPage {
         calibrationMenuItemView.setOnClickListener {
             if (BptSettings.currentUser == "") {
                 showUserNotSelectedError()
-            } else {
-                requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+            } else{
+                val lastCalibration = bptViewModel.historyDataList.value?.findLast { it.isCalibration }
+                if(lastCalibration != null && !lastCalibration.isExpired()){
+                    val c = requireContext()
+                    val date = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US).format(Date(lastCalibration.timestamp))
+                    val ref = "${lastCalibration.sbp1}/${lastCalibration.dbp1}  ${lastCalibration.sbp2}/${lastCalibration.dbp2}  ${lastCalibration.sbp3}/${lastCalibration.dbp3}"
+                    showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.valid_calibration_warning, date, ref), c.getString(R.string.yes)){
+                        requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                    }
+                }else{
+                    requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                }
             }
         }
 
@@ -116,7 +144,23 @@ class BptMainFragment : Fragment(), LandingPage {
             if (BptSettings.currentUser == "") {
                 showUserNotSelectedError()
             } else {
-                requireActivity().addFragment(BptMeasurementFragment.newInstance())
+                val lastCalibration = bptViewModel.historyDataList.value?.findLast { it.isCalibration }
+                when {
+                    lastCalibration == null -> {
+                        val c = requireContext()
+                        showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.no_calibration_warning), c.getString(R.string.ok)){
+                            requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                        }
+                    }
+                    lastCalibration.isExpired() -> {
+                        val c = requireContext()
+                        val date = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US).format(Date(lastCalibration.timestamp))
+                        showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.expired_calibration_warning, date), c.getString(R.string.ok)){
+                            requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                        }
+                    }
+                    else -> requireActivity().addFragment(BptMeasurementFragment.newInstance())
+                }
             }
         }
 

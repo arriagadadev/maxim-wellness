@@ -36,6 +36,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="yes">Yes</string>
 
     <string name="measurement_result_ready_to_start_message">Ready to Start</string>
     <string name="measurement_result_measuring_message">Measuring…</string>
@@ -335,6 +336,9 @@
     <string name="calibration_required_warning">You should calibrate first!</string>
     <string name="username_empty_error">Username cannot be empty.</string>
     <string name="user_not_selected_error">User is not selected.</string>
+    <string name="valid_calibration_warning">Your latest calibration time is \n%1$s (Valid)\n\nREF: %2$s\n\nWould you like to calibrate again?</string>
+    <string name="expired_calibration_warning">Your latest calibration time is \n%1$s (Expired)\n\nYou have to calibrate again.</string>
+    <string name="no_calibration_warning">You don\'t have a calibration data. You should have at least 1 valid calibration before measurement.</string>
 
     <string-array name="bpt_algorithm_out_status">
         <item>No Signal</item>

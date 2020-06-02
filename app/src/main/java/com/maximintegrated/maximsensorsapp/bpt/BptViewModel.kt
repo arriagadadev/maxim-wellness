@@ -9,7 +9,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.maximintegrated.maximsensorsapp.R
+import kotlinx.coroutines.*
 import java.io.File
+import java.lang.Runnable
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -69,10 +71,22 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private var calibrationTimePassed = AtomicInteger(-1)
 
+    private var _historyDataList = MutableLiveData<List<BptHistoryData>?>(emptyList())
+    val historyDataList: LiveData<List<BptHistoryData>?>
+        get() = _historyDataList
+
+    private val job = Job()
+
+    private val uiScope = CoroutineScope(job + Dispatchers.Main)
+
     init {
         prepareUserList()
-        // read SpO2 config file
         readSpO2ConfigFile()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.cancel()
     }
 
     private fun readSpO2ConfigFile() {
@@ -210,5 +224,17 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun isWaitingForCalibrationResults(): Boolean {
         return calibrationStates.value?.second == CalibrationStatus.PROCESSING
+    }
+
+    fun refreshHistoryData(){
+        uiScope.launch {
+            _historyDataList.value = getHistoryData()
+        }
+    }
+
+    private suspend fun getHistoryData(): List<BptHistoryData> {
+        return withContext(Dispatchers.IO){
+            readHistoryData()
+        }
     }
 }

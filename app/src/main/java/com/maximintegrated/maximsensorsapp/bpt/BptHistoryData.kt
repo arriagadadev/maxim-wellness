@@ -1,6 +1,8 @@
 package com.maximintegrated.maximsensorsapp.bpt
 
 import com.maximintegrated.bpt.hsp.HspBptStreamData
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 data class BptHistoryData(
     val timestamp: Long,
@@ -36,4 +38,11 @@ fun HspBptStreamData.toHistoryModel(isCalibration: Boolean): BptHistoryData {
         this.spo2,
         this.pulseFlag
     )
+}
+
+fun BptHistoryData.isExpired(): Boolean{
+    val today = Date()
+    val timeDiffMs = today.time - timestamp
+    val timeDiffDays = TimeUnit.MILLISECONDS.toDays(timeDiffMs)
+    return timeDiffDays > 7
 }

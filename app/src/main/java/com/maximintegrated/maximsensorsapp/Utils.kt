@@ -1,5 +1,7 @@
 package com.maximintegrated.maximsensorsapp
 
+import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import com.maximintegrated.algorithms.AlgorithmInput
 import de.siegmar.fastcsv.reader.CsvReader
 import de.siegmar.fastcsv.reader.CsvRow
@@ -106,4 +108,18 @@ fun getFormattedTime(elapsedTime: Long): String {
     val min = TimeUnit.MILLISECONDS.toMinutes(elapsedTime) % 60
     val sec = TimeUnit.MILLISECONDS.toSeconds(elapsedTime) % 60
     return String.format("%02d:%02d:%02d", hour, min, sec)
+}
+
+fun showAlertDialog(context: Context, title: String, message: String, positiveButtonText: String, action: () -> Unit) {
+    val alertDialog = AlertDialog.Builder(context)
+    alertDialog.setTitle(title)
+    alertDialog.setMessage(message)
+        .setPositiveButton(positiveButtonText) { dialog, _ ->
+            action()
+            dialog.dismiss()
+        }.setNegativeButton(context.getString(R.string.cancel)) { dialog, _ ->
+            dialog.dismiss()
+        }
+    alertDialog.setCancelable(true)
+    alertDialog.show()
 }

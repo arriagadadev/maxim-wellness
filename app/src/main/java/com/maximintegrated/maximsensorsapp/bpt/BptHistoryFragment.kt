@@ -21,6 +21,7 @@ class BptHistoryFragment : Fragment() {
     }
 
     private lateinit var hspViewModel: HspViewModel
+    private lateinit var bptViewModel: BptViewModel
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -56,6 +57,10 @@ class BptHistoryFragment : Fragment() {
 
         val adapter = BptHistoryAdapter()
         bptHistoryRecyclerView.adapter = adapter
-        adapter.submitList(readHistoryData())
+
+        bptViewModel = ViewModelProviders.of(requireActivity()).get(BptViewModel::class.java)
+        bptViewModel.historyDataList.observe(this){
+            adapter.submitList(it)
+        }
     }
 }
