@@ -133,6 +133,13 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
                 requireActivity().onBackPressed()
             }
         }
+        view.repeatButton.setOnClickListener {
+            if(view.sbp1 == 0 || view.dbp1 == 0 || view.sbp2 == 0 || view.dbp2 == 0 || view.sbp3 == 0 || view.dbp3 == 0){
+                Toast.makeText(requireContext(), getString(R.string.ref_bp_required_fields_warning), Toast.LENGTH_SHORT).show()
+            }else{
+                startMonitoring(view.tag.toString().toInt(), view.sbp1, view.dbp1, view.sbp2, view.dbp2, view.sbp3, view.dbp3)
+            }
+        }
     }
 
     private fun setupChart() {
@@ -168,7 +175,7 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
         hspViewModel.startBptCalibrationStreaming()
     }
 
-    private fun stopMonitoring(index: Int = -1){
+    private fun stopMonitoring(index: Int = 0){
         if(!bptViewModel.isMonitoring.value!!) return
         hspViewModel.stopStreaming()
         hspViewModel.bptStreamData.removeObserver(dataStreamObserver)

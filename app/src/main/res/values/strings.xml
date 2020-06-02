@@ -363,4 +363,7 @@
     <string name="algorithm_finished_successfully">Algorithm finished successfully</string>
     <string name="algorithm_not_found_sleep_state">Algorithm did not found a sleep state in the given data</string>
     <string name="sleep_algorithm_result">Sleep Algorithm Result</string>
+    <string name="repeat">Repeat</string>
+    <string name="available_in">Available in</string>
+    <string name="confirm">Confirm</string>
 </resources>

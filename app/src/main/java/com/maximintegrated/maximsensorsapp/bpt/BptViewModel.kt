@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-enum class BptAlgoOutStatus{
+enum class BptAlgoOutStatus {
     NO_SIGNAL,
     PROGRESS,
     SUCCESS,
@@ -24,7 +24,7 @@ enum class BptAlgoOutStatus{
     CAL_SEGMENT_DONE
 }
 
-enum class BptAlgoInitStatus{
+enum class BptAlgoInitStatus {
     SUCCESS,
     TRENDING_ERROR,
     INCOSTINCENY_ERROR
@@ -35,7 +35,10 @@ private const val CALIBRATION_TIMEOUT_IN_SEC = 10
 class BptViewModel(private val app: Application) : AndroidViewModel(app) {
 
     companion object {
-        val OUTPUT_DIRECTORY = File(Environment.getExternalStorageDirectory(), "MaximSensorsApp${File.separator}BP Trending")
+        val OUTPUT_DIRECTORY = File(
+            Environment.getExternalStorageDirectory(),
+            "MaximSensorsApp${File.separator}BP Trending"
+        )
     }
 
     private val _userList = MutableLiveData<MutableList<String>>(arrayListOf())
@@ -61,7 +64,8 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
     val isMonitoring: LiveData<Boolean>
         get() = _isMonitoring
 
-    val spO2Coefficients = floatArrayOf(1.5958422407923467f, -34.6596622470280020f, 112.6898759138307500f)
+    val spO2Coefficients =
+        floatArrayOf(1.5958422407923467f, -34.6596622470280020f, 112.6898759138307500f)
 
     private var calibrationTimePassed = AtomicInteger(-1)
 
@@ -74,13 +78,14 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         readSpO2ConfigFile()
     }
 
-    private fun readSpO2ConfigFile(){
+    private fun readSpO2ConfigFile() {
         val file = File(OUTPUT_DIRECTORY, "${File.separator}SPO2.conf")
-        if(!file.exists()){
+        if (!file.exists()) {
             OUTPUT_DIRECTORY.mkdirs()
             file.createNewFile()
-            file.bufferedWriter().use { out -> out.write("${spO2Coefficients[0]},${spO2Coefficients[1]},${spO2Coefficients[2]}") }
-        }else{
+            file.bufferedWriter()
+                .use { out -> out.write("${spO2Coefficients[0]},${spO2Coefficients[1]},${spO2Coefficients[2]}") }
+        } else {
             val str = file.bufferedReader().readText()
             val coeffs = str.split(",")
             for (i in spO2Coefficients.indices)
@@ -143,9 +148,9 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
             if (timerStarted) {
                 _elapsedTime.value = SystemClock.elapsedRealtime() - startElapsedTime
                 handler.postDelayed(this, 1000)
-                if(calibrationTimePassed.get() >= 0){
+                if (calibrationTimePassed.get() >= 0) {
 
-                    if(calibrationTimePassed.incrementAndGet() == CALIBRATION_TIMEOUT_IN_SEC){
+                    if (calibrationTimePassed.incrementAndGet() == CALIBRATION_TIMEOUT_IN_SEC) {
                         onCalibrationTimeout()
                     }
                 }
@@ -156,7 +161,7 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun startDataCollection(index: Int, refSbp: Int, refDbp: Int) {
-        if(!_isMonitoring.value!!){
+        if (!_isMonitoring.value!!) {
             val state = Pair(index, CalibrationStatus.STARTED)
             _calibrationStates.value = state
             _isMonitoring.value = true
@@ -166,9 +171,10 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun stopDataCollection(index: Int = -1) {
-        val state = Pair(index, CalibrationStatus.IDLE)
-        _calibrationStates.value = state
+    fun stopDataCollection(index: Int = 0) {
+        if (_calibrationStates.value?.second != CalibrationStatus.SUCCESS && _calibrationStates.value?.second != CalibrationStatus.FAIL) {
+            _calibrationStates.value = Pair(index, CalibrationStatus.IDLE)
+        }
         _isMonitoring.value = false
         stopTimer()
     }
@@ -181,7 +187,7 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         calibrationTimePassed.set(0)
     }
 
-    fun onCalibrationReceived(){
+    fun onCalibrationReceived() {
         _calibrationStates.value?.let {
             val state = Pair(_calibrationStates.value!!.first, CalibrationStatus.SUCCESS)
             _calibrationStates.value = state
@@ -189,7 +195,7 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         calibrationTimePassed.set(-1)
     }
 
-    fun onCalibrationTimeout(){
+    fun onCalibrationTimeout() {
         _calibrationStates.value?.let {
             val state = Pair(_calibrationStates.value!!.first, CalibrationStatus.FAIL)
             _calibrationStates.value = state
@@ -197,17 +203,17 @@ class BptViewModel(private val app: Application) : AndroidViewModel(app) {
         calibrationTimePassed.set(-1)
     }
 
-    fun startMeasurement(){
+    fun startMeasurement() {
         _isMonitoring.value = true
         startTimer()
     }
 
-    fun stopMeasurement(){
+    fun stopMeasurement() {
         _isMonitoring.value = false
         stopTimer()
     }
 
-    fun isWaitingForCalibrationResults(): Boolean{
+    fun isWaitingForCalibrationResults(): Boolean {
         return calibrationStates.value?.second == CalibrationStatus.PROCESSING
     }
 }
