@@ -26,6 +26,12 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.round
 
+private enum class DataState{
+    NONE,
+    EMPTY,
+    AVAILABLE
+}
+
 class SleepFragment : Fragment(),
     PieChartAdapter.OnItemClickListener {
     companion object {
@@ -36,7 +42,7 @@ class SleepFragment : Fragment(),
     private lateinit var sourceViewModel: SourceViewModel
     private val pieChartAdapter = PieChartAdapter()
 
-    private var dataAvailable = false
+    private var dataState = DataState.NONE
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +55,18 @@ class SleepFragment : Fragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sourceViewModel = ViewModelProviders.of(requireActivity()).get(SourceViewModel::class.java)
+
+        sourceViewModel.busy.observe(this, Observer {
+            if(it){
+                sleepProgressBar.isVisible = true
+                dataAvailableGroup.isVisible = false
+                dataNotAvailableGroup.isVisible = false
+            }else{
+                sleepProgressBar.isVisible = dataState == DataState.NONE
+                dataAvailableGroup.isVisible = dataState == DataState.AVAILABLE
+                dataNotAvailableGroup.isVisible = dataState == DataState.EMPTY
+            }
+        })
 
         sourceViewModel.getSleepData()
 
@@ -111,10 +129,16 @@ class SleepFragment : Fragment(),
                 val ascOrder = result.sortedBy { it.date }.reversed()
 
                 pieChartAdapter.dataSet = ascOrder
-                dataAvailable = ascOrder.isNotEmpty()
-                sleepProgressBar.isVisible = false
-                dataAvailableGroup.isVisible = ascOrder.isNotEmpty()
-                dataNotAvailableGroup.isVisible = ascOrder.isEmpty()
+                dataState = if(ascOrder.isNotEmpty()){
+                    DataState.AVAILABLE
+                }else{
+                    DataState.EMPTY
+                }
+                if(sourceViewModel.busy.value == false){
+                    sleepProgressBar.isVisible = false
+                    dataAvailableGroup.isVisible = dataState == DataState.AVAILABLE
+                    dataNotAvailableGroup.isVisible = dataState == DataState.EMPTY
+                }
             }
         })
 

@@ -67,8 +67,7 @@ class SleepDetailsFragment(private val dataModel: SleepDataModel) : Fragment() {
             dataModel.numberOfWakeInSleep
         )
         sqiProgressBar.progress = sqi.toInt()
-        val sqiText = "${DecimalFormat("#.##").format(sqi)} %"
-        sqiTextView.text = sqiText
+        sqiTextView.text = DecimalFormat("#.##").format(sqi)
         MaximAlgorithms.end(MaximAlgorithms.FLAG_SLEEP)
     }
 }

@@ -32,20 +32,25 @@ class SourceViewModel(application: Application) : AndroidViewModel(application) 
 
     private var files: Array<File>? = null
 
+    private var filesImported = false
+
     private val listFilePresentObserver = Observer<List<SearchFile>> {list ->
-        val nameList = list?.map { it.fileName }?.toMutableList()
-        val fileNameList = files?.map { it.name }?.toMutableList()
-        if (nameList != null) {
-            fileNameList?.removeAll(nameList)
-        }
-        if (fileNameList != null) {
-            importCsvFiles(fileNameList.toTypedArray())
+        if(!filesImported){
+            val nameList = list?.map { it.fileName }?.toMutableList()
+            val fileNameList = files?.map { it.name }?.toMutableList()
+            if (nameList != null) {
+                fileNameList?.removeAll(nameList)
+            }
+            if (fileNameList != null) {
+                importCsvFiles(fileNameList.toTypedArray())
+            }
+            filesImported = true
         }
     }
 
-    //private val _busy = MutableLiveData<Boolean>(true)
-    //val busy: LiveData<Boolean>
-    //    get() = _busy
+    private val _busy = MutableLiveData<Boolean>(true)
+    val busy: LiveData<Boolean>
+        get() = _busy
 
     init {
         listFilePresent.observeForever(listFilePresentObserver)
@@ -53,12 +58,18 @@ class SourceViewModel(application: Application) : AndroidViewModel(application) 
 
     fun getSleepData(){
         if(files.isNullOrEmpty()){
+            _busy.value = true
             files = SLEEP_OUTPUT_DIRECTORY.listFiles()
+            filesImported = false
             if(files != null){
                 uiScope.launch {
                     listParameter.value = getSleepData(files!!)
                 }
+            }else{
+                _busy.value = false
             }
+        }else{
+            _busy.value = false
         }
     }
 
@@ -73,6 +84,7 @@ class SourceViewModel(application: Application) : AndroidViewModel(application) 
             for (fileName in fileNames) {
                 CsvUtil.importFromCsv(getApplication(), File(SLEEP_OUTPUT_DIRECTORY, fileName))
             }
+            _busy.value = false
         }
     }
 

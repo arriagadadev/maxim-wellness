@@ -124,7 +124,8 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
         chartView.dataSetInfoList = listOf(
             DataSetInfo(R.string.ppg_signal, R.color.channel_red)
         )
-        chartView.maximumEntryCount = 1000
+        chartView.maximumEntryCount = 600
+        chartView.line_chart_view.axisLeft.isEnabled = false
     }
 
     private fun initCsvWriter() {

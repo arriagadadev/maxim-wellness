@@ -45,10 +45,19 @@ data class SleepDataModel(
             var numberOfWakeInSleep = 0
             var inSleepState = false
 
-            val bedDate = sleepList.filter { it.latency > 0 }.minBy { it.date }?.date
-                ?: sleepList.first().date
-            val wakeDate =
-                sleepList.filter { it.latency > 0 }.maxBy { it.date }?.date ?: sleepList.last().date
+            val tempList = sleepList.filter { it.sleepPhasesOutputProcessed >= 2 }
+
+            val bedDate = if (tempList.isNotEmpty()) {
+                tempList.first().date
+            } else {
+                sleepList.first().date
+            }
+
+            val wakeDate = if (tempList.isNotEmpty()) {
+                tempList.last().date
+            } else {
+                sleepList.last().date
+            }
 
             for (sleep in sleepList) {
                 when (sleep.sleepPhasesOutputProcessed) {

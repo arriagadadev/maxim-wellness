@@ -17,8 +17,10 @@ import com.maximintegrated.bpt.hsp.protocol.HspCommand
 import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
+import kotlinx.android.synthetic.main.fragment_bpt_calibration.*
 import kotlinx.android.synthetic.main.include_app_bar.*
 import kotlinx.android.synthetic.main.include_bpt_calibration_fragment_content.*
+import kotlinx.android.synthetic.main.include_bpt_calibration_warning_fragment_content.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import kotlinx.android.synthetic.main.view_old_protocol_calibration_card.view.*
 import java.io.File
@@ -73,7 +75,7 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
                     val array = it.parameters[0].valueAsByteArray
                     val calibrations = BptCalibrationData.parseCalibrationDataFromCommandResponse(array)
                     saveCalibrationData(*calibrations)
-                    Toast.makeText(requireContext(), "Calibration is completed!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), requireContext().getString(R.string.calibration_completed), Toast.LENGTH_SHORT).show()
                     bptViewModel.onCalibrationReceived()
                     stopMonitoring()
                 }
@@ -89,6 +91,8 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
         }
 
         bptViewModel.elapsedTime.observe(this) {
+            calibrationCircleProgressView.setValue(it / 1000f)
+            calibrationCircleProgressView.setText(getFormattedTime(it))
             if(bptViewModel.startTime == ""){
                 toolbar.subtitle = getFormattedTime(it)
             }else{
@@ -107,6 +111,18 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
 
         setupCalibrationView(calibrationCardView)
         setupChart()
+
+        restartTimerButton.setOnClickListener {
+            bptViewModel.restartTimer()
+        }
+
+        goToCalibrationButton.setOnClickListener {
+            bptViewModel.stopTimer()
+            calibrationWarningLayout.isVisible = false
+            calibrationLayout.isVisible = true
+        }
+
+        bptViewModel.startTimer()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +163,8 @@ class BptCalibrationFragment : Fragment(), IOnBackPressed {
         chartView.dataSetInfoList = listOf(
             DataSetInfo(R.string.ppg_signal, R.color.channel_red)
         )
-        chartView.maximumEntryCount = 1000
+        chartView.maximumEntryCount = 600
+        chartView.line_chart_view.axisLeft.isEnabled = false
     }
 
     private fun initCsvWriter(){

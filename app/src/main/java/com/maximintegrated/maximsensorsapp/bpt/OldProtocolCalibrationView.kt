@@ -4,13 +4,14 @@ import android.content.Context
 import android.os.Handler
 import android.text.Editable
 import android.util.AttributeSet
-import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.card.MaterialCardView
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.showAlertDialog
 import kotlinx.android.synthetic.main.view_old_protocol_calibration_card.view.*
+import timber.log.Timber
 import java.util.*
 
 class OldProtocolCalibrationView @JvmOverloads constructor(
@@ -131,22 +132,16 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
     private fun updateCalibrationViews() {
         when (referenceMeasurementState) {
             1 -> {
-                sbpEditText1.isEnabled = true
-                dbpEditText1.isEnabled = true
                 availableTextView1.isInvisible = false
                 timerTextView1.isInvisible = false
                 confirmCheckBox1.isInvisible = true
             }
             2 -> {
-                sbpEditText2.isEnabled = true
-                dbpEditText2.isEnabled = true
                 availableTextView2.isInvisible = false
                 timerTextView2.isInvisible = false
                 confirmCheckBox2.isInvisible = true
             }
             3 -> {
-                sbpEditText3.isEnabled = true
-                dbpEditText3.isEnabled = true
                 availableTextView3.isInvisible = false
                 timerTextView3.isInvisible = false
                 confirmCheckBox3.isInvisible = true
@@ -167,16 +162,22 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
                         confirmCheckBox1.isInvisible = false
                         availableTextView1.isInvisible = true
                         timerTextView1.isInvisible = true
+                        sbpEditText1.isEnabled = true
+                        dbpEditText1.isEnabled = true
                     }
                     2 -> {
                         confirmCheckBox2.isInvisible = false
                         availableTextView2.isInvisible = true
                         timerTextView2.isInvisible = true
+                        sbpEditText2.isEnabled = true
+                        dbpEditText2.isEnabled = true
                     }
                     3 -> {
                         confirmCheckBox3.isInvisible = false
                         availableTextView3.isInvisible = true
                         timerTextView3.isInvisible = true
+                        sbpEditText3.isEnabled = true
+                        dbpEditText3.isEnabled = true
                     }
                 }
                 myHandler.removeCallbacks(this)
@@ -196,7 +197,7 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
     }
 
     init {
-        View.inflate(context, R.layout.view_old_protocol_calibration_card, this)
+        inflate(context, R.layout.view_old_protocol_calibration_card, this)
         order.addAll(listOf(1, 2, 3))
         with(
             context.obtainStyledAttributes(
@@ -209,15 +210,15 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             titleTextView.text = getText(R.styleable.OldProtocolCalibrationView_opcv_title) ?: ""
             recycle()
         }
-
         confirmCheckBox1.setOnCheckedChangeListener { _, isChecked ->
             sbpEditText1.isEnabled = !isChecked
             dbpEditText1.isEnabled = !isChecked
             val enableButton = confirmCheckBox1.isChecked && confirmCheckBox2.isChecked && confirmCheckBox3.isChecked
             calibrationButton.isEnabled = enableButton
             repeatButton.isEnabled = enableButton
-            if (referenceMeasurementState == 1) {
+            if (isChecked && referenceMeasurementState == 1) {
                 if (order.isNotEmpty()) {
+                    showAlertDialog(context, context.getString(R.string.warning), "Wait at least 1 minute before taking a reference measurement.", context.getString(R.string.ok))
                     handler.removeCallbacks(tickRunnable)
                     counter = WAITING_TIME_FOR_NEW_REFERENCE_DATA_IN_SEC
                     handler.postDelayed(tickRunnable, 1000)
@@ -233,8 +234,9 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             val enableButton = confirmCheckBox1.isChecked && confirmCheckBox2.isChecked && confirmCheckBox3.isChecked
             calibrationButton.isEnabled = enableButton
             repeatButton.isEnabled = enableButton
-            if (referenceMeasurementState == 2) {
+            if (isChecked && referenceMeasurementState == 2) {
                 if (order.isNotEmpty()) {
+                    showAlertDialog(context, context.getString(R.string.warning), "Wait at least 1 minute before taking a reference measurement.", context.getString(R.string.ok))
                     myHandler.removeCallbacks(tickRunnable)
                     counter = WAITING_TIME_FOR_NEW_REFERENCE_DATA_IN_SEC
                     myHandler.postDelayed(tickRunnable, 1000)
@@ -250,8 +252,9 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             val enableButton = confirmCheckBox1.isChecked && confirmCheckBox2.isChecked && confirmCheckBox3.isChecked
             calibrationButton.isEnabled = enableButton
             repeatButton.isEnabled = enableButton
-            if (referenceMeasurementState == 3) {
+            if (isChecked && referenceMeasurementState == 3) {
                 if (order.isNotEmpty()) {
+                    showAlertDialog(context, context.getString(R.string.warning), "Wait at least 1 minute before taking a reference measurement.", context.getString(R.string.ok))
                     myHandler.removeCallbacks(tickRunnable)
                     counter = WAITING_TIME_FOR_NEW_REFERENCE_DATA_IN_SEC
                     myHandler.postDelayed(tickRunnable, 1000)

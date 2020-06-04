@@ -60,7 +60,7 @@ class CsvWriter private constructor(var filePath: String) {
                     file.delete()
                 }else if(packetLossOccurred){
                     listener?.onCompleted(false)
-                    val renamedFile = File(file.parentFile, File.separator + file.nameWithoutExtension + "!!!." + file.extension)
+                    val renamedFile = File(file.parentFile, File.separator + file.nameWithoutExtension + "!!!PacketLoss!!!." + file.extension)
                     file.renameTo(renamedFile)
                 }else{
                     listener?.onCompleted(true)

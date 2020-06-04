@@ -121,12 +121,14 @@ class LogParserFragment : Fragment() {
                     inputStream.read(formatSectionLengthBytes)
                     val formatSectionLength = byteArrayToInt(formatSectionLengthBytes)
                     //Timber.d("MELIK: formatSectionLength = $formatSectionLength}")
-                    val formatSectionBytes = ByteArray(formatSectionLength + 1)
+                    val formatSectionBytes = ByteArray(formatSectionLength)
                     inputStream.read(formatSectionBytes)
                     //Timber.d("MELIK: formatSectionBytes = ${String(formatSectionBytes)}")
                     val rawData = ByteArray(HspStreamData.NUMBER_OF_BYTES_IN_PACKET)
                     var isFormatCorrect = true
-                    while (inputStream.read(rawData) == HspStreamData.NUMBER_OF_BYTES_IN_PACKET) {
+                    var formatIndex = inputStream.read()
+                    val isFormatIndexCorrect = formatIndex == 3
+                    while (formatIndex == 3 && inputStream.read(rawData) == HspStreamData.NUMBER_OF_BYTES_IN_PACKET) {
                         if (rawData[0] != (0xAA).toByte()) {
                             isFormatCorrect = false
                             break
@@ -135,6 +137,7 @@ class LogParserFragment : Fragment() {
                         Timber.d("hspRawData = ${rawData.contentToString()}  sampleTime before fix: ${hspData.sampleTime}")
                         fixCurrentTimeMillis(hspData)
                         csvWriter.write(hspData.toCsvModel())
+                        formatIndex = inputStream.read()
                     }
                     if (!isFormatCorrect) {
                         csvWriter.delete()
@@ -145,6 +148,18 @@ class LogParserFragment : Fragment() {
                             Toast.makeText(
                                 context,
                                 getString(R.string.wrong_format),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }else if (!isFormatIndexCorrect) {
+                        csvWriter.delete()
+                        csvWriter.close()
+                        uiThread {
+                            progressBar.visibility = View.GONE
+                            savedFile = null
+                            Toast.makeText(
+                                context,
+                                getString(R.string.wrong_format_index),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }

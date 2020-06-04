@@ -44,5 +44,5 @@ fun BptHistoryData.isExpired(): Boolean{
     val today = Date()
     val timeDiffMs = today.time - timestamp
     val timeDiffDays = TimeUnit.MILLISECONDS.toDays(timeDiffMs)
-    return timeDiffDays > 7
+    return timeDiffDays > 28
 }

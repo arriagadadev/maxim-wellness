@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
 import android.widget.PopupMenu
 import androidx.annotation.ColorRes
@@ -23,7 +22,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.maximintegrated.maximsensorsapp.R
 import com.maximintegrated.maximsensorsapp.exts.getThemeColor
-import kotlinx.android.synthetic.main.offline_data_item.view.*
 import kotlinx.android.synthetic.main.view_multi_channel_chart.view.*
 import java.text.DecimalFormat
 

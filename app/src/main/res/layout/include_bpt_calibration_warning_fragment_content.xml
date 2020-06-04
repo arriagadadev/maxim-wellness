@@ -135,7 +135,7 @@
             android:background="@color/color_primary"
             android:text="@string/calibration"
             android:textColor="@color/color_on_primary"
-            android:id="@+id/calibrationButton"
+            android:id="@+id/goToCalibrationButton"
             android:textSize="16sp"
             android:layout_marginBottom="10dp"/>
 
@@ -146,7 +146,7 @@
             app:layout_constraintStart_toStartOf="@id/startGuideline"
             app:layout_constraintEnd_toEndOf="@id/endGuideline"
             app:layout_constraintTop_toBottomOf="@id/restingCardView"
-            app:layout_constraintBottom_toTopOf="@id/calibrationButton"
+            app:layout_constraintBottom_toTopOf="@id/goToCalibrationButton"
             android:layout_margin="10dp"
             android:id="@+id/calibrationCircleProgressView"
             app:cpv_text="00:00:00"

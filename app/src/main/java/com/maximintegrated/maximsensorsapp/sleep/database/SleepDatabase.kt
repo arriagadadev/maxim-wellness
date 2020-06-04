@@ -10,7 +10,7 @@ import com.maximintegrated.maximsensorsapp.sleep.database.dao.SourceDao
 import com.maximintegrated.maximsensorsapp.sleep.database.entity.Sleep
 import com.maximintegrated.maximsensorsapp.sleep.database.entity.Source
 
-@Database(entities = [(Sleep::class), (Source::class)], version = 4, exportSchema = false)
+@Database(entities = [(Sleep::class), (Source::class)], version = 6, exportSchema = false)
 abstract class SleepDatabase : RoomDatabase() {
     abstract fun sleepDao(): SleepDao
 

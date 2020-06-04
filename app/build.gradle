@@ -89,4 +89,6 @@ dependencies {
     implementation deps.roomRuntime
     annotationProcessor deps.roomCompiler
     kapt deps.roomPersistence
+
+    implementation deps.appIntro
 }

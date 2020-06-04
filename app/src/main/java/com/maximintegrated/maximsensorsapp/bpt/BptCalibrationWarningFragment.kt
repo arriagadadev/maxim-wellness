@@ -11,6 +11,7 @@ import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.BleConnectionInfo
 import com.maximintegrated.maximsensorsapp.R
+import com.maximintegrated.maximsensorsapp.exts.addFragment
 import com.maximintegrated.maximsensorsapp.exts.replaceFragment
 import com.maximintegrated.maximsensorsapp.getFormattedTime
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -56,7 +57,7 @@ class BptCalibrationWarningFragment : Fragment() {
             restartTimer()
         }
 
-        calibrationButton.setOnClickListener {
+        goToCalibrationButton.setOnClickListener {
             bptViewModel.stopTimer()
             requireActivity().replaceFragment(BptCalibrationFragment.newInstance())
         }

@@ -246,7 +246,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/sqiProgressBar"
                     app:layout_constraintStart_toStartOf="@id/sqiProgressBar"
                     app:layout_constraintEnd_toEndOf="@id/sqiProgressBar"
-                    tools:text="50 %"
+                    tools:text="50"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:gravity="center"/>

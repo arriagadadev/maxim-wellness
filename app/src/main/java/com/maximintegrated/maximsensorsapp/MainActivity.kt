@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), OnBluetoothDeviceClickListener {
                         else -> HspViewModel.DeviceModel.UNDEFINED
                     }
 
-                    if (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11D) {
+                    if (hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11D || hspViewModel.deviceModel == HspViewModel.DeviceModel.ME11A) {
                         showBptItems()
                     } else {
                         showMenuItems(arrayListOf("sensors"), arrayListOf("algoos"))

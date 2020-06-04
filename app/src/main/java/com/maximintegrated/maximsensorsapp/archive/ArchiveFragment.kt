@@ -25,6 +25,7 @@ import de.siegmar.fastcsv.reader.CsvRow
 import kotlinx.android.synthetic.main.fragment_archive.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import timber.log.Timber
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat

@@ -276,6 +276,7 @@
     <string name="archive">Archive</string>
     <string name="flash_log_parser">Flash Log Parser</string>
     <string name="wrong_format">Wrong Format</string>
+    <string name="wrong_format_index">Wrong Format Index</string>
 
 
     <string name="hr_confidence_level">HR Confidence Level (0–100)</string>
@@ -312,7 +313,7 @@
     <string name="dbp">DBP</string>
     <string name="sbp_mmhg">SBP (mm Hg)</string>
     <string name="dbp_mmhg">DBP (mm Hg)</string>
-    <string name="calibration_completed">Calibration completed</string>
+    <string name="calibration_completed">Calibration is completed!</string>
     <string name="second_calibration">Second Calibration</string>
     <string name="first_calibration">First Calibration</string>
     <string name="third_calibration">Third Calibration</string>
@@ -370,4 +371,5 @@
     <string name="repeat">Repeat</string>
     <string name="available_in">Available in</string>
     <string name="confirm">Confirm</string>
+    <string name="tutorial">Tutorial</string>
 </resources>

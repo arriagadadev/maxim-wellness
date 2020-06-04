@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    final majorVersion = 2
-    final minorVersion = 1
+    final majorVersion = 3
+    final minorVersion = 0
     final patchVersion = 0
 
 
@@ -12,7 +12,7 @@ buildscript {
 
     ext.config = [
             versionCode: 1000000 * majorVersion + 1000 * minorVersion + patchVersion,
-            versionName: "$majorVersion.$minorVersion.$patchVersion",
+            versionName: "$majorVersion.$minorVersion.$patchVersion-alpha",
             compileSdk : latestSdk,
             targetSdk  : latestSdk,
             minSdk     : minSdk,
@@ -38,7 +38,8 @@ buildscript {
             kotpref              : '2.2.0',
             kotprefInitializer   : '2.2.0',
             room                 : '2.1.0-alpha03',
-            navigation           : '1.0.0-alpha09'
+            navigation           : '1.0.0-alpha09',
+            appIntro             : '6.0.0'
     ]
 
     ext.deps = [
@@ -71,7 +72,8 @@ buildscript {
             kotprefInitializer            : "com.chibatching.kotpref:initializer:${versions.kotprefInitializer}",
             roomRuntime                   : "androidx.room:room-runtime:${versions.room}",
             roomCompiler                  : "androidx.room:room-compiler:${versions.room}",
-            roomPersistence               : "android.arch.persistence.room:compiler:1.1.1"
+            roomPersistence               : "android.arch.persistence.room:compiler:1.1.1",
+            appIntro                      : "com.github.AppIntro:AppIntro:${versions.appIntro}"
     ]
 
     repositories {

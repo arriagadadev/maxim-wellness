@@ -9,14 +9,6 @@ import com.maximintegrated.maximsensorsapp.R
 import kotlinx.android.synthetic.main.view_calibration_card.view.*
 import kotlinx.android.synthetic.main.view_calibration_card.view.progressBar
 
-enum class CalibrationStatus{
-    IDLE,
-    STARTED,
-    PROCESSING,
-    SUCCESS,
-    FAIL
-}
-
 class CalibrationView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) :  MaterialCardView(context, attrs, defStyleAttr) {

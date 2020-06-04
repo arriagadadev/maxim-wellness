@@ -110,12 +110,12 @@ fun getFormattedTime(elapsedTime: Long): String {
     return String.format("%02d:%02d:%02d", hour, min, sec)
 }
 
-fun showAlertDialog(context: Context, title: String, message: String, positiveButtonText: String, action: () -> Unit) {
+fun showAlertDialog(context: Context, title: String, message: String, positiveButtonText: String, action: (() -> Unit)? = null) {
     val alertDialog = AlertDialog.Builder(context)
     alertDialog.setTitle(title)
     alertDialog.setMessage(message)
         .setPositiveButton(positiveButtonText) { dialog, _ ->
-            action()
+            action?.let { it() }
             dialog.dismiss()
         }.setNegativeButton(context.getString(R.string.cancel)) { dialog, _ ->
             dialog.dismiss()

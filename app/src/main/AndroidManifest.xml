@@ -53,6 +53,7 @@
         <activity
             android:name=".ScannerActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".bpt.BpTutorialActivity" />
 
     </application>
 

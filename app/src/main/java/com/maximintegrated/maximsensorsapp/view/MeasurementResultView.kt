@@ -88,7 +88,7 @@ class MeasurementResultView @JvmOverloads constructor(
         override fun run() {
             if (isMeasuring) {
                 if(timerCount.incrementAndGet() >= obsoleteThresholdInSeconds){
-                    resultView.text = "--"
+                    resultView.text = "No Report"
                 }
                 handler.postDelayed(this, 1000)
             }else{
@@ -193,6 +193,10 @@ class MeasurementResultView @JvmOverloads constructor(
     }
 
     private fun updateViewVisibilities() {
+        if(isTimeout){
+            showAsOperationTimeout()
+            return
+        }
         if (result == null) {
             if (isMeasuring) {
                 if (measurementProgress == 0) {
@@ -200,8 +204,6 @@ class MeasurementResultView @JvmOverloads constructor(
                 } else {
                     showAsMeasuringWithProgress()
                 }
-            } else if (isTimeout) {
-                showAsOperationTimeout()
             } else {
                 showAsReadyToMeasure()
             }

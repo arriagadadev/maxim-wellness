@@ -54,7 +54,7 @@ data class HspStreamData(
         //{wSteps,32},{rSteps,32},{kCal,32, 1},{totalActEnergy,32, 1}
 
         const val NUMBER_OF_BYTES_IN_PACKET =
-            52 // including 1 byte data stream start(aa), 1 byte crc
+            51 // including 1 byte data stream start(aa), 1 byte crc
 
         val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
         val CSV_HEADER_HSP = arrayOf(

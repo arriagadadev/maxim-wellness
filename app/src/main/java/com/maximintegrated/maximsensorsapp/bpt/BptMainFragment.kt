@@ -1,5 +1,6 @@
 package com.maximintegrated.maximsensorsapp.bpt
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -103,6 +104,7 @@ class BptMainFragment : Fragment(), LandingPage {
                 } else {
                     BptSettings.currentUser = bptViewModel.userList.value?.get(position) ?: ""
                 }
+                bptViewModel.refreshHistoryData()
             }
         }
 
@@ -119,6 +121,7 @@ class BptMainFragment : Fragment(), LandingPage {
                 bptViewModel.addNewUser(name)
                 newUserEditText.setText("")
                 newUserEditText.onEditorAction(EditorInfo.IME_ACTION_DONE)
+                bptViewModel.refreshHistoryData()
             }
         }
 
@@ -132,10 +135,10 @@ class BptMainFragment : Fragment(), LandingPage {
                     val date = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US).format(Date(lastCalibration.timestamp))
                     val ref = "${lastCalibration.sbp1}/${lastCalibration.dbp1}  ${lastCalibration.sbp2}/${lastCalibration.dbp2}  ${lastCalibration.sbp3}/${lastCalibration.dbp3}"
                     showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.valid_calibration_warning, date, ref), c.getString(R.string.yes)){
-                        requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                        requireActivity().addFragment(BptCalibrationFragment.newInstance())
                     }
                 }else{
-                    requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                    requireActivity().addFragment(BptCalibrationFragment.newInstance())
                 }
             }
         }
@@ -149,14 +152,14 @@ class BptMainFragment : Fragment(), LandingPage {
                     lastCalibration == null -> {
                         val c = requireContext()
                         showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.no_calibration_warning), c.getString(R.string.ok)){
-                            requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                            requireActivity().addFragment(BptCalibrationFragment.newInstance())
                         }
                     }
                     lastCalibration.isExpired() -> {
                         val c = requireContext()
                         val date = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US).format(Date(lastCalibration.timestamp))
                         showAlertDialog(c, c.getString(R.string.warning), c.getString(R.string.expired_calibration_warning, date), c.getString(R.string.ok)){
-                            requireActivity().addFragment(BptCalibrationWarningFragment.newInstance())
+                            requireActivity().addFragment(BptCalibrationFragment.newInstance())
                         }
                     }
                     else -> requireActivity().addFragment(BptMeasurementFragment.newInstance())
@@ -170,6 +173,10 @@ class BptMainFragment : Fragment(), LandingPage {
             } else {
                 requireActivity().addFragment(BptHistoryFragment.newInstance())
             }
+        }
+
+        bpTutorialMenuItemView.setOnClickListener {
+            requireActivity().startActivity(Intent(requireContext(), BpTutorialActivity::class.java))
         }
     }
 
