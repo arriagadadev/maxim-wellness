@@ -348,7 +348,20 @@
         <item>Bad Signal</item>
         <item>Motion</item>
         <item>Failure</item>
-        <item>Progress</item>
+        <item>Calibration Segment Done</item>
+        <item>SUBJECT FAILURE</item>
+        <item>Init Success</item>
+        <item>Trending Error</item>
+        <item>Inconsistency Error 1</item>
+        <item>Inconsistency Error 2</item>
+        <item>Inconsistency Error 3</item>
+        <item>Minimum Pulse Pressure Error</item>
+        <item>Erroneous References</item>
+        <item>HR Too High</item>
+        <item>HR Too High</item>
+        <item>PI Out of Range</item>
+        <item>Estimation Error</item>
+        <item>Too Many Calibration Point</item>
     </string-array>
 
     <string name="multiple_connection_warning">Connecting to multiple BLE devices may result in data packet loss. Please ensure that a proper mobile device is used for evaluation.</string>
@@ -372,4 +385,28 @@
     <string name="available_in">Available in</string>
     <string name="confirm">Confirm</string>
     <string name="tutorial">Tutorial</string>
+    <string name="stop_calibration">Stop Calibration</string>
+    <string name="skip_now">Skip Now</string>
+    <string name="fast_hr">Fast Heart Rate</string>
+    <string name="hr_above_resting_warning">HR is higher than the average resting level. Please rest 5 minutes and retry again for better accuracy.</string>
+    <string name="hr_above_resting_message">HR is greater than 95</string>
+    <string name="subject_failure">Subject Failure</string>
+    <string name="subject_error_message">Error occurred during initialization.</string>
+    <string name="trending_error">Trending Error</string>
+    <string name="trending_error_message">There exists a trend in the reference measurements.</string>
+    <string name="inconsistency_error">Inconsistency Error</string>
+    <string name="inconsistency_error_1">The first reference measurement is discarded.</string>
+    <string name="inconsistency_error_2">The second reference measurement is discarded.</string>
+    <string name="inconsistency_error_3">The third reference measurement is discarded.</string>
+    <string name="pulse_pressure_error">Pulse Pressure Error</string>
+    <string name="pulse_pressure_error_message">Pulse pressure difference is out of range.</string>
+    <string name="missing_reference_error">Missing Reference Error</string>
+    <string name="missing_reference_error_message">Missing reference value.</string>
+    <string name="fast_hr_message">HR is higher than the maximum supported value (110).</string>
+    <string name="pi_out_of_range">PI Out of Range</string>
+    <string name="pi_out_of_range_message">Perfusion index is out of range.</string>
+    <string name="estimation_error">Estimation Error</string>
+    <string name="estimation_error_message">Neural Network failed in estimation.</string>
+    <string name="too_many_cal">Too Many Calibrations</string>
+    <string name="too_many_cal_message">There are more than predefined number of calibration points.</string>
 </resources>

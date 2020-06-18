@@ -15,13 +15,19 @@ data class HspBptStreamData(
     val pulseFlag: Int,
     val r: Float,
     val ibi: Int,
-    val spo2Confidence: Int
-
+    val spo2Confidence: Int,
+    val hrAboveResting: Int = 0,
+    val hrOutOfRange: Int = 0,
+    val bpReportFlag: Int = 0,
+    val piOutOfRange: Int = 0,
+    val spo2ReportFlag: Int = 0
 ) {
 
     companion object {
         val CSV_HEADER_ARRAY = arrayOf(
-            "Timestamp", "irCnt", "redCnt", "status", "percentCompleted", "HR", "SpO2", "pulseFlag","estimatedSBP", "estimatedDBP", "r", "ibi", "spo2Confidence"
+            "Timestamp", "irCnt", "redCnt", "status", "percentCompleted", "HR", "SpO2", "pulseFlag",
+            "estimatedSBP", "estimatedDBP", "r", "ibi", "spo2Confidence", "hrAboveResting",
+            "hrOutOfRange", "bpReportFlag", "piOutOfRange", "spo2ReportFlag"
         )
 
         val TIMESTAMP_FORMAT = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.US)
@@ -49,6 +55,26 @@ data class HspBptStreamData(
     val timestamp = System.currentTimeMillis()
 
     fun toCsvModel(): String {
-        return arrayOf(timestamp, irCnt, redCnt, status, progress, hr, spo2, pulseFlag, sbp, dbp, r, ibi, spo2Confidence).joinToString(separator = ",")
+        return arrayOf(
+            timestamp,
+            irCnt,
+            redCnt,
+            status,
+            progress,
+            hr,
+            spo2,
+            pulseFlag,
+            sbp,
+            dbp,
+            r,
+            ibi,
+            spo2Confidence,
+            hrAboveResting,
+            hrOutOfRange,
+            bpReportFlag,
+            piOutOfRange,
+            spo2ReportFlag
+        )
+            .joinToString(separator = ",")
     }
 }

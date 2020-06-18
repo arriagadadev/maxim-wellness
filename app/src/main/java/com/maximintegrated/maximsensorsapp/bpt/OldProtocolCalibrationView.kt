@@ -294,4 +294,21 @@ class OldProtocolCalibrationView @JvmOverloads constructor(
             !(sbpEditable.toString() == "" || dbpEditable.toString() == "")
         }
     }
+
+    fun discardRefMeasurement(index: Int){
+        when(index){
+            1 -> {
+                sbp1 = sbp2
+                sbp2 = sbp3
+                dbp1 = dbp2
+                dbp2 = dbp3
+            }
+            2 -> {
+                sbp2 = sbp3
+                dbp2 = dbp3
+            }
+        }
+        sbpEditText3.setText("")
+        dbpEditText3.setText("")
+    }
 }

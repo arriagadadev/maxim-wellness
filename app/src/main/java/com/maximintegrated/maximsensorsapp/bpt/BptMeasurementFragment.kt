@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -15,6 +16,7 @@ import androidx.lifecycle.observe
 import com.maximintegrated.bpt.hsp.HspBptStreamData
 import com.maximintegrated.bpt.hsp.HspViewModel
 import com.maximintegrated.maximsensorsapp.*
+import com.maximintegrated.maximsensorsapp.bpt.BptStatus.*
 import com.maximintegrated.maximsensorsapp.exts.CsvWriter
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import kotlinx.android.synthetic.main.include_app_bar.*
@@ -99,9 +101,9 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
         }
 
         bptViewModel.elapsedTime.observe(this) {
-            if(bptViewModel.startTime == ""){
+            if (bptViewModel.startTime == "") {
                 toolbar.subtitle = getFormattedTime(it)
-            }else{
+            } else {
                 toolbar.subtitle = "Start Time: ${bptViewModel.startTime} - ${getFormattedTime(it)}"
             }
         }
@@ -146,8 +148,12 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
         if (bptViewModel.isMonitoring.value!!) return
         bptSuccess = false
         val calResult = getCalibrationDataInHexString()
-        if(calResult == ""){
-            Toast.makeText(requireContext(), R.string.calibration_required_warning, Toast.LENGTH_SHORT).show()
+        if (calResult == "") {
+            Toast.makeText(
+                requireContext(),
+                R.string.calibration_required_warning,
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         chartView.clearChart()
@@ -177,7 +183,7 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
 
     private fun addStreamData(data: HspBptStreamData) {
         dataCount++
-        if(dataCount <= NUMBER_OF_DATA_TO_DISCARD){
+        if (dataCount <= NUMBER_OF_DATA_TO_DISCARD) {
             return
         }
         csvWriter?.write(data.toCsvModel())
@@ -188,17 +194,14 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
         hrTextView.text = data.hr.toString()
         spo2TextView.text = data.spo2.toString()
         signalTextView.text = statusArray[data.status]
-        if (data.status == BptAlgoOutStatus.SUCCESS.ordinal) {
-            if (!bptSuccess) {
-                sbpTextView.text = data.sbp.toString()
-                dbpTextView.text = data.dbp.toString()
-                saveHistoryData(data.toHistoryModel(false))
-                bptSuccess = true
-            }
-
-        } else if (data.status == BptAlgoOutStatus.FAILURE.ordinal) {
-            stopMonitoring()
+        if (data.hrAboveResting == 1) {
+            showWarningMessage(
+                getString(R.string.fast_hr),
+                getString(R.string.hr_above_resting_message),
+                false
+            )
         }
+        onStatusChanged(data)
     }
 
     override fun onBackPressed(): Boolean {
@@ -229,14 +232,111 @@ class BptMeasurementFragment : Fragment(), IOnBackPressed {
             return ""
         }
         val lines = CALIBRATION_FILE.bufferedReader().readLines()
-        if(lines.size < 2){
+        if (lines.size < 2) {
             return ""
         }
-        val calibrations = lines.takeLast(2).map { BptCalibrationData.parseCalibrationDataFromString(it).toArray() }
+        val calibrations = lines.takeLast(2)
+            .map { BptCalibrationData.parseCalibrationDataFromString(it).toArray() }
         val buffer = ByteBuffer.allocate(CAL_RESULT_LENGTH * 4 * 2)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(calibrations[0])
         buffer.put(calibrations[1])
         return buffer.array().toHexString()
+    }
+
+    private fun onStatusChanged(data: HspBptStreamData) {
+        val status = BptStatus.fromInt(data.status)
+        if (status != CAL_SEGMENT_DONE) {
+            signalTextView.text = statusArray[data.status]
+        }
+        when (status) {
+            SUCCESS -> {
+                warningLayout.isVisible = false
+                calibrationChartCardView.isVisible = true
+                if (!bptSuccess) {
+                    sbpTextView.text = data.sbp.toString()
+                    dbpTextView.text = data.dbp.toString()
+                    saveHistoryData(data.toHistoryModel(false))
+                    bptSuccess = true
+                }
+            }
+            FAILURE -> stopMonitoring()
+            INIT_SUBJECT_FAILURE -> showWarningMessage(
+                getString(R.string.subject_failure),
+                getString(R.string.subject_error_message),
+                true
+            )
+            INIT_CAL_REF_BP_TRENDING_ERROR -> showWarningMessage(
+                getString(R.string.trending_error),
+                getString(R.string.trending_error_message),
+                true
+            )
+            INIT_CAL_REF_BP_INCONSISTENCY_ERROR_1 -> showWarningMessage(
+                getString(R.string.inconsistency_error),
+                getString(R.string.inconsistency_error_1),
+                true
+            )
+            INIT_CAL_REF_BP_INCONSISTENCY_ERROR_2 -> showWarningMessage(
+                getString(R.string.inconsistency_error),
+                getString(R.string.inconsistency_error_2),
+                true
+            )
+            INIT_CAL_REF_BP_INCONSISTENCY_ERROR_3 -> showWarningMessage(
+                getString(R.string.inconsistency_error),
+                getString(R.string.inconsistency_error_3),
+                true
+            )
+            INIT_MIN_PULSE_PRESSURE_ERROR -> showWarningMessage(
+                getString(R.string.pulse_pressure_error),
+                getString(R.string.pulse_pressure_error_message),
+                true
+            )
+            INIT_CAL_REF_BP_ERRONEOUS_REF -> showWarningMessage(
+                getString(R.string.missing_reference_error),
+                getString(R.string.missing_reference_error_message),
+                true
+            )
+            HR_TOO_HIGH_IN_CAL -> showWarningMessage(
+                getString(R.string.fast_hr),
+                getString(R.string.fast_hr_message),
+                true
+            )
+            HR_TOO_HIGH_IN_EST -> showWarningMessage(
+                getString(R.string.fast_hr),
+                getString(R.string.fast_hr_message),
+                false
+            )
+            PI_OUT_OF_RANGE -> showWarningMessage(
+                getString(R.string.pi_out_of_range),
+                getString(R.string.pi_out_of_range_message),
+                true
+            )
+            ESTIMATION_ERROR -> showWarningMessage(
+                getString(R.string.estimation_error),
+                getString(R.string.estimation_error_message),
+                true
+            )
+            TOO_MANY_CAL_POINT_ERROR -> showWarningMessage(
+                getString(R.string.too_many_cal),
+                getString(R.string.too_many_cal_message),
+                true
+            )
+            else -> {
+
+            }
+        }
+    }
+
+    private fun showWarningMessage(title: String, message: String, abort: Boolean) {
+        if (!warningLayout.isVisible || abort) {
+            bpWarningTitleTextView.text = title
+            bpWarningMessageTextView.text = message
+            bpWarningSkipButton.isVisible = !abort
+            warningLayout.isVisible = true
+            calibrationChartCardView.isInvisible = true
+        }
+        if (abort) {
+            stopMonitoring()
+        }
     }
 }

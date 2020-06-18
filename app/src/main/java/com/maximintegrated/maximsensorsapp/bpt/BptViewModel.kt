@@ -16,20 +16,32 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-enum class BptAlgoOutStatus {
+enum class BptStatus {
     NO_SIGNAL,
     PROGRESS,
     SUCCESS,
     BAD_SIGNAL,
     MOTION,
     FAILURE,
-    CAL_SEGMENT_DONE
-}
+    CAL_SEGMENT_DONE,
+    INIT_SUBJECT_FAILURE,
+    INIT_SUCCESS,
+    INIT_CAL_REF_BP_TRENDING_ERROR,
+    INIT_CAL_REF_BP_INCONSISTENCY_ERROR_1,
+    INIT_CAL_REF_BP_INCONSISTENCY_ERROR_2,
+    INIT_CAL_REF_BP_INCONSISTENCY_ERROR_3,
+    INIT_MIN_PULSE_PRESSURE_ERROR,
+    INIT_CAL_REF_BP_ERRONEOUS_REF,
+    HR_TOO_HIGH_IN_CAL,
+    HR_TOO_HIGH_IN_EST,
+    PI_OUT_OF_RANGE,
+    ESTIMATION_ERROR,
+    TOO_MANY_CAL_POINT_ERROR;
 
-enum class BptAlgoInitStatus {
-    SUCCESS,
-    TRENDING_ERROR,
-    INCOSTINCENY_ERROR
+    companion object {
+        private val map = values().associateBy(BptStatus::ordinal)
+        fun fromInt(index: Int) = map[index]
+    }
 }
 
 private const val CALIBRATION_TIMEOUT_IN_SEC = 10
