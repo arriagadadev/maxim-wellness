@@ -109,7 +109,6 @@ class EcgFragment : MeasurementBaseFragment() {
     override fun startMonitoring() {
         super.startMonitoring()
         hspViewModel.streamType = HspViewModel.StreamType.ECG
-        menuItemLogToFlash.isEnabled = true
         timestamp = HspStreamData.TIMESTAMP_FORMAT.format(Date())
         csvWriter = CsvWriter.open(getCsvFilePath(), HspEcgStreamData.CSV_HEADER_ARRAY)
 
@@ -139,7 +138,6 @@ class EcgFragment : MeasurementBaseFragment() {
         super.stopMonitoring()
         csvWriter?.close()
         csvWriter = null
-        menuItemLogToFlash.isEnabled = false
 
         hspViewModel.stopStreaming()
 

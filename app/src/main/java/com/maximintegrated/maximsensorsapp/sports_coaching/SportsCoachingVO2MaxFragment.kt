@@ -132,7 +132,6 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
         clearCardViewValues()
         MaximAlgorithms.init(algorithmInitConfig)
 
@@ -152,7 +151,6 @@ class SportsCoachingVO2MaxFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_SPORTS)
         hspViewModel.stopStreaming()

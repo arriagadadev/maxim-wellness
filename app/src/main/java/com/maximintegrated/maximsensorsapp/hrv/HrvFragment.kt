@@ -227,8 +227,6 @@ class HrvFragment : MeasurementBaseFragment() {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
-        menuItemLogToFlash.isEnabled = false
 
         clearChart()
         clearCardViewValues()
@@ -251,8 +249,6 @@ class HrvFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
-        menuItemLogToFlash.isEnabled = true
 
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV)

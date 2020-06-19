@@ -123,7 +123,6 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
             return
         }
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
         clearCardViewValues()
         MaximAlgorithms.init(algorithmInitConfig)
         percentCompleted.measurementProgress = 0
@@ -142,7 +141,6 @@ class SportsCoachingRecoveryTimeFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS)
         hspViewModel.stopStreaming()

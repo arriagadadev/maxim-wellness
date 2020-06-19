@@ -158,8 +158,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
-        menuItemLogToFlash.isEnabled = false
 
         clearChart()
 
@@ -185,6 +183,12 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             }
     }
 
+    override fun sendScdStateMachineIfRequired() {
+        if(radioButtonNormalMode.isChecked){
+            super.sendScdStateMachineIfRequired()
+        }
+    }
+
 
     fun setupTimer() {
         val timeInterval = max(WhrmSettings.sampledModeTimeInterval, MIN_CYCLE_TIME_IN_MILLIS)
@@ -204,8 +208,6 @@ class WhrmFragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
-        menuItemLogToFlash.isEnabled = true
 
         setAlgorithmModeRadioButtonsEnabled(true)
 

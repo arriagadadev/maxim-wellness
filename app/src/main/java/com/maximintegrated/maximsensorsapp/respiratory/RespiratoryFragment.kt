@@ -130,8 +130,6 @@ class RespiratoryFragment : MeasurementBaseFragment() {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = true
-        menuItemLogToFlash.isEnabled = true
 
         clearChart()
         clearCardViewValues()
@@ -149,8 +147,6 @@ class RespiratoryFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = false
-        menuItemLogToFlash.isEnabled = false
 
         MaximAlgorithms.end(MaximAlgorithms.FLAG_RESP)
 

@@ -140,8 +140,6 @@ class StressFragment : MeasurementBaseFragment() {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
-        menuItemLogToFlash.isEnabled = false
 
         clearCardViewValues()
         MaximAlgorithms.init(algorithmInitConfig)
@@ -162,8 +160,6 @@ class StressFragment : MeasurementBaseFragment() {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
-        menuItemLogToFlash.isEnabled = true
 
         percentCompleted.isMeasuring = false
         MaximAlgorithms.end(MaximAlgorithms.FLAG_HRV or MaximAlgorithms.FLAG_STRESS)

@@ -45,6 +45,20 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/enable_mfio"
+        android:checkable="true"
+        android:checked="false"
+        android:title="@string/enable_mfio"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/enable_scdsm"
+        android:checkable="true"
+        android:checked="false"
+        android:title="@string/enable_scdsm"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/hrm_settings"
         android:checkable="false"
         android:checked="false"

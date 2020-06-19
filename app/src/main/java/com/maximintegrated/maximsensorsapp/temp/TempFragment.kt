@@ -101,7 +101,6 @@ class TempFragment : MeasurementBaseFragment() {
     override fun startMonitoring() {
         super.startMonitoring()
         hspViewModel.streamType = HspViewModel.StreamType.TEMP
-        menuItemLogToFlash.isEnabled = true
         timestamp = HspStreamData.TIMESTAMP_FORMAT.format(Date())
         csvWriter = CsvWriter.open(getCsvFilePath(), HspTempStreamData.CSV_HEADER_ARRAY)
         tempChartView.clearData()
@@ -119,7 +118,6 @@ class TempFragment : MeasurementBaseFragment() {
         super.stopMonitoring()
         csvWriter?.close()
         csvWriter = null
-        menuItemLogToFlash.isEnabled = false
 
         hspViewModel.stopStreaming()
 

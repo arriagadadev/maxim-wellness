@@ -409,4 +409,6 @@
     <string name="estimation_error_message">Neural Network failed in estimation.</string>
     <string name="too_many_cal">Too Many Calibrations</string>
     <string name="too_many_cal_message">There are more than predefined number of calibration points.</string>
+    <string name="enable_mfio">Enable MFIO</string>
+    <string name="enable_scdsm">Enable Scd SM</string>
 </resources>

@@ -44,6 +44,8 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     lateinit var menuItemLogToFlash: MenuItem
     lateinit var menuItemSettings: MenuItem
     lateinit var menuItemEnabledScd: MenuItem
+    lateinit var menuItemEnabledMfio: MenuItem
+    lateinit var menuItemEnabledScdsm: MenuItem
     lateinit var menuItemArbitraryCommand: MenuItem
     lateinit var readFromFile: MenuItem
 
@@ -74,11 +76,20 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                 menuItemLogToFlash = findItem(R.id.log_to_flash)
                 menuItemSettings = findItem(R.id.hrm_settings)
                 menuItemEnabledScd = findItem(R.id.enable_scd)
+                menuItemEnabledMfio = findItem(R.id.enable_mfio)
+                menuItemEnabledScdsm = findItem(R.id.enable_scdsm)
                 menuItemArbitraryCommand = findItem(R.id.send_arbitrary_command)
                 readFromFile = findItem(R.id.readFromFileButton)
 
-                menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
+                menuItemEnabledScd.isChecked = DeviceSettings.scdEnabled
                 menuItemEnabledScd.isEnabled = true
+                menuItemEnabledMfio.isChecked = DeviceSettings.mfioEnabled
+                if(!DeviceSettings.mfioEnabled || !DeviceSettings.scdEnabled){
+                    DeviceSettings.scdsmEnabled = false
+                }
+                menuItemEnabledScdsm.isChecked = DeviceSettings.scdsmEnabled
+                menuItemEnabledScdsm.isEnabled = DeviceSettings.mfioEnabled && DeviceSettings.scdEnabled
+
             }
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -87,6 +98,8 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
                     R.id.log_to_file -> dataLoggingToggled()
                     R.id.log_to_flash -> flashLoggingToggled()
                     R.id.enable_scd -> enableScdToggled()
+                    R.id.enable_mfio -> mfioToggled()
+                    R.id.enable_scdsm -> scdsmToggled()
                     R.id.hrm_settings -> showSettingsDialog()
                     R.id.info_menu_item -> showInfoDialog()
                     R.id.send_arbitrary_command -> showArbitraryCommandDialog()
@@ -118,6 +131,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         handler.postDelayed(tickRunnable, 1000)
 
         startService()
+        menuItemEnabledScd.isEnabled = false
+        menuItemEnabledMfio.isEnabled = false
+        menuItemEnabledScdsm.isEnabled = false
+        menuItemLogToFlash.isEnabled = false
     }
 
     open fun stopMonitoring() {
@@ -130,6 +147,10 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         stopService()
         errorWriter?.close()
         errorWriter = null
+        menuItemEnabledScd.isEnabled = true
+        menuItemEnabledMfio.isEnabled = true
+        menuItemEnabledScdsm.isEnabled = menuItemEnabledMfio.isChecked && menuItemEnabledScd.isChecked
+        menuItemLogToFlash.isEnabled = true
     }
 
     open fun isMonitoringChanged() {
@@ -145,6 +166,13 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
             )
         )
         hspViewModel.sendCommand(SetConfigurationCommand("blepower", "0"))
+        hspViewModel.sendCommand(SetConfigurationCommand("event_mode", if (DeviceSettings.mfioEnabled) "1" else "0"))
+    }
+
+    open fun sendScdStateMachineIfRequired() {
+        if(DeviceSettings.scdsmEnabled){
+            hspViewModel.sendCommand(SetConfigurationCommand("scdsm", "1"))
+        }
     }
 
     open fun sendAlgoMode() {
@@ -184,8 +212,32 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
     }
 
     open fun enableScdToggled() {
-        ScdSettings.scdEnabled = !menuItemEnabledScd.isChecked
-        menuItemEnabledScd.isChecked = ScdSettings.scdEnabled
+        DeviceSettings.scdEnabled = !menuItemEnabledScd.isChecked
+        menuItemEnabledScd.isChecked = DeviceSettings.scdEnabled
+        if(!DeviceSettings.scdEnabled){
+            DeviceSettings.scdsmEnabled = false
+            menuItemEnabledScdsm.isChecked = false
+            menuItemEnabledScdsm.isEnabled = false
+        }else{
+            menuItemEnabledScdsm.isEnabled = DeviceSettings.mfioEnabled
+        }
+    }
+
+    open fun mfioToggled() {
+        DeviceSettings.mfioEnabled = !menuItemEnabledMfio.isChecked
+        menuItemEnabledMfio.isChecked = DeviceSettings.mfioEnabled
+        if(!DeviceSettings.mfioEnabled){
+            DeviceSettings.scdsmEnabled = false
+            menuItemEnabledScdsm.isChecked = false
+            menuItemEnabledScdsm.isEnabled = false
+        }else{
+            menuItemEnabledScdsm.isEnabled = DeviceSettings.scdEnabled
+        }
+    }
+
+    open fun scdsmToggled() {
+        DeviceSettings.scdsmEnabled = !menuItemEnabledScdsm.isChecked
+        menuItemEnabledScdsm.isChecked = DeviceSettings.scdsmEnabled
     }
 
     abstract fun showSettingsDialog()
@@ -233,6 +285,9 @@ abstract class MeasurementBaseFragment : Fragment(), IOnBackPressed,
         //Timber.d("MELIK: $data")
         if (!isMonitoring) return@Observer
         dataCount++
+        if(dataCount == 25L){
+            sendScdStateMachineIfRequired()
+        }
         if (expectingSampleCount != data.sampleCount) {
             errorCount++
             if ((data.sampleCount - expectingSampleCount > 1) || (errorCount * 100f / dataCount > 2f)) {

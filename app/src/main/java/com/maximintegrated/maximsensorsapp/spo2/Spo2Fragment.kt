@@ -21,8 +21,11 @@ import com.maximintegrated.maximsensorsapp.*
 import com.maximintegrated.maximsensorsapp.view.DataSetInfo
 import com.maximintegrated.maximsensorsapp.view.MultiChannelChartView
 import com.maximintegrated.maximsensorsapp.view.ReferenceDeviceView
-import com.maximintegrated.maximsensorsapp.whrm.WhrmFragment
 import kotlinx.android.synthetic.main.include_spo2_fragment_content.*
+import kotlinx.android.synthetic.main.include_spo2_fragment_content.algorithmModeRadioGroup
+import kotlinx.android.synthetic.main.include_spo2_fragment_content.hrResultView
+import kotlinx.android.synthetic.main.include_spo2_fragment_content.referenceDeviceView
+import kotlinx.android.synthetic.main.include_whrm_fragment_content.*
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -125,8 +128,6 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun startMonitoring() {
         super.startMonitoring()
-        menuItemEnabledScd.isEnabled = false
-        menuItemLogToFlash.isEnabled = false
 
         clearChart()
         clearCardViewValues()
@@ -151,6 +152,12 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
             }
     }
 
+    override fun sendScdStateMachineIfRequired() {
+        if(algorithmModeContinuousRadioButton.isChecked){
+            super.sendScdStateMachineIfRequired()
+        }
+    }
+
     override fun sendDefaultSettings() {
         super.sendDefaultSettings()
         hspViewModel.sendCommand(
@@ -168,8 +175,6 @@ class Spo2Fragment : MeasurementBaseFragment(), OnBluetoothDeviceClickListener {
 
     override fun stopMonitoring() {
         super.stopMonitoring()
-        menuItemEnabledScd.isEnabled = true
-        menuItemLogToFlash.isEnabled = true
 
         spo2ResultView.isMeasuring = false
 
